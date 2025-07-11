@@ -1,0 +1,44 @@
+{
+  "name": "@aikidosec/safe-chain",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "node --test --experimental-test-module-mocks **/*.spec.js",
+    "test:watch": "node --test --watch --experimental-test-module-mocks **/*.spec.js",
+    "lint": "eslint ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AikidoSec/safe-chain.git"
+  },
+  "bin": {
+    "aikido-npm": "bin/aikido-npm.js",
+    "aikido-npx": "bin/aikido-npx.js",
+    "aikido-yarn": "bin/aikido-yarn.js",
+    "safe-chain": "bin/safe-chain.js"
+  },
+  "type": "module",
+  "keywords": [],
+  "author": "Aikido Security",
+  "license": "AGPL-3.0-or-later",
+  "description": "The Aikido Safe Chain wraps around the [npm cli](https://github.com/npm/cli), [npx](https://github.com/npm/cli/blob/latest/docs/content/commands/npx.md), [yarn](https://yarnpkg.com/), [pnpm](https://pnpm.io/), and [pnpx](https://pnpm.io/cli/dlx) to provide extra checks before installing new packages. This tool will detect when a package contains malware and prompt you to exit, preventing npm, npx, yarn, pnpm, or pnpx from downloading or running the malware.",
+  "dependencies": {
+    "@inquirer/prompts": "^7.4.1",
+    "abbrev": "^3.0.1",
+    "chalk": "^5.4.1",
+    "npm-registry-fetch": "^18.0.2",
+    "ora": "^8.2.0",
+    "semver": "^7.7.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.26.0",
+    "eslint": "^9.26.0",
+    "eslint-plugin-import": "^2.31.0",
+    "globals": "^16.1.0",
+    "typescript-eslint": "^8.32.0"
+  },
+  "main": "eslint.config.js",
+  "bugs": {
+    "url": "https://github.com/AikidoSec/safe-chain/issues"
+  },
+  "homepage": "https://github.com/AikidoSec/safe-chain#readme"
+}
