@@ -1,4 +1,8 @@
-const knownAikidoTools = [
+import { execSync } from "child_process";
+import * as os from "os";
+import fs from "fs";
+
+export const knownAikidoTools = [
   { tool: "npm", aikidoCommand: "aikido-npm" },
   { tool: "npx", aikidoCommand: "aikido-npx" },
   { tool: "yarn", aikidoCommand: "aikido-yarn" },
@@ -6,39 +10,43 @@ const knownAikidoTools = [
   // and add the documentation for the new tool in the README.md
 ];
 
-export function getAliases(fileName) {
-  const fileExtension = fileName.split(".").pop().toLowerCase();
-
-  let createAlias = pickCreateAliasFunction(fileExtension);
-
-  const aliases = knownAikidoTools.map(({ tool, aikidoCommand }) =>
-    createAlias(tool, aikidoCommand)
-  );
-
-  return aliases;
-}
-
-function pickCreateAliasFunction(fileExtension) {
-  let createAlias;
-  switch (fileExtension) {
-    case "ps1":
-      createAlias = createGeneralPowershellAlias;
-      break;
-    case "fish":
-      createAlias = createGeneralFishAlias;
-      break;
-    default:
-      createAlias = createGeneralPosixAlias;
+export function doesExecutableExistOnSystem(executableName) {
+  try {
+    if (os.platform() === "win32") {
+      execSync(`where ${executableName}`, { stdio: "ignore" });
+    } else {
+      execSync(`which ${executableName}`, { stdio: "ignore" });
+    }
+    return true;
+  } catch {
+    return false;
   }
-  return createAlias;
 }
 
-function createGeneralPosixAlias(tool, aikidoCommand) {
-  return `alias ${tool}='${aikidoCommand}'`;
+export function execAndGetOutput(command, shell) {
+  try {
+    return execSync(command, { encoding: "utf8", shell }).trim();
+  } catch (error) {
+    throw new Error(`Command failed: ${command}. Error: ${error.message}`);
+  }
 }
-function createGeneralPowershellAlias(tool, aikidoCommand) {
-  return `Set-Alias ${tool} ${aikidoCommand}`;
+
+export function removeLinesMatchingPattern(filePath, pattern) {
+  if (!fs.existsSync(filePath)) {
+    return;
+  }
+
+  const fileContent = fs.readFileSync(filePath, "utf-8");
+  const lines = fileContent.split(os.EOL);
+  const updatedLines = lines.filter((line) => !pattern.test(line));
+  fs.writeFileSync(filePath, updatedLines.join(os.EOL), "utf-8");
 }
-function createGeneralFishAlias(tool, aikidoCommand) {
-  return `alias ${tool} "${aikidoCommand}"`;
+
+export function addLineToFile(filePath, line) {
+  if (!fs.existsSync(filePath)) {
+    fs.writeFileSync(filePath, "", "utf-8");
+  }
+  const fileContent = fs.readFileSync(filePath, "utf-8");
+  const updatedContent = fileContent + os.EOL + line;
+  fs.writeFileSync(filePath, updatedContent, "utf-8");
 }

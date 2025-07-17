@@ -1,10 +1,11 @@
 import chalk from "chalk";
 import { ui } from "../environment/userInteraction.js";
 import { detectShells } from "./shellDetection.js";
-import { getAliases } from "./helpers.js";
-import fs from "fs";
-import { EOL } from "os";
+import { knownAikidoTools } from "./helpers.js";
 
+/**
+ * Loops over the detected shells and calls the setup function for each.
+ */
 export async function setup() {
   ui.writeInformation(
     chalk.bold("Setting up shell aliases.") +
@@ -27,7 +28,7 @@ export async function setup() {
 
     let updatedCount = 0;
     for (const shell of shells) {
-      if (setupAliasesForShell(shell)) {
+      if (setupShell(shell)) {
         updatedCount++;
       }
     }
@@ -45,107 +46,29 @@ export async function setup() {
 }
 
 /**
- * This function sets up aliases for the given shell.
- * It reads the shell's startup file (eg ~/.bashrc, ~/.zshrc, etc.),
- * and then appends the aliases for npm, npx, and yarn commands.
- * If the aliases already exist, it will not add them again.
- * If the startup file does not exist, it will create it.
- *
- * The shell startup script is loaded by the respective shell when it starts.
- * This means that the aliases will be available in the shell after it is restarted.
+ * Calls the setup function for the given shell and reports the result.
  */
-function setupAliasesForShell(shell) {
-  if (!shell.startupFile) {
-    ui.writeError(
-      `- ${chalk.bold(
-        shell.name
-      )}: no startup file found. Cannot set up aliases.`
+function setupShell(shell) {
+  let success = false;
+  try {
+    success = shell.setup(knownAikidoTools);
+  } catch {
+    success = false;
+  }
+
+  if (success) {
+    ui.writeInformation(
+      `${chalk.bold("- " + shell.name + ":")} ${chalk.green(
+        "Setup successful"
+      )}`
     );
-    return false;
+  } else {
+    ui.writeError(
+      `${chalk.bold("- " + shell.name + ":")} ${chalk.red(
+        "Setup failed"
+      )}. Please check your ${shell.name} configuration.`
+    );
   }
 
-  const aliases = getAliases(shell.startupFile);
-
-  if (aliases.length === 0) {
-    ui.writeError(`- ${chalk.bold(shell.name)}: could not generate aliases.`);
-    return false;
-  }
-
-  const fileContent = readOrCreateStartupFile(shell.startupFile);
-  const { addedCount, existingCount, failedCount } = appendAliasesToFile(
-    aliases,
-    fileContent,
-    shell.startupFile
-  );
-
-  let summary = "- " + chalk.bold(shell.name) + ": ";
-
-  if (addedCount > 0) {
-    summary += chalk.green(`${addedCount} aliases were added`);
-  }
-  if (existingCount > 0) {
-    if (addedCount > 0) {
-      summary += ", ";
-    }
-    summary += chalk.yellow(`${existingCount} aliases were already present`);
-  }
-  if (failedCount > 0) {
-    if (addedCount > 0 || existingCount > 0) {
-      summary += ", ";
-    }
-    summary += chalk.red(`${failedCount} aliases failed to add`);
-  }
-
-  // write summary in a single line
-  ui.writeInformation(summary);
-
-  return true;
-}
-
-/**
- * This reads the content of the startup file.
- * If the file does not exist, it creates an empty file and returns an empty string.
- * The startup file is the shell's startup script (eg: ~/.bashrc, ~/.zshrc, etc.).
- * It is used to set up the shell environment when it starts.
- * Some shells may not have a startup file, in which case this function will create one.
- */
-export function readOrCreateStartupFile(filePath) {
-  if (!fs.existsSync(filePath)) {
-    fs.writeFileSync(filePath, "", "utf-8");
-    ui.writeInformation(`File ${filePath} created.`);
-  }
-  return fs.readFileSync(filePath, "utf-8");
-}
-
-/**
- * This function appends the aliases to the startup file.
- *  eg: for bash it will append 'alias npm="aikido-npm"' for npm to ~/.bashrc
- * @returns an object with the counts of added, existing, and failed aliases.
- */
-export function appendAliasesToFile(aliases, fileContent, startupFilePath) {
-  let addedCount = 0;
-  let existingCount = 0;
-  let failedCount = 0;
-
-  for (const alias of aliases) {
-    try {
-      if (fileContent.includes(alias)) {
-        existingCount++;
-        continue;
-      }
-
-      fs.appendFileSync(startupFilePath, `${EOL}${alias}`, "utf-8");
-
-      addedCount++;
-    } catch {
-      failedCount++;
-      continue;
-    }
-  }
-
-  return {
-    addedCount,
-    existingCount,
-    failedCount,
-  };
+  return success;
 }
