@@ -20,19 +20,23 @@ function teardown() {
   // This will remove the safe-chain aliases for npm, npx, and yarn commands.
   removeLinesMatchingPattern(startupFile, /^alias\s+(npm|npx|yarn)=/);
 
+  // Removes the line that sources the safe-chain zsh initialization script (~/.aikido/scripts/init-zsh.sh)
+  removeLinesMatchingPattern(
+    startupFile,
+    /^source\s+~\/\.safe-chain\/scripts\/init-zsh\.sh/
+  );
+
   return true;
 }
 
-function setup(tools) {
+function setup() {
   const startupFile = execAndGetOutput(startupFileCommand, executableName);
   teardown();
 
-  for (const tool of tools) {
-    addLineToFile(
-      startupFile,
-      `alias ${tool}="aikido-${tool}" # Safe-chain alias for ${tool}`
-    );
-  }
+  addLineToFile(
+    startupFile,
+    `source ~/.safe-chain/scripts/init-zsh.sh # Safe-chain Zsh initialization script`
+  );
 
   return true;
 }

@@ -59,49 +59,40 @@ describe("Zsh shell integration", () => {
   });
 
   describe("setup", () => {
-    it("should add aliases for all provided tools", () => {
-      const tools = ["npm", "npx", "yarn"];
-
-      const result = zsh.setup(tools);
+    it("should add source line for zsh initialization script", () => {
+      const result = zsh.setup();
       assert.strictEqual(result, true);
 
       const content = fs.readFileSync(mockStartupFile, "utf-8");
       assert.ok(
-        content.includes('alias npm="aikido-npm" # Safe-chain alias for npm')
-      );
-      assert.ok(
-        content.includes('alias npx="aikido-npx" # Safe-chain alias for npx')
-      );
-      assert.ok(
-        content.includes('alias yarn="aikido-yarn" # Safe-chain alias for yarn')
+        content.includes(
+          "source ~/.safe-chain/scripts/init-zsh.sh # Safe-chain Zsh initialization script"
+        )
       );
     });
 
     it("should call teardown before setup", () => {
-      // Pre-populate file with existing aliases
+      // Pre-populate file with existing source line
       fs.writeFileSync(
         mockStartupFile,
-        'alias npm="old-npm"\nalias npx="old-npx"\n',
+        "source ~/.safe-chain/scripts/init-zsh.sh\n",
         "utf-8"
       );
 
-      const tools = ["npm"];
-      zsh.setup(tools);
+      zsh.setup();
 
       const content = fs.readFileSync(mockStartupFile, "utf-8");
-      assert.ok(!content.includes('alias npm="old-npm"'));
-      assert.ok(content.includes('alias npm="aikido-npm"'));
+      const sourceMatches = (content.match(/source.*init-zsh\.sh/g) || [])
+        .length;
+      assert.strictEqual(sourceMatches, 1, "Should not duplicate source lines");
     });
 
-    it("should handle empty tools array", () => {
-      const result = zsh.setup([]);
+    it("should handle empty startup file", () => {
+      const result = zsh.setup();
       assert.strictEqual(result, true);
 
-      // File should be created during teardown call even if no tools are provided
-      if (fs.existsSync(mockStartupFile)) {
-        const content = fs.readFileSync(mockStartupFile, "utf-8");
-        assert.strictEqual(content.trim(), "");
-      }
+      const content = fs.readFileSync(mockStartupFile, "utf-8");
+      assert.ok(content.includes("source ~/.safe-chain/scripts/init-zsh.sh"));
     });
   });
 
@@ -129,6 +120,23 @@ describe("Zsh shell integration", () => {
       assert.ok(content.includes("alias grep="));
     });
 
+    it("should remove zsh initialization script source line", () => {
+      const initialContent = [
+        "#!/bin/zsh",
+        "source ~/.safe-chain/scripts/init-zsh.sh",
+        "alias ls='ls --color=auto'",
+      ].join("\n");
+
+      fs.writeFileSync(mockStartupFile, initialContent, "utf-8");
+
+      const result = zsh.teardown();
+      assert.strictEqual(result, true);
+
+      const content = fs.readFileSync(mockStartupFile, "utf-8");
+      assert.ok(!content.includes("source ~/.safe-chain/scripts/init-zsh.sh"));
+      assert.ok(content.includes("alias ls="));
+    });
+
     it("should handle file that doesn't exist", () => {
       if (fs.existsSync(mockStartupFile)) {
         fs.unlinkSync(mockStartupFile);
@@ -138,7 +146,7 @@ describe("Zsh shell integration", () => {
       assert.strictEqual(result, true);
     });
 
-    it("should handle file with no relevant aliases", () => {
+    it("should handle file with no relevant aliases or source lines", () => {
       const initialContent = [
         "#!/bin/zsh",
         "alias ls='ls --color=auto'",
@@ -171,30 +179,43 @@ describe("Zsh shell integration", () => {
 
   describe("integration tests", () => {
     it("should handle complete setup and teardown cycle", () => {
-      const tools = ["npm", "yarn"];
-
       // Setup
-      zsh.setup(tools);
+      zsh.setup();
       let content = fs.readFileSync(mockStartupFile, "utf-8");
-      assert.ok(content.includes('alias npm="aikido-npm"'));
-      assert.ok(content.includes('alias yarn="aikido-yarn"'));
+      assert.ok(content.includes("source ~/.safe-chain/scripts/init-zsh.sh"));
 
       // Teardown
       zsh.teardown();
       content = fs.readFileSync(mockStartupFile, "utf-8");
-      assert.ok(!content.includes("alias npm="));
-      assert.ok(!content.includes("alias yarn="));
+      assert.ok(!content.includes("source ~/.safe-chain/scripts/init-zsh.sh"));
     });
 
     it("should handle multiple setup calls", () => {
-      const tools = ["npm"];
-
-      zsh.setup(tools);
-      zsh.setup(tools);
+      zsh.setup();
+      zsh.setup();
 
       const content = fs.readFileSync(mockStartupFile, "utf-8");
-      const npmMatches = (content.match(/alias npm="/g) || []).length;
-      assert.strictEqual(npmMatches, 1, "Should not duplicate aliases");
+      const sourceMatches = (content.match(/source.*init-zsh\.sh/g) || [])
+        .length;
+      assert.strictEqual(sourceMatches, 1, "Should not duplicate source lines");
+    });
+
+    it("should handle mixed content with aliases and source lines", () => {
+      const initialContent = [
+        "#!/bin/zsh",
+        "alias npm='old-npm'",
+        "source ~/.safe-chain/scripts/init-zsh.sh",
+        "alias ls='ls --color=auto'",
+      ].join("\n");
+
+      fs.writeFileSync(mockStartupFile, initialContent, "utf-8");
+
+      // Teardown should remove both aliases and source line
+      zsh.teardown();
+      const content = fs.readFileSync(mockStartupFile, "utf-8");
+      assert.ok(!content.includes("alias npm="));
+      assert.ok(!content.includes("source ~/.safe-chain/scripts/init-zsh.sh"));
+      assert.ok(content.includes("alias ls="));
     });
   });
 });
