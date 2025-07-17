@@ -4,7 +4,7 @@ const knownAikidoTools = [
   { tool: "yarn", aikidoCommand: "aikido-yarn" },
   { tool: "pnpm", aikidoCommand: "aikido-pnpm" },
   { tool: "pnpx", aikidoCommand: "aikido-pnpx" },
-  // When adding a new tool here, also update the expected alias in the tests (shellIntegration.spec.js)
+  // When adding a new tool here, also update the expected alias in the tests (setup.spec.js, teardown.spec.js)
   // and add the documentation for the new tool in the README.md
 ];
 
