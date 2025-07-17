@@ -13,6 +13,7 @@ Aikido Safe Chain works on Node.js version 18 and above and supports the followi
 - ✅ **yarn**
 - ✅ **pnpm**
 - ✅ **pnpx**
+- 🚧 **bun** Coming soon
 
 # Usage
 
