@@ -13,11 +13,12 @@ export const knownAikidoTools = [
 export function doesExecutableExistOnSystem(executableName) {
   try {
     if (os.platform() === "win32") {
-      spawnSync("where", [executableName], { stdio: "ignore" });
+      const result = spawnSync("where", [executableName], { stdio: "ignore" });
+      return result.status === 0;
     } else {
-      spawnSync("which", [executableName], { stdio: "ignore" });
+      const result = spawnSync("which", [executableName], { stdio: "ignore" });
+      return result.status === 0;
     }
-    return true;
   } catch {
     return false;
   }
