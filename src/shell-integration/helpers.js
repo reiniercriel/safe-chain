@@ -1,4 +1,4 @@
-import { execSync } from "child_process";
+import { execSync, spawnSync } from "child_process";
 import * as os from "os";
 import fs from "fs";
 
@@ -13,9 +13,9 @@ export const knownAikidoTools = [
 export function doesExecutableExistOnSystem(executableName) {
   try {
     if (os.platform() === "win32") {
-      execSync(`where ${executableName}`, { stdio: "ignore" });
+      spawnSync("where", [executableName], { stdio: "ignore" });
     } else {
-      execSync(`which ${executableName}`, { stdio: "ignore" });
+      spawnSync("which", [executableName], { stdio: "ignore" });
     }
     return true;
   } catch {
@@ -46,6 +46,7 @@ export function addLineToFile(filePath, line) {
   if (!fs.existsSync(filePath)) {
     fs.writeFileSync(filePath, "", "utf-8");
   }
+
   const fileContent = fs.readFileSync(filePath, "utf-8");
   const updatedContent = fileContent + os.EOL + line;
   fs.writeFileSync(filePath, updatedContent, "utf-8");
