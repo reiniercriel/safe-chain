@@ -60,7 +60,11 @@ describe("Zsh shell integration", () => {
 
   describe("setup", () => {
     it("should add aliases for all provided tools", () => {
-      const tools = ["npm", "npx", "yarn"];
+      const tools = [
+        { tool: "npm", aikidoCommand: "aikido-npm" },
+        { tool: "npx", aikidoCommand: "aikido-npx" },
+        { tool: "yarn", aikidoCommand: "aikido-yarn" }
+      ];
 
       const result = zsh.setup(tools);
       assert.strictEqual(result, true);
@@ -85,7 +89,7 @@ describe("Zsh shell integration", () => {
         "utf-8"
       );
 
-      const tools = ["npm"];
+      const tools = [{ tool: "npm", aikidoCommand: "aikido-npm" }];
       zsh.setup(tools);
 
       const content = fs.readFileSync(mockStartupFile, "utf-8");
@@ -171,7 +175,10 @@ describe("Zsh shell integration", () => {
 
   describe("integration tests", () => {
     it("should handle complete setup and teardown cycle", () => {
-      const tools = ["npm", "yarn"];
+      const tools = [
+        { tool: "npm", aikidoCommand: "aikido-npm" },
+        { tool: "yarn", aikidoCommand: "aikido-yarn" }
+      ];
 
       // Setup
       zsh.setup(tools);
@@ -187,7 +194,7 @@ describe("Zsh shell integration", () => {
     });
 
     it("should handle multiple setup calls", () => {
-      const tools = ["npm"];
+      const tools = [{ tool: "npm", aikidoCommand: "aikido-npm" }];
 
       zsh.setup(tools);
       zsh.setup(tools);

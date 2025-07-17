@@ -60,7 +60,11 @@ describe("Bash shell integration", () => {
 
   describe("setup", () => {
     it("should add aliases for all provided tools", () => {
-      const tools = ["npm", "npx", "yarn"];
+      const tools = [
+        { tool: "npm", aikidoCommand: "aikido-npm" },
+        { tool: "npx", aikidoCommand: "aikido-npx" },
+        { tool: "yarn", aikidoCommand: "aikido-yarn" }
+      ];
 
       const result = bash.setup(tools);
       assert.strictEqual(result, true);
@@ -85,7 +89,7 @@ describe("Bash shell integration", () => {
         "utf-8"
       );
 
-      const tools = ["npm"];
+      const tools = [{ tool: "npm", aikidoCommand: "aikido-npm" }];
       bash.setup(tools);
 
       const content = fs.readFileSync(mockStartupFile, "utf-8");
@@ -171,7 +175,10 @@ describe("Bash shell integration", () => {
 
   describe("integration tests", () => {
     it("should handle complete setup and teardown cycle", () => {
-      const tools = ["npm", "yarn"];
+      const tools = [
+        { tool: "npm", aikidoCommand: "aikido-npm" },
+        { tool: "yarn", aikidoCommand: "aikido-yarn" }
+      ];
 
       // Setup
       bash.setup(tools);
@@ -187,7 +194,7 @@ describe("Bash shell integration", () => {
     });
 
     it("should handle multiple setup calls", () => {
-      const tools = ["npm"];
+      const tools = [{ tool: "npm", aikidoCommand: "aikido-npm" }];
 
       bash.setup(tools);
       bash.setup(tools);
