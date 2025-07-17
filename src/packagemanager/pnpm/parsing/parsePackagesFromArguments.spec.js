@@ -2,7 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert";
 import { parsePackagesFromArguments } from "./parsePackagesFromArguments.js";
 
-describe("standardYarnArgumentParser", () => {
+describe("standardPnpmArgumentParser", () => {
   it("should return an empty array for no changes", () => {
     const args = [];
 
