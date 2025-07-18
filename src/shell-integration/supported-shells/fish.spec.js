@@ -3,6 +3,7 @@ import assert from "node:assert";
 import { tmpdir } from "node:os";
 import fs from "node:fs";
 import path from "path";
+import { knownAikidoTools } from "../helpers.js";
 
 describe("Fish shell integration", () => {
   let mockStartupFile;
@@ -11,11 +12,10 @@ describe("Fish shell integration", () => {
   beforeEach(async () => {
     // Create temporary startup file for testing
     mockStartupFile = path.join(tmpdir(), `test-fish-config-${Date.now()}`);
-    
+
     // Mock the helpers module
     mock.module("../helpers.js", {
       namedExports: {
-        execAndGetOutput: () => mockStartupFile,
         doesExecutableExistOnSystem: () => true,
         addLineToFile: (filePath, line) => {
           if (!fs.existsSync(filePath)) {
@@ -27,10 +27,17 @@ describe("Fish shell integration", () => {
           if (!fs.existsSync(filePath)) return;
           const content = fs.readFileSync(filePath, "utf-8");
           const lines = content.split("\n");
-          const filteredLines = lines.filter(line => !pattern.test(line));
+          const filteredLines = lines.filter((line) => !pattern.test(line));
           fs.writeFileSync(filePath, filteredLines.join("\n"), "utf-8");
-        }
-      }
+        },
+      },
+    });
+
+    // Mock child_process execSync
+    mock.module("child_process", {
+      namedExports: {
+        execSync: () => mockStartupFile,
+      },
     });
 
     // Import fish module after mocking
@@ -42,7 +49,7 @@ describe("Fish shell integration", () => {
     if (fs.existsSync(mockStartupFile)) {
       fs.unlinkSync(mockStartupFile);
     }
-    
+
     // Reset mocks
     mock.reset();
   });
@@ -63,34 +70,28 @@ describe("Fish shell integration", () => {
       const tools = [
         { tool: "npm", aikidoCommand: "aikido-npm" },
         { tool: "npx", aikidoCommand: "aikido-npx" },
-        { tool: "yarn", aikidoCommand: "aikido-yarn" }
+        { tool: "yarn", aikidoCommand: "aikido-yarn" },
       ];
 
       const result = fish.setup(tools);
       assert.strictEqual(result, true);
 
       const content = fs.readFileSync(mockStartupFile, "utf-8");
-      assert.ok(content.includes('alias npm "aikido-npm" # Safe-chain alias for npm'));
-      assert.ok(content.includes('alias npx "aikido-npx" # Safe-chain alias for npx'));
-      assert.ok(content.includes('alias yarn "aikido-yarn" # Safe-chain alias for yarn'));
-    });
-
-    it("should call teardown before setup", () => {
-      // Pre-populate file with existing aliases
-      fs.writeFileSync(mockStartupFile, 'alias npm "old-npm"\nalias npx "old-npx"\n', "utf-8");
-
-      const tools = [{ tool: "npm", aikidoCommand: "aikido-npm" }];
-      fish.setup(tools);
-
-      const content = fs.readFileSync(mockStartupFile, "utf-8");
-      assert.ok(!content.includes('alias npm "old-npm"'));
-      assert.ok(content.includes('alias npm "aikido-npm"'));
+      assert.ok(
+        content.includes('alias npm "aikido-npm" # Safe-chain alias for npm')
+      );
+      assert.ok(
+        content.includes('alias npx "aikido-npx" # Safe-chain alias for npx')
+      );
+      assert.ok(
+        content.includes('alias yarn "aikido-yarn" # Safe-chain alias for yarn')
+      );
     });
 
     it("should handle empty tools array", () => {
       const result = fish.setup([]);
       assert.strictEqual(result, true);
-      
+
       // File should be created during teardown call even if no tools are provided
       if (fs.existsSync(mockStartupFile)) {
         const content = fs.readFileSync(mockStartupFile, "utf-8");
@@ -107,12 +108,12 @@ describe("Fish shell integration", () => {
         "alias npx 'aikido-npx'",
         "alias yarn 'aikido-yarn'",
         "alias ls 'ls --color=auto'",
-        "alias grep 'grep --color=auto'"
+        "alias grep 'grep --color=auto'",
       ].join("\n");
 
       fs.writeFileSync(mockStartupFile, initialContent, "utf-8");
 
-      const result = fish.teardown();
+      const result = fish.teardown(knownAikidoTools);
       assert.strictEqual(result, true);
 
       const content = fs.readFileSync(mockStartupFile, "utf-8");
@@ -128,7 +129,7 @@ describe("Fish shell integration", () => {
         fs.unlinkSync(mockStartupFile);
       }
 
-      const result = fish.teardown();
+      const result = fish.teardown(knownAikidoTools);
       assert.strictEqual(result, true);
     });
 
@@ -136,12 +137,12 @@ describe("Fish shell integration", () => {
       const initialContent = [
         "#!/usr/bin/env fish",
         "alias ls 'ls --color=auto'",
-        "set PATH $PATH ~/bin"
+        "set PATH $PATH ~/bin",
       ].join("\n");
 
       fs.writeFileSync(mockStartupFile, initialContent, "utf-8");
 
-      const result = fish.teardown();
+      const result = fish.teardown(knownAikidoTools);
       assert.strictEqual(result, true);
 
       const content = fs.readFileSync(mockStartupFile, "utf-8");
@@ -167,7 +168,7 @@ describe("Fish shell integration", () => {
     it("should handle complete setup and teardown cycle", () => {
       const tools = [
         { tool: "npm", aikidoCommand: "aikido-npm" },
-        { tool: "yarn", aikidoCommand: "aikido-yarn" }
+        { tool: "yarn", aikidoCommand: "aikido-yarn" },
       ];
 
       // Setup
@@ -177,7 +178,7 @@ describe("Fish shell integration", () => {
       assert.ok(content.includes('alias yarn "aikido-yarn"'));
 
       // Teardown
-      fish.teardown();
+      fish.teardown(tools);
       content = fs.readFileSync(mockStartupFile, "utf-8");
       assert.ok(!content.includes("alias npm "));
       assert.ok(!content.includes("alias yarn "));
@@ -187,8 +188,9 @@ describe("Fish shell integration", () => {
       const tools = [{ tool: "npm", aikidoCommand: "aikido-npm" }];
 
       fish.setup(tools);
+      fish.teardown(tools);
       fish.setup(tools);
-      
+
       const content = fs.readFileSync(mockStartupFile, "utf-8");
       const npmMatches = (content.match(/alias npm "/g) || []).length;
       assert.strictEqual(npmMatches, 1, "Should not duplicate aliases");

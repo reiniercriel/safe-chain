@@ -1,9 +1,9 @@
 import {
   addLineToFile,
   doesExecutableExistOnSystem,
-  execAndGetOutput,
   removeLinesMatchingPattern,
 } from "../helpers.js";
+import { execSync } from "child_process";
 
 const shellName = "PowerShell Core";
 const executableName = "pwsh";
@@ -13,19 +13,22 @@ function isInstalled() {
   return doesExecutableExistOnSystem(executableName);
 }
 
-function teardown() {
-  const startupFile = execAndGetOutput(startupFileCommand, executableName);
+function teardown(tools) {
+  const startupFile = getStartupFile();
 
-  // Removes all aliases starting with "Set-Alias npm=", "Set-Alias npx=", or "Set-Alias yarn="
-  // This will remove the safe-chain aliases for npm, npx, and yarn commands.
-  removeLinesMatchingPattern(startupFile, /^Set-Alias\s+(npm|npx|yarn)\s+/);
+  for (const { tool } of tools) {
+    // Remove any existing alias for the tool
+    removeLinesMatchingPattern(
+      startupFile,
+      new RegExp(`^Set-Alias\\s+${tool}\\s+`)
+    );
+  }
 
   return true;
 }
 
 function setup(tools) {
-  const startupFile = execAndGetOutput(startupFileCommand, executableName);
-  teardown();
+  const startupFile = getStartupFile();
 
   for (const { tool, aikidoCommand } of tools) {
     addLineToFile(
@@ -35,6 +38,19 @@ function setup(tools) {
   }
 
   return true;
+}
+
+function getStartupFile() {
+  try {
+    return execSync(startupFileCommand, {
+      encoding: "utf8",
+      shell: executableName,
+    }).trim();
+  } catch (error) {
+    throw new Error(
+      `Command failed: ${startupFileCommand}. Error: ${error.message}`
+    );
+  }
 }
 
 export default {

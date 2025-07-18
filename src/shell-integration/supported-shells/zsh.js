@@ -1,9 +1,9 @@
 import {
   addLineToFile,
   doesExecutableExistOnSystem,
-  execAndGetOutput,
   removeLinesMatchingPattern,
 } from "../helpers.js";
+import { execSync } from "child_process";
 
 const shellName = "Zsh";
 const executableName = "zsh";
@@ -13,12 +13,13 @@ function isInstalled() {
   return doesExecutableExistOnSystem(executableName);
 }
 
-function teardown() {
-  const startupFile = execAndGetOutput(startupFileCommand, executableName);
+function teardown(tools) {
+  const startupFile = getStartupFile();
 
-  // Removes all aliases starting with "alias npm=", "alias npx=", or "alias yarn="
-  // This will remove the safe-chain aliases for npm, npx, and yarn commands.
-  removeLinesMatchingPattern(startupFile, /^alias\s+(npm|npx|yarn)=/);
+  for (const { tool } of tools) {
+    // Remove any existing alias for the tool
+    removeLinesMatchingPattern(startupFile, new RegExp(`^alias\\s+${tool}=`));
+  }
 
   // Removes the line that sources the safe-chain zsh initialization script (~/.aikido/scripts/init-zsh.sh)
   removeLinesMatchingPattern(
@@ -29,9 +30,8 @@ function teardown() {
   return true;
 }
 
-function setup() {
-  const startupFile = execAndGetOutput(startupFileCommand, executableName);
-  teardown();
+function setup(tools) {
+  const startupFile = getStartupFile();
 
   addLineToFile(
     startupFile,
@@ -39,6 +39,19 @@ function setup() {
   );
 
   return true;
+}
+
+function getStartupFile() {
+  try {
+    return execSync(startupFileCommand, {
+      encoding: "utf8",
+      shell: executableName,
+    }).trim();
+  } catch (error) {
+    throw new Error(
+      `Command failed: ${startupFileCommand}. Error: ${error.message}`
+    );
+  }
 }
 
 export default {
