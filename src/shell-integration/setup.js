@@ -81,7 +81,7 @@ function setupShell(shell) {
 }
 
 function copyStartupFiles() {
-  const startupFiles = ["init-zsh.sh"];
+  const startupFiles = ["init-posix.sh"];
 
   for (const file of startupFiles) {
     const targetPath = path.join(os.homedir(), ".safe-chain", "scripts", file);

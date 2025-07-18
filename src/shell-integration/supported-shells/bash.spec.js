@@ -66,37 +66,16 @@ describe("Bash shell integration", () => {
   });
 
   describe("setup", () => {
-    it("should add aliases for all provided tools", () => {
-      const tools = [
-        { tool: "npm", aikidoCommand: "aikido-npm" },
-        { tool: "npx", aikidoCommand: "aikido-npx" },
-        { tool: "yarn", aikidoCommand: "aikido-yarn" },
-      ];
-
-      const result = bash.setup(tools);
+    it("should add source line for bash initialization script", () => {
+      const result = bash.setup();
       assert.strictEqual(result, true);
 
       const content = fs.readFileSync(mockStartupFile, "utf-8");
       assert.ok(
-        content.includes('alias npm="aikido-npm" # Safe-chain alias for npm')
+        content.includes(
+          "source ~/.safe-chain/scripts/init-posix.sh # Safe-chain bash initialization script"
+        )
       );
-      assert.ok(
-        content.includes('alias npx="aikido-npx" # Safe-chain alias for npx')
-      );
-      assert.ok(
-        content.includes('alias yarn="aikido-yarn" # Safe-chain alias for yarn')
-      );
-    });
-
-    it("should handle empty tools array", () => {
-      const result = bash.setup([]);
-      assert.strictEqual(result, true);
-
-      // File should be created during teardown call even if no tools are provided
-      if (fs.existsSync(mockStartupFile)) {
-        const content = fs.readFileSync(mockStartupFile, "utf-8");
-        assert.strictEqual(content.trim(), "");
-      }
     });
   });
 
@@ -174,14 +153,14 @@ describe("Bash shell integration", () => {
       // Setup
       bash.setup(tools);
       let content = fs.readFileSync(mockStartupFile, "utf-8");
-      assert.ok(content.includes('alias npm="aikido-npm"'));
-      assert.ok(content.includes('alias yarn="aikido-yarn"'));
+      assert.ok(content.includes("source ~/.safe-chain/scripts/init-posix.sh"));
 
       // Teardown
       bash.teardown(tools);
       content = fs.readFileSync(mockStartupFile, "utf-8");
-      assert.ok(!content.includes("alias npm="));
-      assert.ok(!content.includes("alias yarn="));
+      assert.ok(
+        !content.includes("source ~/.safe-chain/scripts/init-posix.sh")
+      );
     });
 
     it("should handle multiple setup calls", () => {
@@ -192,8 +171,29 @@ describe("Bash shell integration", () => {
       bash.setup(tools);
 
       const content = fs.readFileSync(mockStartupFile, "utf-8");
-      const npmMatches = (content.match(/alias npm="/g) || []).length;
-      assert.strictEqual(npmMatches, 1, "Should not duplicate aliases");
+      const sourceMatches = (content.match(/source.*init-posix\.sh/g) || [])
+        .length;
+      assert.strictEqual(sourceMatches, 1, "Should not duplicate source lines");
+    });
+
+    it("should handle mixed content with aliases and source lines", () => {
+      const initialContent = [
+        "#!/bin/bash",
+        "alias npm='old-npm'",
+        "source ~/.safe-chain/scripts/init-posix.sh",
+        "alias ls='ls --color=auto'",
+      ].join("\n");
+
+      fs.writeFileSync(mockStartupFile, initialContent, "utf-8");
+
+      // Teardown should remove both aliases and source line
+      bash.teardown(knownAikidoTools);
+      const content = fs.readFileSync(mockStartupFile, "utf-8");
+      assert.ok(!content.includes("alias npm="));
+      assert.ok(
+        !content.includes("source ~/.safe-chain/scripts/init-posix.sh")
+      );
+      assert.ok(content.includes("alias ls="));
     });
   });
 });
