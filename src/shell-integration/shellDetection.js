@@ -1,75 +1,26 @@
-import * as os from "os";
-import { execSync } from "child_process";
-
-const shellList = {
-  bash: {
-    name: "Bash",
-    executable: "bash",
-    getStartupFileCommand: "echo ~/.bashrc",
-  },
-  zsh: {
-    name: "Zsh",
-    executable: "zsh",
-    getStartupFileCommand: "echo ${ZDOTDIR:-$HOME}/.zshrc",
-  },
-  fish: {
-    name: "Fish",
-    executable: "fish",
-    getStartupFileCommand: "echo ~/.config/fish/config.fish",
-  },
-  powershell: {
-    name: "PowerShell Core",
-    executable: "pwsh",
-    getStartupFileCommand: "echo $PROFILE",
-  },
-  windowsPowerShell: {
-    name: "Windows PowerShell",
-    executable: "powershell",
-    getStartupFileCommand: "echo $PROFILE",
-  },
-};
+import zsh from "./supported-shells/zsh.js";
+import bash from "./supported-shells/bash.js";
+import powershell from "./supported-shells/powershell.js";
+import windowsPowershell from "./supported-shells/windowsPowershell.js";
+import fish from "./supported-shells/fish.js";
+import { ui } from "../environment/userInteraction.js";
 
 export function detectShells() {
+  let possibleShells = [zsh, bash, powershell, windowsPowershell, fish];
   let availableShells = [];
 
-  for (const shellName of Object.keys(shellList)) {
-    const shell = shellList[shellName];
-
-    if (isShellAvailable(shell)) {
-      const startupFile = getShellStartupFile(shell);
-      availableShells.push({
-        name: shell.name,
-        executable: shell.executable,
-        startupFile: startupFile || null,
-      });
+  try {
+    for (const shell of possibleShells) {
+      if (shell.isInstalled()) {
+        availableShells.push(shell);
+      }
     }
+  } catch (error) {
+    ui.writeError(
+      `We were not able to detect which shells are installed on your system. Please check your shell configuration. Error: ${error.message}`
+    );
+    return [];
   }
 
   return availableShells;
-}
-
-function isShellAvailable(shell) {
-  try {
-    if (os.platform() === "win32") {
-      execSync(`where ${shell.executable}`, { stdio: "ignore" });
-    } else {
-      execSync(`which ${shell.executable}`, { stdio: "ignore" });
-    }
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-function getShellStartupFile(shell) {
-  try {
-    const command = shell.getStartupFileCommand;
-    const output = execSync(command, {
-      encoding: "utf8",
-      shell: shell.executable,
-    }).trim();
-    return output;
-  } catch {
-    return null;
-  }
 }
