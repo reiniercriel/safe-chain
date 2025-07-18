@@ -60,7 +60,11 @@ describe("Fish shell integration", () => {
 
   describe("setup", () => {
     it("should add aliases for all provided tools", () => {
-      const tools = ["npm", "npx", "yarn"];
+      const tools = [
+        { tool: "npm", aikidoCommand: "aikido-npm" },
+        { tool: "npx", aikidoCommand: "aikido-npx" },
+        { tool: "yarn", aikidoCommand: "aikido-yarn" }
+      ];
 
       const result = fish.setup(tools);
       assert.strictEqual(result, true);
@@ -75,7 +79,7 @@ describe("Fish shell integration", () => {
       // Pre-populate file with existing aliases
       fs.writeFileSync(mockStartupFile, 'alias npm "old-npm"\nalias npx "old-npx"\n', "utf-8");
 
-      const tools = ["npm"];
+      const tools = [{ tool: "npm", aikidoCommand: "aikido-npm" }];
       fish.setup(tools);
 
       const content = fs.readFileSync(mockStartupFile, "utf-8");
@@ -161,7 +165,10 @@ describe("Fish shell integration", () => {
 
   describe("integration tests", () => {
     it("should handle complete setup and teardown cycle", () => {
-      const tools = ["npm", "yarn"];
+      const tools = [
+        { tool: "npm", aikidoCommand: "aikido-npm" },
+        { tool: "yarn", aikidoCommand: "aikido-yarn" }
+      ];
 
       // Setup
       fish.setup(tools);
@@ -177,7 +184,7 @@ describe("Fish shell integration", () => {
     });
 
     it("should handle multiple setup calls", () => {
-      const tools = ["npm"];
+      const tools = [{ tool: "npm", aikidoCommand: "aikido-npm" }];
 
       fish.setup(tools);
       fish.setup(tools);

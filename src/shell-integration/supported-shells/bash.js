@@ -27,10 +27,10 @@ function setup(tools) {
   const startupFile = execAndGetOutput(startupFileCommand, executableName);
   teardown();
 
-  for (const tool of tools) {
+  for (const { tool, aikidoCommand } of tools) {
     addLineToFile(
       startupFile,
-      `alias ${tool}="aikido-${tool}" # Safe-chain alias for ${tool}`
+      `alias ${tool}="${aikidoCommand}" # Safe-chain alias for ${tool}`
     );
   }
 
