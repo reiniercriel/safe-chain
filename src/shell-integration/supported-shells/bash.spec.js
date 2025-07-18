@@ -3,6 +3,7 @@ import assert from "node:assert";
 import { tmpdir } from "node:os";
 import fs from "node:fs";
 import path from "path";
+import { knownAikidoTools } from "../helpers.js";
 
 describe("Bash shell integration", () => {
   let mockStartupFile;
@@ -69,7 +70,7 @@ describe("Bash shell integration", () => {
       const tools = [
         { tool: "npm", aikidoCommand: "aikido-npm" },
         { tool: "npx", aikidoCommand: "aikido-npx" },
-        { tool: "yarn", aikidoCommand: "aikido-yarn" }
+        { tool: "yarn", aikidoCommand: "aikido-yarn" },
       ];
 
       const result = bash.setup(tools);
@@ -85,22 +86,6 @@ describe("Bash shell integration", () => {
       assert.ok(
         content.includes('alias yarn="aikido-yarn" # Safe-chain alias for yarn')
       );
-    });
-
-    it("should call teardown before setup", () => {
-      // Pre-populate file with existing aliases
-      fs.writeFileSync(
-        mockStartupFile,
-        'alias npm="old-npm"\nalias npx="old-npx"\n',
-        "utf-8"
-      );
-
-      const tools = [{ tool: "npm", aikidoCommand: "aikido-npm" }];
-      bash.setup(tools);
-
-      const content = fs.readFileSync(mockStartupFile, "utf-8");
-      assert.ok(!content.includes('alias npm="old-npm"'));
-      assert.ok(content.includes('alias npm="aikido-npm"'));
     });
 
     it("should handle empty tools array", () => {
@@ -128,7 +113,7 @@ describe("Bash shell integration", () => {
 
       fs.writeFileSync(mockStartupFile, initialContent, "utf-8");
 
-      const result = bash.teardown();
+      const result = bash.teardown(knownAikidoTools);
       assert.strictEqual(result, true);
 
       const content = fs.readFileSync(mockStartupFile, "utf-8");
@@ -144,7 +129,7 @@ describe("Bash shell integration", () => {
         fs.unlinkSync(mockStartupFile);
       }
 
-      const result = bash.teardown();
+      const result = bash.teardown(knownAikidoTools);
       assert.strictEqual(result, true);
     });
 
@@ -157,7 +142,7 @@ describe("Bash shell integration", () => {
 
       fs.writeFileSync(mockStartupFile, initialContent, "utf-8");
 
-      const result = bash.teardown();
+      const result = bash.teardown(knownAikidoTools);
       assert.strictEqual(result, true);
 
       const content = fs.readFileSync(mockStartupFile, "utf-8");
@@ -183,7 +168,7 @@ describe("Bash shell integration", () => {
     it("should handle complete setup and teardown cycle", () => {
       const tools = [
         { tool: "npm", aikidoCommand: "aikido-npm" },
-        { tool: "yarn", aikidoCommand: "aikido-yarn" }
+        { tool: "yarn", aikidoCommand: "aikido-yarn" },
       ];
 
       // Setup
@@ -193,7 +178,7 @@ describe("Bash shell integration", () => {
       assert.ok(content.includes('alias yarn="aikido-yarn"'));
 
       // Teardown
-      bash.teardown();
+      bash.teardown(tools);
       content = fs.readFileSync(mockStartupFile, "utf-8");
       assert.ok(!content.includes("alias npm="));
       assert.ok(!content.includes("alias yarn="));
@@ -203,6 +188,7 @@ describe("Bash shell integration", () => {
       const tools = [{ tool: "npm", aikidoCommand: "aikido-npm" }];
 
       bash.setup(tools);
+      bash.teardown(tools);
       bash.setup(tools);
 
       const content = fs.readFileSync(mockStartupFile, "utf-8");

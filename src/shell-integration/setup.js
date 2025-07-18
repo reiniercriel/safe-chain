@@ -51,6 +51,7 @@ export async function setup() {
 function setupShell(shell) {
   let success = false;
   try {
+    shell.teardown(knownAikidoTools); // First, tear down to prevent duplicate aliases
     success = shell.setup(knownAikidoTools);
   } catch {
     success = false;

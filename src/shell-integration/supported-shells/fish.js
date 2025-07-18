@@ -13,19 +13,22 @@ function isInstalled() {
   return doesExecutableExistOnSystem(executableName);
 }
 
-function teardown() {
+function teardown(tools) {
   const startupFile = getStartupFile();
 
-  // Removes all aliases starting with "alias npm=", "alias npx=", or "alias yarn="
-  // This will remove the safe-chain aliases for npm, npx, and yarn commands.
-  removeLinesMatchingPattern(startupFile, /^alias\s+(npm|npx|yarn)\s+/);
+  for (const { tool } of tools) {
+    // Remove any existing alias for the tool
+    removeLinesMatchingPattern(
+      startupFile,
+      new RegExp(`^alias\\s+${tool}\\s+`)
+    );
+  }
 
   return true;
 }
 
 function setup(tools) {
   const startupFile = getStartupFile();
-  teardown();
 
   for (const { tool, aikidoCommand } of tools) {
     addLineToFile(
