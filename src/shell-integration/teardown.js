@@ -1,6 +1,7 @@
 import chalk from "chalk";
 import { ui } from "../environment/userInteraction.js";
 import { detectShells } from "./shellDetection.js";
+import { knownAikidoTools } from "./helpers.js";
 
 export async function teardown() {
   ui.writeInformation(
@@ -26,7 +27,7 @@ export async function teardown() {
     for (const shell of shells) {
       let success = false;
       try {
-        success = shell.teardown();
+        success = shell.teardown(knownAikidoTools);
       } catch {
         success = false;
       }
