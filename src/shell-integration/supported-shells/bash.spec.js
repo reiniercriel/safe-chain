@@ -15,7 +15,6 @@ describe("Bash shell integration", () => {
     // Mock the helpers module
     mock.module("../helpers.js", {
       namedExports: {
-        execAndGetOutput: () => mockStartupFile,
         doesExecutableExistOnSystem: () => true,
         addLineToFile: (filePath, line) => {
           if (!fs.existsSync(filePath)) {
@@ -30,6 +29,13 @@ describe("Bash shell integration", () => {
           const filteredLines = lines.filter((line) => !pattern.test(line));
           fs.writeFileSync(filePath, filteredLines.join("\n"), "utf-8");
         },
+      },
+    });
+
+    // Mock child_process execSync
+    mock.module("child_process", {
+      namedExports: {
+        execSync: () => mockStartupFile,
       },
     });
 

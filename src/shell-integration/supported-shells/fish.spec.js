@@ -15,7 +15,6 @@ describe("Fish shell integration", () => {
     // Mock the helpers module
     mock.module("../helpers.js", {
       namedExports: {
-        execAndGetOutput: () => mockStartupFile,
         doesExecutableExistOnSystem: () => true,
         addLineToFile: (filePath, line) => {
           if (!fs.existsSync(filePath)) {
@@ -31,6 +30,13 @@ describe("Fish shell integration", () => {
           fs.writeFileSync(filePath, filteredLines.join("\n"), "utf-8");
         }
       }
+    });
+
+    // Mock child_process execSync
+    mock.module("child_process", {
+      namedExports: {
+        execSync: () => mockStartupFile,
+      },
     });
 
     // Import fish module after mocking

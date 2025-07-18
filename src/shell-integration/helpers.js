@@ -1,4 +1,4 @@
-import { execSync, spawnSync } from "child_process";
+import { spawnSync } from "child_process";
 import * as os from "os";
 import fs from "fs";
 
@@ -23,14 +23,6 @@ export function doesExecutableExistOnSystem(executableName) {
     }
   } catch {
     return false;
-  }
-}
-
-export function execAndGetOutput(command, shell) {
-  try {
-    return execSync(command, { encoding: "utf8", shell }).trim();
-  } catch (error) {
-    throw new Error(`Command failed: ${command}. Error: ${error.message}`);
   }
 }
 
