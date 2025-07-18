@@ -69,6 +69,14 @@ function yarn() {
   wrapCommand "yarn" "aikido-yarn" "$@"
 }
 
+function pnpm() {
+  wrapCommand "pnpm" "aikido-pnpm" "$@"
+}
+
+function pnpx() {
+  wrapCommand "pnpx" "aikido-pnpx" "$@"
+}
+
 function npm() {
   if [[ "$1" == "-v" || "$1" == "--version" ]] && [[ $# -eq 1 ]]; then
     # If args is just -v or --version and nothing else, just run the npm version command
