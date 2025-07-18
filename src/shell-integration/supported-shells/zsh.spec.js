@@ -120,7 +120,7 @@ describe("Zsh shell integration", () => {
 
       fs.writeFileSync(mockStartupFile, initialContent, "utf-8");
 
-      const result = zsh.teardown();
+      const result = zsh.teardown(knownAikidoTools);
       assert.strictEqual(result, true);
 
       const content = fs.readFileSync(mockStartupFile, "utf-8");
@@ -210,7 +210,7 @@ describe("Zsh shell integration", () => {
       fs.writeFileSync(mockStartupFile, initialContent, "utf-8");
 
       // Teardown should remove both aliases and source line
-      zsh.teardown();
+      zsh.teardown(knownAikidoTools);
       const content = fs.readFileSync(mockStartupFile, "utf-8");
       assert.ok(!content.includes("alias npm="));
       assert.ok(!content.includes("source ~/.safe-chain/scripts/init-zsh.sh"));
