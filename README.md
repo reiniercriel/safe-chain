@@ -33,7 +33,7 @@ Installing the Aikido Safe Chain is easy. You just need 3 simple steps:
    - This step is crucial as it ensures that the shell aliases for npm, npx, yarn, pnpm and pnpx are loaded correctly. If you do not restart your terminal, the aliases will not be available.
 4. **Verify the installation** by running:
    ```shell
-   npm install eslint-js
+   npm install safe-chain-test
    ```
    - The output should show that Aikido Safe Chain is blocking the installation of this package as it is flagged as malware.
 
