@@ -75,7 +75,9 @@ describe("Windows PowerShell shell integration", () => {
 
       const content = fs.readFileSync(mockStartupFile, "utf-8");
       assert.ok(
-        content.includes(". \"$HOME\\\\.safe-chain\\\\scripts\\\\init-pwsh.ps1\" # Safe-chain PowerShell initialization script")
+        content.includes(
+          '. "$HOME\\.safe-chain\\scripts\\init-pwsh.ps1" # Safe-chain PowerShell initialization script'
+        )
       );
     });
   });
@@ -84,7 +86,7 @@ describe("Windows PowerShell shell integration", () => {
     it("should remove init-pwsh.ps1 source line", () => {
       const initialContent = [
         "# Windows PowerShell profile",
-        ". \"$HOME\\\\.safe-chain\\\\scripts\\\\init-pwsh.ps1\" # Safe-chain PowerShell initialization script",
+        '. "$HOME\\.safe-chain\\scripts\\init-pwsh.ps1" # Safe-chain PowerShell initialization script',
         "Set-Alias ls Get-ChildItem",
         "Set-Alias grep Select-String",
       ].join("\n");
@@ -95,7 +97,9 @@ describe("Windows PowerShell shell integration", () => {
       assert.strictEqual(result, true);
 
       const content = fs.readFileSync(mockStartupFile, "utf-8");
-      assert.ok(!content.includes(". \"$HOME\\\\.safe-chain\\\\scripts\\\\init-pwsh.ps1\""));
+      assert.ok(
+        !content.includes('. "$HOME\\.safe-chain\\scripts\\init-pwsh.ps1"')
+      );
       assert.ok(content.includes("Set-Alias ls "));
       assert.ok(content.includes("Set-Alias grep "));
     });
@@ -168,12 +172,16 @@ describe("Windows PowerShell shell integration", () => {
       // Setup
       windowsPowershell.setup();
       let content = fs.readFileSync(mockStartupFile, "utf-8");
-      assert.ok(content.includes(". \"$HOME\\\\.safe-chain\\\\scripts\\\\init-pwsh.ps1\""));
+      assert.ok(
+        content.includes('. "$HOME\\.safe-chain\\scripts\\init-pwsh.ps1"')
+      );
 
       // Teardown
       windowsPowershell.teardown(knownAikidoTools);
       content = fs.readFileSync(mockStartupFile, "utf-8");
-      assert.ok(!content.includes(". \"$HOME\\\\.safe-chain\\\\scripts\\\\init-pwsh.ps1\""));
+      assert.ok(
+        !content.includes('. "$HOME\\.safe-chain\\scripts\\init-pwsh.ps1"')
+      );
     });
 
     it("should handle multiple setup calls", () => {
@@ -182,7 +190,10 @@ describe("Windows PowerShell shell integration", () => {
       windowsPowershell.setup();
 
       const content = fs.readFileSync(mockStartupFile, "utf-8");
-      const sourceMatches = (content.match(/\. "\$HOME\\\\.safe-chain\\\\scripts\\\\init-pwsh\.ps1"/g) || []).length;
+      const sourceMatches = (
+        content.match(/\. "\$HOME\\.safe-chain\\scripts\\init-pwsh\.ps1"/g) ||
+        []
+      ).length;
       assert.strictEqual(sourceMatches, 1, "Should not duplicate source lines");
     });
   });
