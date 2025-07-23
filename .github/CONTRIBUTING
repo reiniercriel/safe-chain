@@ -1,0 +1,45 @@
+# Contributing to Aikido Safe Chain
+
+Thank you for your interest in contributing to the Aikido Safe Chain! Before you start, please take a moment to read through our guidelines.
+
+## Reporting Issues
+
+If you encounter any issues while using the Aikido Safe Chain, please report them on our [GitHub Issues page](https://github.com/AikidoSec/safe-chain).
+
+Before creating a new issue, please check if the issue has already been reported or addressed in the documentation. If you find a similar issue, feel free to add any additional information that might help us resolve it.
+
+Please try to create bug reports that are:
+
+- **Reproducible**: Include steps to reproduce the issue.
+- **Clear**: Describe the issue in detail, including what you expected to happen and what
+  actually happened.
+- **Environment**: Specify your environment, including the version of Node.js, the package manager you are using and its version, and your operating system.
+- **Logs**: Include any relevant logs or error messages.
+- **Scoped**: Please report a single issue per report.
+
+## Contributing Code
+
+To avoid your contribution is rejected, please engage with the community and maintainers before starting work on a new feature or significant change. You can do this by opening an issue to discuss your ideas or by discussing your ideas in an existing issue. This helps to avoid to accept contributions and avoids duplication of work.
+
+If you would like to contribute code to the Aikido Safe Chain, please follow these steps:
+
+1. **Fork the repository**: Create a fork of the Aikido Safe Chain repository on GitHub.
+2. **Clone your fork**: Clone your forked repository to your local machine.
+3. **Create a new branch**: Create a new branch for your changes. Use a descriptive name for the branch that reflects the changes you are making.
+4. **Make your changes**: Implement your changes in the new branch. Make sure to follow the coding style and conventions used in the project.
+5. **Test your changes**: Please ensure that your changes are covered by tests and that all tests pass.
+6. **Commit your changes**: Commit your changes with a clear and descriptive commit message.
+7. **Push your changes**: Push your changes to your forked repository.
+8. **Create a pull request**: Open a pull request against the main repository. Provide a clear description of your changes and reference any related issues.
+
+### Development Environment
+
+To set up your development environment, you can follow these steps:
+
+1. **Install Node.js**: Make sure you have Node.js version 18 or above installed on your machine.
+2. **Install dependencies**: Run `npm install` in the root directory of the project to install the necessary dependencies.
+3. **Run tests**: You can run the tests using `npm test` to ensure that everything is working correctly.
+
+### Code Style
+
+Our style guides are documented in the .editorconfig file in the root of the repository. Use Prettier to format your code according to these guidelines. You can run Prettier manually or set it up to run automatically on save in your code editor.
