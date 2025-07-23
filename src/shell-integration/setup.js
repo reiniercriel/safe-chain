@@ -84,10 +84,9 @@ function copyStartupFiles() {
   const startupFiles = ["init-posix.sh", "init-pwsh.ps1"];
 
   for (const file of startupFiles) {
+    const targetDir = path.join(os.homedir(), ".safe-chain", "scripts");
     const targetPath = path.join(os.homedir(), ".safe-chain", "scripts", file);
 
-    // Create target directory if it doesn't exist
-    const targetDir = targetPath.substring(0, targetPath.lastIndexOf("/"));
     if (!fs.existsSync(targetDir)) {
       fs.mkdirSync(targetDir, { recursive: true });
     }
