@@ -69,49 +69,43 @@ describe("Windows PowerShell shell integration", () => {
   });
 
   describe("setup", () => {
-    it("should add aliases for all provided tools", () => {
-      const tools = [
-        { tool: "npm", aikidoCommand: "aikido-npm" },
-        { tool: "npx", aikidoCommand: "aikido-npx" },
-        { tool: "yarn", aikidoCommand: "aikido-yarn" },
-      ];
-
-      const result = windowsPowershell.setup(tools);
+    it("should add init-pwsh.ps1 source line", () => {
+      const result = windowsPowershell.setup();
       assert.strictEqual(result, true);
 
       const content = fs.readFileSync(mockStartupFile, "utf-8");
       assert.ok(
-        content.includes("Set-Alias npm aikido-npm # Safe-chain alias for npm")
+        content.includes(". \"$HOME\\\\.safe-chain\\\\scripts\\\\init-pwsh.ps1\" # Safe-chain PowerShell initialization script")
       );
-      assert.ok(
-        content.includes("Set-Alias npx aikido-npx # Safe-chain alias for npx")
-      );
-      assert.ok(
-        content.includes(
-          "Set-Alias yarn aikido-yarn # Safe-chain alias for yarn"
-        )
-      );
-    });
-
-    it("should handle empty tools array", () => {
-      const result = windowsPowershell.setup([]);
-      assert.strictEqual(result, true);
-
-      // File should be created during teardown call even if no tools are provided
-      if (fs.existsSync(mockStartupFile)) {
-        const content = fs.readFileSync(mockStartupFile, "utf-8");
-        assert.strictEqual(content.trim(), "");
-      }
     });
   });
 
   describe("teardown", () => {
-    it("should remove npm, npx, and yarn aliases", () => {
+    it("should remove init-pwsh.ps1 source line", () => {
       const initialContent = [
         "# Windows PowerShell profile",
-        "Set-Alias npm aikido-npm",
-        "Set-Alias npx aikido-npx",
-        "Set-Alias yarn aikido-yarn",
+        ". \"$HOME\\\\.safe-chain\\\\scripts\\\\init-pwsh.ps1\" # Safe-chain PowerShell initialization script",
+        "Set-Alias ls Get-ChildItem",
+        "Set-Alias grep Select-String",
+      ].join("\n");
+
+      fs.writeFileSync(mockStartupFile, initialContent, "utf-8");
+
+      const result = windowsPowershell.teardown(knownAikidoTools);
+      assert.strictEqual(result, true);
+
+      const content = fs.readFileSync(mockStartupFile, "utf-8");
+      assert.ok(!content.includes(". \"$HOME\\\\.safe-chain\\\\scripts\\\\init-pwsh.ps1\""));
+      assert.ok(content.includes("Set-Alias ls "));
+      assert.ok(content.includes("Set-Alias grep "));
+    });
+
+    it("should remove old-style aliases from earlier versions", () => {
+      const initialContent = [
+        "# Windows PowerShell profile",
+        "Set-Alias npm aikido-npm # Safe-chain alias for npm",
+        "Set-Alias npx aikido-npx # Safe-chain alias for npx",
+        "Set-Alias yarn aikido-yarn # Safe-chain alias for yarn",
         "Set-Alias ls Get-ChildItem",
         "Set-Alias grep Select-String",
       ].join("\n");
@@ -138,7 +132,7 @@ describe("Windows PowerShell shell integration", () => {
       assert.strictEqual(result, true);
     });
 
-    it("should handle file with no relevant aliases", () => {
+    it("should handle file with no relevant content", () => {
       const initialContent = [
         "# Windows PowerShell profile",
         "Set-Alias ls Get-ChildItem",
@@ -171,34 +165,25 @@ describe("Windows PowerShell shell integration", () => {
 
   describe("integration tests", () => {
     it("should handle complete setup and teardown cycle", () => {
-      const tools = [
-        { tool: "npm", aikidoCommand: "aikido-npm" },
-        { tool: "yarn", aikidoCommand: "aikido-yarn" },
-      ];
-
       // Setup
-      windowsPowershell.setup(tools);
+      windowsPowershell.setup();
       let content = fs.readFileSync(mockStartupFile, "utf-8");
-      assert.ok(content.includes("Set-Alias npm aikido-npm"));
-      assert.ok(content.includes("Set-Alias yarn aikido-yarn"));
+      assert.ok(content.includes(". \"$HOME\\\\.safe-chain\\\\scripts\\\\init-pwsh.ps1\""));
 
       // Teardown
-      windowsPowershell.teardown(tools);
+      windowsPowershell.teardown(knownAikidoTools);
       content = fs.readFileSync(mockStartupFile, "utf-8");
-      assert.ok(!content.includes("Set-Alias npm "));
-      assert.ok(!content.includes("Set-Alias yarn "));
+      assert.ok(!content.includes(". \"$HOME\\\\.safe-chain\\\\scripts\\\\init-pwsh.ps1\""));
     });
 
     it("should handle multiple setup calls", () => {
-      const tools = [{ tool: "npm", aikidoCommand: "aikido-npm" }];
-
-      windowsPowershell.setup(tools);
-      windowsPowershell.teardown(tools);
-      windowsPowershell.setup(tools);
+      windowsPowershell.setup();
+      windowsPowershell.teardown(knownAikidoTools);
+      windowsPowershell.setup();
 
       const content = fs.readFileSync(mockStartupFile, "utf-8");
-      const npmMatches = (content.match(/Set-Alias npm /g) || []).length;
-      assert.strictEqual(npmMatches, 1, "Should not duplicate aliases");
+      const sourceMatches = (content.match(/\. "\$HOME\\\\.safe-chain\\\\scripts\\\\init-pwsh\.ps1"/g) || []).length;
+      assert.strictEqual(sourceMatches, 1, "Should not duplicate source lines");
     });
   });
 });
