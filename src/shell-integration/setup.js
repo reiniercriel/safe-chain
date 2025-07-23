@@ -81,7 +81,7 @@ function setupShell(shell) {
 }
 
 function copyStartupFiles() {
-  const startupFiles = ["init-posix.sh", "init-pwsh.ps1"];
+  const startupFiles = ["init-posix.sh", "init-pwsh.ps1", "init-fish.fish"];
 
   for (const file of startupFiles) {
     const targetDir = path.join(os.homedir(), ".safe-chain", "scripts");
