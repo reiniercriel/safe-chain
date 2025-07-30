@@ -1,4 +1,4 @@
-FROM node:24 as builder
+FROM node:24-bookworm as builder
 
 ENV CI=true
 
@@ -18,7 +18,7 @@ COPY . .
 RUN npm --no-git-tag-version version 1.0.0 --allow-same-version
 RUN npm pack
 
-FROM mcr.microsoft.com/devcontainers/javascript-node as runner
+FROM mcr.microsoft.com/devcontainers/javascript-node:22-bookworm as runner
 
 WORKDIR /app
 
