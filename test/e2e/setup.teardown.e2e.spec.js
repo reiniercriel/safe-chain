@@ -7,7 +7,6 @@ import assert from "node:assert";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const projectRoot = path.resolve(__dirname, "../..");
 
 describe("E2E: safe-chain setup command", () => {
   const imageName = "safe-chain-e2e-test";
@@ -17,8 +16,8 @@ describe("E2E: safe-chain setup command", () => {
   before(async () => {
     // Build the Docker image for the test environment
     try {
-      execSync(`docker build -t ${imageName} -f test/e2e/Dockerfile .`, {
-        cwd: projectRoot,
+      execSync(`docker build -t ${imageName} -f Dockerfile ../../safe-chain`, {
+        cwd: __dirname,
         stdio: "ignore",
       });
     } catch (error) {

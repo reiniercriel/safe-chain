@@ -48,18 +48,18 @@ jobs:
           node-version: "24"
           cache: "npm"
 
-  #     - name: Install dependencies
-  #       run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-  #     - name: Run unit tests
-  #       run: npm test
+      - name: Run unit tests
+        run: npm test
 
-  #     - name: Run E2E tests
-  #       run: npm run test:e2e
+      - name: Run E2E tests
+        run: npm run test:e2e
 
-  #     - name: Clean up Docker resources
-  #       if: always()
-  #       run: |
-  #         # Clean up any remaining containers and images
-  #         docker ps -aq --filter "name=safe-chain-e2e-test" | xargs -r docker rm -f
-  #         docker images -q safe-chain-e2e-test | xargs -r docker rmi -f
+      - name: Clean up Docker resources
+        if: always()
+        run: |
+          # Clean up any remaining containers and images
+          docker ps -aq --filter "name=safe-chain-e2e-test" | xargs -r docker rm -f
+          docker images -q safe-chain-e2e-test | xargs -r docker rmi -f

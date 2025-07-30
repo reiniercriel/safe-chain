@@ -4,7 +4,6 @@
   "scripts": {
     "test": "node --test --experimental-test-module-mocks **/*.spec.js",
     "test:watch": "node --test --watch --experimental-test-module-mocks **/*.spec.js",
-    "test:e2e": "node --test test/e2e/**/*.e2e.spec.js",
     "lint": "eslint ."
   },
   "repository": {
