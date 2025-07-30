@@ -30,4 +30,3 @@ RUN npm install -g /app/*.tgz
 RUN mkdir /testapp
 RUN cd /testapp && npm init -y
 
-# ENV SHELL=/bin/bash
