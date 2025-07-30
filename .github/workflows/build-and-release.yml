@@ -8,6 +8,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: safe-chain
 
     steps:
       - name: Checkout code
@@ -26,6 +29,12 @@ jobs:
         run: |
           version="${{ github.ref_name }}"
           echo "tag=$version" >> $GITHUB_OUTPUT
+
+      - name: Add docs
+        run: |
+          cp ../README.md ./README.md
+          cp ../LICENSE ./LICENSE
+          cp -r ../docs ./docs
 
       - name: Set the version
         run: npm --no-git-tag-version version ${{ steps.get_version.outputs.tag }}
