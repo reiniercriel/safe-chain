@@ -1,10 +1,6 @@
-FROM node:18-alpine
+FROM node:24 as builder
 
-# Install bash and basic utilities (Alpine uses apk, not apt-get)
-RUN apk add --no-cache bash curl
-
-# Create a test user to simulate real user environment (Alpine syntax)
-RUN addgroup -S testuser && adduser -S testuser -G testuser -s /bin/bash
+ENV CI=true
 
 # Set working directory
 WORKDIR /app
@@ -18,15 +14,20 @@ RUN npm install
 # Copy the rest of the application
 COPY . .
 
-# Switch to test user
-USER testuser
+# Build the application
+RUN npm --no-git-tag-version version 1.0.0 --allow-same-version
+RUN npm pack
 
-# Create home directory structure that bash expects
-RUN mkdir -p /home/testuser
+FROM mcr.microsoft.com/devcontainers/javascript-node as runner
 
-# Set environment variables for testing
-ENV HOME=/home/testuser
-ENV SHELL=/bin/bash
+WORKDIR /app
 
-# Default command runs our test
-CMD ["bash", "test/e2e/test-setup.sh"]
+COPY --from=builder /app/*.tgz /app/
+
+# # Install the application package globally
+RUN npm install -g /app/*.tgz
+
+RUN mkdir /testapp
+RUN cd /testapp && npm init -y
+
+# ENV SHELL=/bin/bash
