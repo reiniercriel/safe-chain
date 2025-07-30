@@ -1,4 +1,4 @@
-name: Run Unit Tests
+name: Run tests
 
 on:
   pull_request:
@@ -6,7 +6,9 @@ on:
       - main
 
 jobs:
-  test:
+  unit-test:
+    name: Run unit tests and linting
+
     runs-on: ubuntu-latest
     defaults:
       run:
