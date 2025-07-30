@@ -2,6 +2,10 @@ const escapeChar = "\u001b";
 const startMarker = `${escapeChar}[?2004l`;
 const endMarker = `${escapeChar}[?2004h`;
 
+/* eslint-disable no-control-regex */
+// This module removes control characters and escape sequences from shell output.
+// So it is allowed to use control characters in the regex patterns here.
+
 export function parseShellOutput(rawData) {
   const stringData = rawData.join("");
 
