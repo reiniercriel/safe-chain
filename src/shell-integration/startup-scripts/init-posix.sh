@@ -2,7 +2,7 @@
 function printSafeChainWarning() {
   # \033[43;30m is used to set the background color to yellow and text color to black
   # \033[0m is used to reset the text formatting
-  printf "\033[43;30mWarning:\033[0m safe-chain is not available to protect you from installing malware. %s will be run directly.\n" "$1"
+  printf "\033[43;30mWarning:\033[0m safe-chain is not available to protect you from installing malware. %s will run without it.\n" "$1"
   # \033[36m is used to set the text color to cyan
   printf "Install safe-chain by using \033[36mnpm install -g @aikidosec/safe-chain\033[0m.\n"
 }
