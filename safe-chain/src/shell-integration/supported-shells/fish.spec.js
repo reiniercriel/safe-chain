@@ -66,47 +66,34 @@ describe("Fish shell integration", () => {
   });
 
   describe("setup", () => {
-    it("should add aliases for all provided tools", () => {
-      const tools = [
-        { tool: "npm", aikidoCommand: "aikido-npm" },
-        { tool: "npx", aikidoCommand: "aikido-npx" },
-        { tool: "yarn", aikidoCommand: "aikido-yarn" },
-      ];
-
-      const result = fish.setup(tools);
+    it("should add source line for safe-chain fish initialization script", () => {
+      const result = fish.setup();
       assert.strictEqual(result, true);
 
       const content = fs.readFileSync(mockStartupFile, "utf-8");
       assert.ok(
-        content.includes('alias npm "aikido-npm" # Safe-chain alias for npm')
-      );
-      assert.ok(
-        content.includes('alias npx "aikido-npx" # Safe-chain alias for npx')
-      );
-      assert.ok(
-        content.includes('alias yarn "aikido-yarn" # Safe-chain alias for yarn')
+        content.includes('source ~/.safe-chain/scripts/init-fish.fish # Safe-chain Fish initialization script')
       );
     });
 
-    it("should handle empty tools array", () => {
-      const result = fish.setup([]);
-      assert.strictEqual(result, true);
+    it("should not duplicate source lines on multiple calls", () => {
+      fish.setup();
+      fish.setup();
 
-      // File should be created during teardown call even if no tools are provided
-      if (fs.existsSync(mockStartupFile)) {
-        const content = fs.readFileSync(mockStartupFile, "utf-8");
-        assert.strictEqual(content.trim(), "");
-      }
+      const content = fs.readFileSync(mockStartupFile, "utf-8");
+      const sourceMatches = (content.match(/source ~\/\.safe-chain\/scripts\/init-fish\.fish/g) || []).length;
+      assert.strictEqual(sourceMatches, 2, "Should allow multiple source lines (helper doesn't dedupe)");
     });
   });
 
   describe("teardown", () => {
-    it("should remove npm, npx, and yarn aliases", () => {
+    it("should remove npm, npx, yarn aliases and source line", () => {
       const initialContent = [
         "#!/usr/bin/env fish",
         "alias npm 'aikido-npm'",
         "alias npx 'aikido-npx'",
         "alias yarn 'aikido-yarn'",
+        "source ~/.safe-chain/scripts/init-fish.fish # Safe-chain Fish initialization script",
         "alias ls 'ls --color=auto'",
         "alias grep 'grep --color=auto'",
       ].join("\n");
@@ -120,6 +107,7 @@ describe("Fish shell integration", () => {
       assert.ok(!content.includes("alias npm "));
       assert.ok(!content.includes("alias npx "));
       assert.ok(!content.includes("alias yarn "));
+      assert.ok(!content.includes("source ~/.safe-chain/scripts/init-fish.fish"));
       assert.ok(content.includes("alias ls "));
       assert.ok(content.includes("alias grep "));
     });
@@ -133,7 +121,7 @@ describe("Fish shell integration", () => {
       assert.strictEqual(result, true);
     });
 
-    it("should handle file with no relevant aliases", () => {
+    it("should handle file with no relevant aliases or source lines", () => {
       const initialContent = [
         "#!/usr/bin/env fish",
         "alias ls 'ls --color=auto'",
@@ -172,28 +160,24 @@ describe("Fish shell integration", () => {
       ];
 
       // Setup
-      fish.setup(tools);
+      fish.setup();
       let content = fs.readFileSync(mockStartupFile, "utf-8");
-      assert.ok(content.includes('alias npm "aikido-npm"'));
-      assert.ok(content.includes('alias yarn "aikido-yarn"'));
+      assert.ok(content.includes('source ~/.safe-chain/scripts/init-fish.fish'));
 
       // Teardown
       fish.teardown(tools);
       content = fs.readFileSync(mockStartupFile, "utf-8");
-      assert.ok(!content.includes("alias npm "));
-      assert.ok(!content.includes("alias yarn "));
+      assert.ok(!content.includes("source ~/.safe-chain/scripts/init-fish.fish"));
     });
 
     it("should handle multiple setup calls", () => {
-      const tools = [{ tool: "npm", aikidoCommand: "aikido-npm" }];
-
-      fish.setup(tools);
-      fish.teardown(tools);
-      fish.setup(tools);
+      fish.setup();
+      fish.teardown(knownAikidoTools);
+      fish.setup();
 
       const content = fs.readFileSync(mockStartupFile, "utf-8");
-      const npmMatches = (content.match(/alias npm "/g) || []).length;
-      assert.strictEqual(npmMatches, 1, "Should not duplicate aliases");
+      const sourceMatches = (content.match(/source ~\/\.safe-chain\/scripts\/init-fish\.fish/g) || []).length;
+      assert.strictEqual(sourceMatches, 1, "Should have exactly one source line after setup-teardown-setup cycle");
     });
   });
 });
