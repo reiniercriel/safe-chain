@@ -3,7 +3,7 @@ function Write-SafeChainWarning {
     
     # PowerShell equivalent of ANSI color codes: yellow background, black text for "Warning:"
     Write-Host "Warning:" -BackgroundColor Yellow -ForegroundColor Black -NoNewline
-    Write-Host " safe-chain is not available to protect you from installing malware. $Command will be run directly."
+    Write-Host " safe-chain is not available to protect you from installing malware. $Command will run without it."
     
     # Cyan text for the install command
     Write-Host "Install safe-chain by using " -NoNewline
