@@ -21,18 +21,22 @@ function teardown(tools) {
     removeLinesMatchingPattern(startupFile, new RegExp(`^alias\\s+${tool}=`));
   }
 
+  // Removes the line that sources the safe-chain zsh initialization script (~/.aikido/scripts/init-posix.sh)
+  removeLinesMatchingPattern(
+    startupFile,
+    /^source\s+~\/\.safe-chain\/scripts\/init-posix\.sh/
+  );
+
   return true;
 }
 
-function setup(tools) {
+function setup() {
   const startupFile = getStartupFile();
 
-  for (const { tool, aikidoCommand } of tools) {
-    addLineToFile(
-      startupFile,
-      `alias ${tool}="${aikidoCommand}" # Safe-chain alias for ${tool}`
-    );
-  }
+  addLineToFile(
+    startupFile,
+    `source ~/.safe-chain/scripts/init-posix.sh # Safe-chain Zsh initialization script`
+  );
 
   return true;
 }

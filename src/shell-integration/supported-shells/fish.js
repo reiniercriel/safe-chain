@@ -24,18 +24,22 @@ function teardown(tools) {
     );
   }
 
+  // Removes the line that sources the safe-chain fish initialization script (~/.safe-chain/scripts/init-fish.fish)
+  removeLinesMatchingPattern(
+    startupFile,
+    /^source\s+~\/\.safe-chain\/scripts\/init-fish\.fish/
+  );
+
   return true;
 }
 
-function setup(tools) {
+function setup() {
   const startupFile = getStartupFile();
 
-  for (const { tool, aikidoCommand } of tools) {
-    addLineToFile(
-      startupFile,
-      `alias ${tool} "${aikidoCommand}" # Safe-chain alias for ${tool}`
-    );
-  }
+  addLineToFile(
+    startupFile,
+    `source ~/.safe-chain/scripts/init-fish.fish # Safe-chain Fish initialization script`
+  );
 
   return true;
 }

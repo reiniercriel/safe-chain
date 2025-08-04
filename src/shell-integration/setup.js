@@ -2,6 +2,10 @@ import chalk from "chalk";
 import { ui } from "../environment/userInteraction.js";
 import { detectShells } from "./shellDetection.js";
 import { knownAikidoTools } from "./helpers.js";
+import fs from "fs";
+import os from "os";
+import path from "path";
+import { fileURLToPath } from "url";
 
 /**
  * Loops over the detected shells and calls the setup function for each.
@@ -12,6 +16,8 @@ export async function setup() {
       " This will wrap safe-chain around npm, npx, and yarn commands."
   );
   ui.emptyLine();
+
+  copyStartupFiles();
 
   try {
     const shells = detectShells();
@@ -72,4 +78,23 @@ function setupShell(shell) {
   }
 
   return success;
+}
+
+function copyStartupFiles() {
+  const startupFiles = ["init-posix.sh", "init-pwsh.ps1", "init-fish.fish"];
+
+  for (const file of startupFiles) {
+    const targetDir = path.join(os.homedir(), ".safe-chain", "scripts");
+    const targetPath = path.join(os.homedir(), ".safe-chain", "scripts", file);
+
+    if (!fs.existsSync(targetDir)) {
+      fs.mkdirSync(targetDir, { recursive: true });
+    }
+
+    // Use absolute path for source
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    const sourcePath = path.resolve(__dirname, "startup-scripts", file);
+    fs.copyFileSync(sourcePath, targetPath);
+  }
 }
