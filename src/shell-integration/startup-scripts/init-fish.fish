@@ -5,7 +5,7 @@ function printSafeChainWarning
     set_color -b yellow black
     printf "Warning:"
     set_color normal
-    printf " safe-chain is not available to protect you from installing malware. %s will be run directly.\n" $original_cmd
+    printf " safe-chain is not available to protect you from installing malware. %s will run without it.\n" $original_cmd
     
     # Cyan text for the install command
     printf "Install safe-chain by using "
