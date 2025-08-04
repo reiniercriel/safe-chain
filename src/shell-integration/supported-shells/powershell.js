@@ -24,18 +24,22 @@ function teardown(tools) {
     );
   }
 
+  // Remove the line that sources the safe-chain PowerShell initialization script
+  removeLinesMatchingPattern(
+    startupFile,
+    /^\.\s+["']?\$HOME[/\\].safe-chain[/\\]scripts[/\\]init-pwsh\.ps1["']?/
+  );
+
   return true;
 }
 
-function setup(tools) {
+function setup() {
   const startupFile = getStartupFile();
 
-  for (const { tool, aikidoCommand } of tools) {
-    addLineToFile(
-      startupFile,
-      `Set-Alias ${tool} ${aikidoCommand} # Safe-chain alias for ${tool}`
-    );
-  }
+  addLineToFile(
+    startupFile,
+    `. "$HOME\\.safe-chain\\scripts\\init-pwsh.ps1" # Safe-chain PowerShell initialization script`
+  );
 
   return true;
 }
