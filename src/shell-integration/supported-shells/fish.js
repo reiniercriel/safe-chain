@@ -1,0 +1,65 @@
+import {
+  addLineToFile,
+  doesExecutableExistOnSystem,
+  removeLinesMatchingPattern,
+} from "../helpers.js";
+import { execSync } from "child_process";
+
+const shellName = "Fish";
+const executableName = "fish";
+const startupFileCommand = "echo ~/.config/fish/config.fish";
+
+function isInstalled() {
+  return doesExecutableExistOnSystem(executableName);
+}
+
+function teardown(tools) {
+  const startupFile = getStartupFile();
+
+  for (const { tool } of tools) {
+    // Remove any existing alias for the tool
+    removeLinesMatchingPattern(
+      startupFile,
+      new RegExp(`^alias\\s+${tool}\\s+`)
+    );
+  }
+
+  // Removes the line that sources the safe-chain fish initialization script (~/.safe-chain/scripts/init-fish.fish)
+  removeLinesMatchingPattern(
+    startupFile,
+    /^source\s+~\/\.safe-chain\/scripts\/init-fish\.fish/
+  );
+
+  return true;
+}
+
+function setup() {
+  const startupFile = getStartupFile();
+
+  addLineToFile(
+    startupFile,
+    `source ~/.safe-chain/scripts/init-fish.fish # Safe-chain Fish initialization script`
+  );
+
+  return true;
+}
+
+function getStartupFile() {
+  try {
+    return execSync(startupFileCommand, {
+      encoding: "utf8",
+      shell: executableName,
+    }).trim();
+  } catch (error) {
+    throw new Error(
+      `Command failed: ${startupFileCommand}. Error: ${error.message}`
+    );
+  }
+}
+
+export default {
+  name: shellName,
+  isInstalled,
+  setup,
+  teardown,
+};

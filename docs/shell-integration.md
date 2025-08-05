@@ -2,7 +2,7 @@
 
 ## Overview
 
-The shell integration automatically wraps common package manager commands (`npm`, `npx`, `yarn`) with Aikido's security scanning functionality. This is achieved by adding shell aliases that redirect these commands to their Aikido-wrapped equivalents.
+The shell integration automatically wraps common package manager commands (`npm`, `npx`, `yarn`, `pnpm`, `pnpx`) with Aikido's security scanning functionality. This is achieved by adding shell aliases that redirect these commands to their Aikido-wrapped equivalents.
 
 ## Supported Shells
 
@@ -27,7 +27,7 @@ safe-chain setup
 This command:
 
 - Detects all supported shells on your system
-- Adds aliases for `npm`, `npx`, and `yarn` to each shell's startup file
+- Adds aliases for `npm`, `npx`, `yarn`, `pnpm` and `pnpx` to each shell's startup file
 
 ❗ After running this command, **you must restart your terminal** for the changes to take effect. This ensures that the aliases are loaded correctly.
 
@@ -75,7 +75,7 @@ The system modifies the following files based on your shell configuration:
 This means the aliases are working but the Aikido commands aren't installed or available in your PATH:
 
 - Make sure Aikido Safe Chain is properly installed on your system
-- Verify the `aikido-npm`, `aikido-npx`, and `aikido-yarn` commands exist
+- Verify the `aikido-npm`, `aikido-npx`, `aikido-yarn`, `aikido-pnpm` and `aikido-pnpx` commands exist
 - Check that these commands are in your system's PATH
 
 ### Manual Verification
@@ -105,4 +105,4 @@ To verify the integration is working, follow these steps:
 
 3. **If you need to remove aliases manually:**
 
-   Edit the same startup file from step 1 and delete any lines containing `aikido-npm`, `aikido-npx`, or `aikido-yarn`.
+   Edit the same startup file from step 1 and delete any lines containing `aikido-npm`, `aikido-npx`, `aikido-yarn`, `aikido-pnpm` or `aikido-pnpx`.

@@ -2,8 +2,8 @@
   "name": "@aikidosec/safe-chain",
   "version": "1.0.0",
   "scripts": {
-    "test": "node --test --experimental-test-module-mocks **/*.spec.js",
-    "test:watch": "node --test --watch --experimental-test-module-mocks **/*.spec.js",
+    "test": "node --test --experimental-test-module-mocks 'src/**/*.spec.js'",
+    "test:watch": "node --test --watch --experimental-test-module-mocks 'src/**/*.spec.js'",
     "lint": "eslint ."
   },
   "repository": {
@@ -14,6 +14,8 @@
     "aikido-npm": "bin/aikido-npm.js",
     "aikido-npx": "bin/aikido-npx.js",
     "aikido-yarn": "bin/aikido-yarn.js",
+    "aikido-pnpm": "bin/aikido-pnpm.js",
+    "aikido-pnpx": "bin/aikido-pnpx.js",
     "safe-chain": "bin/safe-chain.js"
   },
   "type": "module",

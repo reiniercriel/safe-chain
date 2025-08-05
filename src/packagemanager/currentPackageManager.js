@@ -1,5 +1,9 @@
 import { createNpmPackageManager } from "./npm/createPackageManager.js";
 import { createNpxPackageManager } from "./npx/createPackageManager.js";
+import {
+  createPnpmPackageManager,
+  createPnpxPackageManager,
+} from "./pnpm/createPackageManager.js";
 import { createYarnPackageManager } from "./yarn/createPackageManager.js";
 
 const state = {
@@ -13,6 +17,10 @@ export function initializePackageManager(packageManagerName, version) {
     state.packageManagerName = createNpxPackageManager();
   } else if (packageManagerName === "yarn") {
     state.packageManagerName = createYarnPackageManager();
+  } else if (packageManagerName === "pnpm") {
+    state.packageManagerName = createPnpmPackageManager();
+  } else if (packageManagerName === "pnpx") {
+    state.packageManagerName = createPnpxPackageManager();
   } else {
     throw new Error("Unsupported package manager: " + packageManagerName);
   }
