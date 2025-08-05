@@ -42,5 +42,8 @@
   "bugs": {
     "url": "https://github.com/AikidoSec/safe-chain/issues"
   },
-  "homepage": "https://github.com/AikidoSec/safe-chain#readme"
+  "homepage": "https://github.com/AikidoSec/safe-chain#readme",
+  "overrides": {
+    "brace-expansion@<=2.0.2": "2.0.2"
+  }
 }
