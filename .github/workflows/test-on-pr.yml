@@ -10,9 +10,6 @@ jobs:
     name: Run unit tests and linting
 
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: safe-chain
 
     steps:
       - name: Checkout code
