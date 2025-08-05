@@ -1,5 +1,5 @@
 import js from "@eslint/js";
-import { defineConfig } from "@eslint/config-helpers";
+import { defineConfig, globalIgnores } from "@eslint/config-helpers";
 import globals from "globals";
 import importPlugin from "eslint-plugin-import";
 
@@ -22,4 +22,5 @@ export default defineConfig([
     },
     rules: {},
   },
+  globalIgnores(['test/e2e']),
 ]);

@@ -1,4 +1,4 @@
-name: Run Unit Tests
+name: Run tests
 
 on:
   pull_request:
@@ -6,7 +6,9 @@ on:
       - main
 
 jobs:
-  test:
+  unit-test:
+    name: Run unit tests and linting
+
     runs-on: ubuntu-latest
 
     steps:
@@ -21,8 +23,38 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run tests
+      - name: Run unit tests
         run: npm test
 
       - name: Run ESLint
         run: npm run lint
+
+  e2e-tests:
+    name: Run E2E tests
+
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "test/e2e"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm test
+
+      - name: Clean up Docker resources
+        if: always()
+        run: |
+          # Clean up any remaining containers and images
+          docker ps -aq --filter "name=safe-chain-e2e-test" | xargs -r docker rm -f
+          docker images -q safe-chain-e2e-test | xargs -r docker rmi -f
