@@ -16,7 +16,8 @@ describe("E2E: safe-chain setup command", () => {
   before(async () => {
     // Build the Docker image for the test environment
     try {
-      execSync(`docker build -t ${imageName} -f Dockerfile ../../safe-chain`, {
+      const sourceDir = path.join(__dirname, "../..");
+      execSync(`docker build -t ${imageName} -f Dockerfile ${sourceDir}`, {
         cwd: __dirname,
         stdio: "ignore",
       });
