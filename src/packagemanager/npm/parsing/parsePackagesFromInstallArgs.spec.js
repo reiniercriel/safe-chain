@@ -19,6 +19,14 @@ describe("parsePackagesFromInstallArgs", () => {
     assert.deepEqual(result, [{ name: "@jest/transform", version: "29.7.0" }]);
   });
 
+  it("should return the package in the format @vercel/otel", () => {
+    const args = ["install", "@vercel/otel"];
+
+    const result = parsePackagesFromInstallArgs(args);
+
+    assert.deepEqual(result, [{ name: "@vercel/otel", version: "latest" }]);
+  });
+
   it("should return an array of changes for multiple packages", () => {
     const args = ["install", "express@4.17.1", "lodash@4.17.21"];
 

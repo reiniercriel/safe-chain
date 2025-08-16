@@ -86,7 +86,9 @@ function parsePackagename(arg) {
   const lastAtIndex = arg.lastIndexOf("@");
 
   let name, version;
-  if (lastAtIndex !== -1) {
+  // The index of the last "@" should be greater than 0
+  // If the index is 0, it means the package name starts with "@" (eg: "@vercel/otel")
+  if (lastAtIndex > 0) {
     name = arg.slice(0, lastAtIndex);
     version = arg.slice(lastAtIndex + 1);
   } else {

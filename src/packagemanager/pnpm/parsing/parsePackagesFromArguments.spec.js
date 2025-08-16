@@ -27,6 +27,14 @@ describe("standardPnpmArgumentParser", () => {
     assert.deepEqual(result, [{ name: "axios", version: "latest" }]);
   });
 
+  it("should return the package in the format @vercel/otel", () => {
+    const args = ["@vercel/otel"];
+
+    const result = parsePackagesFromArguments(args);
+
+    assert.deepEqual(result, [{ name: "@vercel/otel", version: "latest" }]);
+  });
+
   it("should return the package with latest tag if the version is absent and package starts with @", () => {
     const args = ["@aikidosec/package-name"];
 
