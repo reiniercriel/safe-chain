@@ -38,6 +38,14 @@ describe("standardYarnArgumentParser", () => {
     ]);
   });
 
+  it("should return the package in the format @vercel/otel", () => {
+    const args = ["add", "@vercel/otel"];
+
+    const result = parsePackagesFromArguments(args);
+
+    assert.deepEqual(result, [{ name: "@vercel/otel", version: "latest" }]);
+  });
+
   it("should ignore options with parameters and return an array of changes", () => {
     const args = ["add", "--proxy", "http://localhost", "axios@1.9.0"];
 
