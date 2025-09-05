@@ -22,5 +22,5 @@ export default defineConfig([
     },
     rules: {},
   },
-  globalIgnores(['test/e2e']),
+  globalIgnores(['test/e2e', 'node_modules']),
 ]);
