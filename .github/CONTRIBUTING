@@ -21,15 +21,20 @@ Report issues on our [GitHub Issues page](https://github.com/AikidoSec/safe-chai
 
 ## Development
 
+**Workspace Structure:**
+- `packages/safe-chain/` - Main CLI package
+- `test/e2e/` - End-to-end tests
+
 **Setup:**
 ```bash
-npm install
+npm install  # Installs dependencies for all workspaces
 ```
 
 **Commands:**
-- `npm test` - Run tests
-- `npm run test:watch` - Watch mode
+- `npm test` - Run unit tests
+- `npm run test:e2e` - Run end-to-end tests  
 - `npm run lint` - Check code style
+- `npm run test --workspace=packages/safe-chain` - Test specific workspace
 
 **Requirements:**
 - Node.js 18+
