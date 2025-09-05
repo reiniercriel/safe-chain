@@ -15,6 +15,14 @@
     "safe-chain": "bin/safe-chain.js"
   },
   "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/main.js"
+    },
+    "./scanning": {
+      "default": "./src/scanning/audit/index.js"
+    }
+  },
   "keywords": [],
   "author": "Aikido Security",
   "license": "AGPL-3.0-or-later",
