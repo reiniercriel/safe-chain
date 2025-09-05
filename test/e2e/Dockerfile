@@ -6,13 +6,13 @@ ENV CI=true
 WORKDIR /app
 
 # Copy package files first for better caching
-COPY package*.json ./
+COPY packages/safe-chain/package*.json ./
 
 # Install dependencies
 RUN npm install
 
 # Copy the rest of the application
-COPY . .
+COPY packages/safe-chain ./
 
 # Build the application
 RUN npm --no-git-tag-version version 1.0.0 --allow-same-version

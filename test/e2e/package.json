@@ -1,5 +1,6 @@
 {
   "name": "@aikidosec/safe-chain-e2e-tests",
+  "private": true,
   "version": "1.0.0",
   "description": "End-to-end tests for the Aikido Safe Chain",
   "scripts": {
