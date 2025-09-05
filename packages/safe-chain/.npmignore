@@ -1,0 +1,5 @@
+# Test files
+src/**/*.spec.js
+
+# Package files
+*.tgz

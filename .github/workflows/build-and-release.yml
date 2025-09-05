@@ -27,15 +27,24 @@ jobs:
           version="${{ github.ref_name }}"
           echo "tag=$version" >> $GITHUB_OUTPUT
 
-      - name: Set the version
-        run: npm --no-git-tag-version version ${{ steps.get_version.outputs.tag }}
+      - name: Set the version in safe-chain package
+        run: npm --no-git-tag-version version ${{ steps.get_version.outputs.tag }} --workspace=packages/safe-chain
 
       - name: Install dependencies
         run: npm ci
 
+      - name: Run tests
+        run: npm run test
+
+      - name: Copy documentation files to package
+        run: |
+          cp README.md packages/safe-chain/
+          cp LICENSE packages/safe-chain/
+          cp -r docs packages/safe-chain/
+
       - name: Publish to npm
         run: |
           echo "Publishing version ${{ steps.get_version.outputs.tag }} to NPM"
-          npm publish --access public
+          npm publish --workspace=packages/safe-chain --access public
         env:
           NPM_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
