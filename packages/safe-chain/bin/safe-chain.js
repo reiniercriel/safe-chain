@@ -46,7 +46,7 @@ function writeHelp() {
   ui.writeInformation(
     `- ${chalk.cyan(
       "safe-chain setup"
-    )}: This will setup your shell to wrap safe-chain around npm, npx and yarn.`
+    )}: This will setup your shell to wrap safe-chain around npm, npx, yarn, pnpm and pnpx.`
   );
   ui.writeInformation(
     `- ${chalk.cyan(
