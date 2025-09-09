@@ -13,6 +13,7 @@ export function createPnpmPackageManager() {
       matchesCommand(args, "update") ||
       matchesCommand(args, "upgrade") ||
       matchesCommand(args, "up") ||
+      matchesCommand(args, "install") ||
       // dlx does not always come in the first position
       // eg: pnpm --package=yo --package=generator-webapp dlx yo webapp
       // documentation: https://pnpm.io/cli/dlx#--package-name
