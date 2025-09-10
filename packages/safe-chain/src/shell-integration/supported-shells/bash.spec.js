@@ -80,6 +80,10 @@ describe("Bash shell integration", () => {
     if (fs.existsSync(mockStartupFile)) {
       fs.unlinkSync(mockStartupFile);
     }
+    if (windowsCygwinPath && fs.existsSync(windowsCygwinPath)) {
+      fs.unlinkSync(windowsCygwinPath);
+      windowsCygwinPath = "";
+    }
 
     // Reset mocks
     mock.reset();
