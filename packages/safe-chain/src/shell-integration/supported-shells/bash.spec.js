@@ -115,10 +115,13 @@ describe("Bash shell integration", () => {
     });
 
     it("should use the correct startup file for cygwin bash on Windows", () => {
+      // Simulate Windows platform with Cygwin bash
+      // The mockStartupFile contains a path we cannot open, so we set it to something useless
+      // The cygpath -w command that is mocked, will return the windowsCygwinPath variable
+      // This simulates the conversion from /c/Users/... to C:\Users\...
       platform = "win32";
-      // set windows path to the correct filename
       windowsCygwinPath = mockStartupFile;
-      mockStartupFile = "DUMMY"; // This will be overridden by the mocked execSync
+      mockStartupFile = "DUMMY";
 
       const result = bash.setup();
       assert.strictEqual(result, true);
