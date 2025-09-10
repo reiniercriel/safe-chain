@@ -8,6 +8,8 @@ import { knownAikidoTools } from "../helpers.js";
 describe("Bash shell integration", () => {
   let mockStartupFile;
   let bash;
+  let windowsCygwinPath = "";
+  let platform = "linux";
 
   beforeEach(async () => {
     // Create temporary startup file for testing
@@ -37,6 +39,35 @@ describe("Bash shell integration", () => {
     mock.module("child_process", {
       namedExports: {
         execSync: () => mockStartupFile,
+        spawnSync: (command, args) => {
+          if (platform !== "win32") {
+            return { status: 0 };
+          }
+
+          if (command === "where" && args[0] === "cygpath") {
+            return {
+              status: 0,
+              stdout: Buffer.from("C:\\cygwin64\\bin\\cygpath.exe\n"),
+            };
+          }
+
+          if (
+            command === "cygpath" &&
+            args[0] === "-w" &&
+            args[1] === mockStartupFile
+          ) {
+            return {
+              status: 0,
+              stdout: windowsCygwinPath + "\n",
+            };
+          }
+        },
+      },
+    });
+
+    mock.module("os", {
+      namedExports: {
+        platform: () => platform,
       },
     });
 
@@ -49,9 +80,14 @@ describe("Bash shell integration", () => {
     if (fs.existsSync(mockStartupFile)) {
       fs.unlinkSync(mockStartupFile);
     }
+    if (windowsCygwinPath && fs.existsSync(windowsCygwinPath)) {
+      fs.unlinkSync(windowsCygwinPath);
+      windowsCygwinPath = "";
+    }
 
     // Reset mocks
     mock.reset();
+    platform = "linux";
   });
 
   describe("isInstalled", () => {
@@ -71,6 +107,26 @@ describe("Bash shell integration", () => {
       assert.strictEqual(result, true);
 
       const content = fs.readFileSync(mockStartupFile, "utf-8");
+      assert.ok(
+        content.includes(
+          "source ~/.safe-chain/scripts/init-posix.sh # Safe-chain bash initialization script"
+        )
+      );
+    });
+
+    it("should use the correct startup file for cygwin bash on Windows", () => {
+      // Simulate Windows platform with Cygwin bash
+      // The mockStartupFile contains a path we cannot open, so we set it to something useless
+      // The cygpath -w command that is mocked, will return the windowsCygwinPath variable
+      // This simulates the conversion from /c/Users/... to C:\Users\...
+      platform = "win32";
+      windowsCygwinPath = mockStartupFile;
+      mockStartupFile = "DUMMY";
+
+      const result = bash.setup();
+      assert.strictEqual(result, true);
+
+      const content = fs.readFileSync(windowsCygwinPath, "utf-8");
       assert.ok(
         content.includes(
           "source ~/.safe-chain/scripts/init-posix.sh # Safe-chain bash initialization script"

@@ -3,7 +3,8 @@ import {
   doesExecutableExistOnSystem,
   removeLinesMatchingPattern,
 } from "../helpers.js";
-import { execSync } from "child_process";
+import { execSync, spawnSync } from "child_process";
+import * as os from "os";
 
 const shellName = "Bash";
 const executableName = "bash";
@@ -43,14 +44,60 @@ function setup() {
 
 function getStartupFile() {
   try {
-    return execSync(startupFileCommand, {
+    var path = execSync(startupFileCommand, {
       encoding: "utf8",
       shell: executableName,
     }).trim();
+
+    return windowsFixPath(path);
   } catch (error) {
     throw new Error(
       `Command failed: ${startupFileCommand}. Error: ${error.message}`
     );
+  }
+}
+
+function windowsFixPath(path) {
+  try {
+    if (os.platform() !== "win32") {
+      return path;
+    }
+
+    // On windows cygwin bash, paths are returned in format /c/user/..., but we need it in format C:\user\...
+    // To convert, the cygpath -w command can be used to convert to the desired format.
+    // Cygpath only exists on Cygwin, so we first check if the command is available.
+    // If it is, we use it to convert the path.
+    if (hasCygpath()) {
+      return cygpathw(path);
+    }
+
+    return path;
+  } catch {
+    return path;
+  }
+}
+
+function hasCygpath() {
+  try {
+    var result = spawnSync("where", ["cygpath"], { shell: executableName });
+    return result.status === 0;
+  } catch {
+    return false;
+  }
+}
+
+function cygpathw(path) {
+  try {
+    var result = spawnSync("cygpath", ["-w", path], {
+      encoding: "utf8",
+      shell: executableName,
+    });
+    if (result.status === 0) {
+      return result.stdout.trim();
+    }
+    return path;
+  } catch {
+    return path;
   }
 }
 
