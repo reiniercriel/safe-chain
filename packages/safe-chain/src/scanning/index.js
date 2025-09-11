@@ -4,6 +4,7 @@ import { setTimeout } from "timers/promises";
 import chalk from "chalk";
 import { getPackageManager } from "../packagemanager/currentPackageManager.js";
 import { ui } from "../environment/userInteraction.js";
+import { getMalwareAction, MALWARE_ACTION_PROMPT } from "../config/settings.js";
 
 export function shouldScanCommand(args) {
   if (!args || args.length === 0) {
@@ -59,10 +60,7 @@ export async function scanCommand(args) {
     spinner.succeed("No malicious packages detected.");
   } else {
     printMaliciousChanges(audit.disallowedChanges, spinner);
-    await acceptRiskOrExit(
-      "Do you want to continue with the installation despite the risks?",
-      false
-    );
+    await onMalwareFound();
   }
 }
 
@@ -74,19 +72,23 @@ function printMaliciousChanges(changes, spinner) {
   }
 }
 
-async function acceptRiskOrExit(message, defaultValue) {
+async function onMalwareFound() {
   ui.emptyLine();
-  const continueInstall = await ui.confirm({
-    message: message,
-    default: defaultValue,
-  });
 
-  if (continueInstall) {
-    ui.writeInformation("Continuing with the installation...");
-    return;
+  if (getMalwareAction() === MALWARE_ACTION_PROMPT) {
+    const continueInstall = await ui.confirm({
+      message:
+        "Malicious packages were found. Do you want to continue with the installation?",
+      default: false,
+    });
+
+    if (continueInstall) {
+      ui.writeWarning("Continuing with the installation despite the risks...");
+      return;
+    }
   }
 
-  ui.writeInformation("Exiting without installing packages.");
+  ui.writeError("Exiting without installing malicious packages.");
   ui.emptyLine();
   process.exit(1);
 }
