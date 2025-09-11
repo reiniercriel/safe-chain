@@ -67,6 +67,21 @@ To uninstall the Aikido Safe Chain, you can run the following command:
    ```
 3. **❗Restart your terminal** to remove the aliases.
 
+# Configuration
+
+## Malware Action
+
+You can control how Aikido Safe Chain responds when malware is detected using the `--safe-chain-malware-action` flag:
+
+- `--safe-chain-malware-action=block` (**default**) - Automatically blocks installation and exits with an error when malware is detected
+- `--safe-chain-malware-action=prompt` - Prompts the user to decide whether to continue despite the malware detection
+
+Example usage:
+
+```shell
+npm install suspicious-package --safe-chain-malware-action=prompt
+```
+
 # Usage in CI/CD
 
 🚧 Support for CI/CD environments is coming soon...

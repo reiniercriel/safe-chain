@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it, mock } from "node:test";
 import { setTimeout } from "node:timers/promises";
+import {
+  MALWARE_ACTION_PROMPT,
+  MALWARE_ACTION_BLOCK,
+} from "../config/settings.js";
 
 describe("scanCommand", async () => {
   const getScanTimeoutMock = mock.fn(() => 1000);
@@ -11,6 +15,7 @@ describe("scanCommand", async () => {
     fail: () => {},
   }));
   const mockConfirm = mock.fn(() => true);
+  let malwareAction = MALWARE_ACTION_PROMPT;
 
   // import { getPackageManager } from "../packagemanager/currentPackageManager.js";
   mock.module("../packagemanager/currentPackageManager.js", {
@@ -43,6 +48,14 @@ describe("scanCommand", async () => {
         emptyLine: () => {},
         confirm: mockConfirm,
       },
+    },
+  });
+
+  mock.module("../config/settings.js", {
+    namedExports: {
+      getMalwareAction: () => malwareAction,
+      MALWARE_ACTION_PROMPT,
+      MALWARE_ACTION_BLOCK,
     },
   });
 
@@ -176,5 +189,100 @@ describe("scanCommand", async () => {
     const failureMessage = failureMessages[0];
     assert.equal(failureMessage.toLowerCase().includes("timeout"), false);
     assert.equal(failureMessage.toLowerCase().includes("malicious"), true);
+  });
+
+  it("should exit immediately when malicious changes are detected in block mode", async () => {
+    // Set malware action to block mode for this test
+    malwareAction = MALWARE_ACTION_BLOCK;
+    
+    // Reset mock call count
+    mockConfirm.mock.resetCalls();
+    
+    let failureMessageWasSet = false;
+    let exitCode = null;
+    
+    mockStartProcess.mock.mockImplementationOnce(() => ({
+      setText: () => {},
+      succeed: () => {},
+      fail: () => {
+        failureMessageWasSet = true;
+      },
+    }));
+    
+    mockGetDependencyUpdatesForCommand.mock.mockImplementation(() => [
+      { name: "malicious", version: "1.0.0" },
+    ]);
+
+    // Mock process.exit
+    const originalExit = process.exit;
+    process.exit = mock.fn((code) => {
+      exitCode = code;
+      throw new Error("Process exit called"); // Prevent actual exit
+    });
+
+    try {
+      await assert.rejects(
+        scanCommand(["install", "malicious"]),
+        /Process exit called/
+      );
+    } finally {
+      // Restore original process.exit
+      process.exit = originalExit;
+      // Reset malware action back to prompt mode for other tests
+      malwareAction = MALWARE_ACTION_PROMPT;
+    }
+
+    assert.equal(failureMessageWasSet, true);
+    assert.equal(exitCode, 1);
+    // Confirm should not have been called in block mode
+    assert.equal(mockConfirm.mock.callCount(), 0);
+  });
+
+  it("should exit immediately when malicious changes are detected in block mode without prompting", async () => {
+    // Set malware action to block mode for this test
+    malwareAction = MALWARE_ACTION_BLOCK;
+    
+    // Reset mock call count
+    mockConfirm.mock.resetCalls();
+    
+    let processExited = false;
+    let userWasPrompted = false;
+    
+    mockStartProcess.mock.mockImplementationOnce(() => ({
+      setText: () => {},
+      succeed: () => {},
+      fail: () => {},
+    }));
+    
+    mockGetDependencyUpdatesForCommand.mock.mockImplementation(() => [
+      { name: "malicious", version: "1.0.0" },
+    ]);
+
+    mockConfirm.mock.mockImplementationOnce(() => {
+      userWasPrompted = true;
+      return false;
+    });
+
+    // Mock process.exit
+    const originalExit = process.exit;
+    process.exit = mock.fn(() => {
+      processExited = true;
+      throw new Error("Process exit called"); // Prevent actual exit
+    });
+
+    try {
+      await assert.rejects(
+        scanCommand(["install", "malicious"]),
+        /Process exit called/
+      );
+    } finally {
+      // Restore original process.exit
+      process.exit = originalExit;
+      // Reset malware action back to prompt mode for other tests
+      malwareAction = MALWARE_ACTION_PROMPT;
+    }
+
+    assert.equal(processExited, true);
+    assert.equal(userWasPrompted, false);
   });
 });
