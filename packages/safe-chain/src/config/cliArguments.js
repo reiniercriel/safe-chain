@@ -12,20 +12,37 @@ export function initializeCliArguments(args) {
   const remainingArgs = [];
 
   for (const arg of args) {
-    if (arg.startsWith(SAFE_CHAIN_ARG_PREFIX)) {
+    if (arg.toLowerCase().startsWith(SAFE_CHAIN_ARG_PREFIX)) {
       safeChainArgs.push(arg);
-
-      if (arg.startsWith(SAFE_CHAIN_ARG_PREFIX + "malware-action=")) {
-        state.malwareAction = arg.substring(
-          (SAFE_CHAIN_ARG_PREFIX + "malware-action=").length
-        );
-      }
     } else {
       remainingArgs.push(arg);
     }
   }
 
+  setMalwareAction(safeChainArgs);
+
   return remainingArgs;
+}
+
+function setMalwareAction(args) {
+  const safeChainMalwareActionArg = SAFE_CHAIN_ARG_PREFIX + "malware-action=";
+
+  const action = getLastArgEqualsValue(args, safeChainMalwareActionArg);
+  if (!action) {
+    return;
+  }
+  state.malwareAction = action.toLowerCase();
+}
+
+function getLastArgEqualsValue(args, prefix) {
+  for (var i = args.length - 1; i >= 0; i--) {
+    const arg = args[i];
+    if (arg.toLowerCase().startsWith(prefix)) {
+      return arg.substring(prefix.length);
+    }
+  }
+
+  return undefined;
 }
 
 export function getMalwareAction() {

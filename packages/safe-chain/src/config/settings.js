@@ -7,7 +7,7 @@ export function getMalwareAction() {
     return MALWARE_ACTION_PROMPT;
   }
 
-  return "block";
+  return MALWARE_ACTION_BLOCK;
 }
 
 export const MALWARE_ACTION_BLOCK = "block";
