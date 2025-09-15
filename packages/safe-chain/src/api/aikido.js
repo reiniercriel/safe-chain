@@ -1,3 +1,5 @@
+import fetch from "make-fetch-happen";
+
 const malwareDatabaseUrl =
   "https://malware-list.aikido.dev/malware_predictions.json";
 
