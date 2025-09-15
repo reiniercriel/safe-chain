@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import ora from "ora";
-import { confirm as inquirerConfirm } from "@inquirer/prompts";
+import { createInterface } from "readline";
 import { isCi } from "./environment.js";
 
 function emptyLine() {
@@ -61,12 +61,29 @@ function startProcess(message) {
 async function confirm(config) {
   if (isCi()) {
     return Promise.resolve(config.default);
-  } else {
-    return inquirerConfirm({
-      message: config.message,
-      default: config.default,
-    });
   }
+
+  const rl = createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  return new Promise((resolve) => {
+    const defaultText = config.default ? " (Y/n)" : " (y/N)";
+    rl.question(`${config.message}${defaultText} `, (answer) => {
+      rl.close();
+
+      const normalizedAnswer = answer.trim().toLowerCase();
+
+      if (normalizedAnswer === "y" || normalizedAnswer === "yes") {
+        resolve(true);
+      } else if (normalizedAnswer === "n" || normalizedAnswer === "no") {
+        resolve(false);
+      } else {
+        resolve(config.default);
+      }
+    });
+  });
 }
 
 export const ui = {
