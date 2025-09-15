@@ -6,7 +6,6 @@ const scanner = commandArgumentScanner();
 
 export function createPnpmPackageManager() {
   return {
-    getWarningMessage: () => null,
     runCommand: (args) => runPnpmCommand(args, "pnpm"),
     isSupportedCommand: (args) =>
       matchesCommand(args, "add") ||
@@ -26,7 +25,6 @@ export function createPnpmPackageManager() {
 
 export function createPnpxPackageManager() {
   return {
-    getWarningMessage: () => null,
     runCommand: (args) => runPnpmCommand(args, "pnpx"),
     isSupportedCommand: () => true,
     getDependencyUpdatesForCommand: (args) =>

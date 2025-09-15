@@ -14,10 +14,13 @@ import {
 } from "./utils/npmCommands.js";
 
 export function createNpmPackageManager(version) {
-  const supportedScanners =
-    getMajorVersion(version) >= 22
-      ? npm22AndAboveSupportedScanners
-      : npm21AndBelowSupportedScanners;
+  // From npm v10.4.0 onwards, the npm commands output detailed information
+  // when using the --dry-run flag.
+  // We use that information to scan for dependency changes.
+  // For older versions of npm we have to rely on parsing the command arguments.
+  const supportedScanners = isPriorToNpm10_4(version)
+    ? npm10_3AndBelowSupportedScanners
+    : npm10_4AndAboveSupportedScanners;
 
   function isSupportedCommand(args) {
     const scanner = findDependencyScannerForCommand(supportedScanners, args);
@@ -30,14 +33,13 @@ export function createNpmPackageManager(version) {
   }
 
   return {
-    getWarningMessage: () => warnForLimitedSupport(version),
     runCommand: runNpm,
     isSupportedCommand,
     getDependencyUpdatesForCommand,
   };
 }
 
-const npm22AndAboveSupportedScanners = {
+const npm10_4AndAboveSupportedScanners = {
   [npmInstallCommand]: dryRunScanner(),
   [npmUpdateCommand]: dryRunScanner(),
   [npmCiCommand]: dryRunScanner(),
@@ -53,23 +55,22 @@ const npm22AndAboveSupportedScanners = {
   [npmInstallCiTestCommand]: dryRunScanner({ dryRunCommand: npmCiCommand }),
 };
 
-const npm21AndBelowSupportedScanners = {
+const npm10_3AndBelowSupportedScanners = {
   [npmInstallCommand]: commandArgumentScanner(),
   [npmUpdateCommand]: commandArgumentScanner(),
   [npmExecCommand]: commandArgumentScanner({ ignoreDryRun: true }), // exec command doesn't support dry-run
 };
 
-function warnForLimitedSupport(version) {
-  if (getMajorVersion(version) >= 22) {
-    return null;
+function isPriorToNpm10_4(version) {
+  try {
+    const [major, minor] = version.split(".").map(Number);
+    if (major < 10) return true;
+    if (major === 10 && minor < 4) return true;
+    return false;
+  } catch {
+    // Default to true: if version parsing fails, assume it's an older version
+    return true;
   }
-
-  return `Aikido-npm will only scan the arguments of the install command for Node.js version prior to version 22.
-Please update your Node.js version to 22 or higher for full coverage. Current version: v${version}`;
-}
-
-function getMajorVersion(version) {
-  return parseInt(version.split(".")[0]);
 }
 
 function findDependencyScannerForCommand(scanners, args) {

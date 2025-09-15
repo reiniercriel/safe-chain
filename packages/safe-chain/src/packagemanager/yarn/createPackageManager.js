@@ -5,7 +5,6 @@ const scanner = commandArgumentScanner();
 
 export function createYarnPackageManager() {
   return {
-    getWarningMessage: () => null,
     runCommand: runYarnCommand,
     isSupportedCommand: (args) =>
       matchesCommand(args, "add") ||
