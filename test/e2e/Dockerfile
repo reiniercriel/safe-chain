@@ -45,8 +45,7 @@ RUN volta install pnpm@${PNPM_VERSION}
 
 # Copy and install Safe chain
 COPY --from=builder /app/*.tgz /pkgs/
-# RUN npm install -g /pkgs/*.tgz
-RUN npm install -g @aikidosec/safe-chain@1.0.21
+RUN npm install -g /pkgs/*.tgz
 
 WORKDIR /testapp
 RUN npm init -y
