@@ -40,6 +40,18 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        include:
+          - node_version: "lts"
+            npm_version: "latest"
+            yarn_version: "latest"
+            pnpm_version: "latest"
+          - node_version: "22"
+            npm_version: "10.0.0"
+            yarn_version: "latest"
+            pnpm_version: "latest"
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -53,6 +65,11 @@ jobs:
         run: npm ci
 
       - name: Run E2E tests
+        env:
+          NODE_VERSION: ${{ matrix.node_version }}
+          NPM_VERSION: ${{ matrix.npm_version }}
+          YARN_VERSION: ${{ matrix.yarn_version }}
+          PNPM_VERSION: ${{ matrix.pnpm_version }}
         run: npm run test:e2e
 
       - name: Clean up Docker resources

@@ -1,40 +1,20 @@
 import { describe, it, before, beforeEach, afterEach } from "node:test";
-import { execSync } from "node:child_process";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { DockerTestContainer } from "./DockerTestContainer.js";
 import assert from "node:assert";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 describe("E2E: safe-chain setup command", () => {
-  const imageName = "safe-chain-e2e-test";
-  const containerName = "safe-chain-e2e-test-container";
   let container;
 
   before(async () => {
-    // Build the Docker image for the test environment
-    try {
-      const sourceDir = path.join(__dirname, "../..");
-      execSync(`docker build -t ${imageName} -f Dockerfile ${sourceDir}`, {
-        cwd: __dirname,
-        stdio: "ignore",
-      });
-    } catch (error) {
-      throw new Error(`Failed to setup test environment: ${error.message}`);
-    }
+    DockerTestContainer.buildImage();
   });
 
   beforeEach(async () => {
-    // Run a new Docker container for each test
-    container = new DockerTestContainer(imageName, containerName);
-
+    container = new DockerTestContainer();
     await container.start();
   });
 
   afterEach(async () => {
-    // Stop and clean up the container after each test
     if (container) {
       await container.stop();
       container = null;
@@ -51,9 +31,14 @@ describe("E2E: safe-chain setup command", () => {
       await projectShell.runCommand("cd /testapp");
       const result = await projectShell.runCommand("npm i axios");
 
+      const hasExpectedOutput = result.output.includes(
+        "Scanning for malicious packages..."
+      );
       assert.ok(
-        result.output.includes("Scanning for malicious packages..."),
-        "Expected npm command to be wrapped by safe-chain"
+        hasExpectedOutput,
+        hasExpectedOutput
+          ? "Expected npm command to be wrapped by safe-chain"
+          : `Output did not contain "Scanning for malicious packages...": \n${result.output}`
       );
     });
 
