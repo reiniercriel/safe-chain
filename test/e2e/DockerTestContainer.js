@@ -1,12 +1,46 @@
 import { execSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
 import * as pty from "node-pty";
 import { parseShellOutput } from "./parseShellOutput.js";
 
+const imageName = "safe-chain-e2e-test";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const dockerFile = path.join(__dirname, "Dockerfile");
+const contextPath = path.join(__dirname, "../..");
+
+const nodeVersion = process.env.NODE_VERSION || "lts";
+const npmVersion = process.env.NPM_VERSION || "latest";
+const yarnVersion = process.env.YARN_VERSION || "latest";
+const pnpmVersion = process.env.PNPM_VERSION || "latest";
+
 export class DockerTestContainer {
-  constructor(imageName, containerName) {
-    this.imageName = imageName;
-    this.containerName = containerName;
+  constructor() {
+    this.containerName = `safe-chain-test-${Math.random()
+      .toString(36)
+      .substring(2, 15)}`;
     this.isRunning = false;
+  }
+
+  static buildImage() {
+    try {
+      const buildArgs = [
+        `--build-arg NODE_VERSION=${nodeVersion}`,
+        `--build-arg NPM_VERSION=${npmVersion}`,
+        `--build-arg YARN_VERSION=${yarnVersion}`,
+        `--build-arg PNPM_VERSION=${pnpmVersion}`,
+      ].join(" ");
+
+      execSync(
+        `docker build -t ${imageName} -f ${dockerFile} ${contextPath} ${buildArgs}`,
+        {
+          stdio: "ignore",
+        }
+      );
+    } catch (error) {
+      throw new Error(`Failed to build Docker image: ${error.message}`);
+    }
   }
 
   async start() {
@@ -17,7 +51,7 @@ export class DockerTestContainer {
     try {
       // Start a long-running container that we can exec commands into
       execSync(
-        `docker run -d --name ${this.containerName} ${this.imageName} sleep infinity`,
+        `docker run -d --name ${this.containerName} ${imageName} sleep infinity`,
         { stdio: "ignore" }
       );
       this.isRunning = true;

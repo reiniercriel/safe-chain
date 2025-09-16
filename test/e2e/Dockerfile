@@ -18,15 +18,35 @@ COPY packages/safe-chain ./
 RUN npm --no-git-tag-version version 1.0.0 --allow-same-version
 RUN npm pack
 
-FROM mcr.microsoft.com/devcontainers/javascript-node:22-bookworm as runner
+FROM buildpack-deps:trixie
 
-WORKDIR /app
+# Package manager version arguments with defaults
+ARG NODE_VERSION=latest
+ARG NPM_VERSION=latest
+ARG YARN_VERSION=latest
+ARG PNPM_VERSION=latest
 
-COPY --from=builder /app/*.tgz /app/
+SHELL ["/bin/bash", "-c"]
+ENV BASH_ENV=~/.bashrc
 
-# # Install the application package globally
-RUN npm install -g /app/*.tgz
+# Install zsh
+RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/v1.2.1/zsh-in-docker.sh)"
+# Install fish
+RUN apt-get install -y fish && \
+    mkdir -p /root/.config/fish/ && \
+    touch /root/.config/fish/config.fish
 
-RUN mkdir /testapp
-RUN cd /testapp && npm init -y
+# Install Volta and Node.js
+RUN curl https://get.volta.sh | bash
+RUN volta install node@${NODE_VERSION}
+RUN volta install npm@${NPM_VERSION}
+RUN volta install yarn@${YARN_VERSION}
+RUN volta install pnpm@${PNPM_VERSION}
+
+# Copy and install Safe chain
+COPY --from=builder /app/*.tgz /pkgs/
+RUN npm install -g /pkgs/*.tgz
+
+WORKDIR /testapp
+RUN npm init -y
 
