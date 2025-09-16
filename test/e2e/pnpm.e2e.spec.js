@@ -2,7 +2,7 @@ import { describe, it, before, beforeEach, afterEach } from "node:test";
 import { DockerTestContainer } from "./DockerTestContainer.js";
 import assert from "node:assert";
 
-describe("E2E: npm coverage", () => {
+describe("E2E: pnpm coverage", () => {
   let container;
 
   before(async () => {
@@ -28,7 +28,7 @@ describe("E2E: npm coverage", () => {
 
   it(`safe-chain succesfully installs safe packages`, async () => {
     const shell = await container.openShell("zsh");
-    const result = await shell.runCommand("npm i axios");
+    const result = await shell.runCommand("pnpm add axios");
 
     assert.ok(
       result.output.includes("No malicious packages detected."),
@@ -38,7 +38,7 @@ describe("E2E: npm coverage", () => {
 
   it(`safe-chain blocks installation of malicious packages`, async () => {
     const shell = await container.openShell("zsh");
-    const result = await shell.runCommand("npm i safe-chain-test");
+    const result = await shell.runCommand("pnpm add safe-chain-test");
 
     assert.ok(
       result.output.includes("Malicious changes detected:"),
@@ -53,16 +53,16 @@ describe("E2E: npm coverage", () => {
       `Output did not include expected text. Output was:\n${result.output}`
     );
 
-    const listResult = await shell.runCommand("npm list");
+    const listResult = await shell.runCommand("pnpm list");
     assert.ok(
       !listResult.output.includes("safe-chain-test"),
-      `Malicious package was installed despite safe-chain protection. Output of 'npm list' was:\n${listResult.output}`
+      `Malicious package was installed despite safe-chain protection. Output of 'pnpm list' was:\n${listResult.output}`
     );
   });
 
-  it("safe-chain blocks npx from executing malicious packages", async () => {
+  it("safe-chain blocks pnpx from executing malicious packages", async () => {
     const shell = await container.openShell("zsh");
-    const result = await shell.runCommand("npx safe-chain-test");
+    const result = await shell.runCommand("pnpx safe-chain-test");
 
     assert.ok(
       result.output.includes("Malicious changes detected:"),
@@ -78,9 +78,29 @@ describe("E2E: npm coverage", () => {
     );
   });
 
-  it("safe-chain blocks npm exec from executing malicious packages", async () => {
+  it("safe-chain blocks pnpm dlx from executing malicious packages", async () => {
     const shell = await container.openShell("zsh");
-    const result = await shell.runCommand("npm exec safe-chain-test");
+    const result = await shell.runCommand("pnpm dlx safe-chain-test");
+
+    assert.ok(
+      result.output.includes("Malicious changes detected:"),
+      `Output did not include expected text. Output was:\n${result.output}`
+    );
+    assert.ok(
+      result.output.includes("- safe-chain-test"),
+      `Output did not include expected text. Output was:\n${result.output}`
+    );
+    assert.ok(
+      result.output.includes("Exiting without installing malicious packages."),
+      `Output did not include expected text. Output was:\n${result.output}`
+    );
+  });
+
+  it("safe-chain blocks pnpm --package=name dlx from executing malicious packages", async () => {
+    const shell = await container.openShell("zsh");
+    const result = await shell.runCommand(
+      "pnpm --package=safe-chain-test dlx safe-chain-test"
+    );
 
     assert.ok(
       result.output.includes("Malicious changes detected:"),
