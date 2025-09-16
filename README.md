@@ -84,4 +84,4 @@ npm install suspicious-package --safe-chain-malware-action=prompt
 
 # Usage in CI/CD
 
-🚧 Support for CI/CD environments is coming soon...
+[Learn more about Safe Chain CI/CD integration in the Aikido docs.](https://help.aikido.dev/code-scanning/aikido-malware-scanning/malware-scanning-with-safe-chain-in-ci-cd-environments)
