@@ -79,6 +79,16 @@ jobs:
             npm_version: "latest"
             yarn_version: "latest"
             pnpm_version: "latest"
+          # EOL compatibility testing - Node 16 (EOL Sept 2023)
+          - node_version: "16"
+            npm_version: "8.0.0"
+            yarn_version: "3.6.0"
+            pnpm_version: "8.0.0"
+          # EOL compatibility testing - Node 14 (EOL April 2023)
+          - node_version: "14"
+            npm_version: "7.0.0"
+            yarn_version: "3.2.4"
+            pnpm_version: "7.33.7"
 
     steps:
       - name: Checkout code
