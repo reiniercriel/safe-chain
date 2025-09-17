@@ -28,7 +28,7 @@ export function removeLinesMatchingPattern(filePath, pattern) {
   }
 
   const fileContent = fs.readFileSync(filePath, "utf-8");
-  const lines = fileContent.split(/[\r\n\u2028\u2029]+/);
+  const lines = fileContent.split(/[\r\n\u2028\u2029]/);
   const updatedLines = lines.filter((line) => !shouldRemoveLine(line, pattern));
   fs.writeFileSync(filePath, updatedLines.join(os.EOL), "utf-8");
 }
@@ -43,12 +43,17 @@ function shouldRemoveLine(line, pattern) {
 
   if (line.length > maxLineLength) {
     // safe-chain only adds lines shorter than maxLineLength
-    // so if the line is longer, it must be from a different 
+    // so if the line is longer, it must be from a different
     // source and could be dangerous to remove
     return false;
   }
 
-  if (line.includes("\n") || line.includes("\r") || line.includes("\u2028") || line.includes("\u2029")) {
+  if (
+    line.includes("\n") ||
+    line.includes("\r") ||
+    line.includes("\u2028") ||
+    line.includes("\u2029")
+  ) {
     // If the line contains newlines, something has gone wrong in splitting
     // \u2028 and \u2029 are Unicode line separator characters (line and paragraph separators)
     return false;
