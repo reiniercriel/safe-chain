@@ -1,6 +1,7 @@
 import { spawnSync } from "child_process";
 import * as os from "os";
 import fs from "fs";
+import path from "path";
 
 export const knownAikidoTools = [
   { tool: "npm", aikidoCommand: "aikido-npm" },
@@ -43,12 +44,17 @@ function shouldRemoveLine(line, pattern) {
 
   if (line.length > maxLineLength) {
     // safe-chain only adds lines shorter than maxLineLength
-    // so if the line is longer, it must be from a different 
+    // so if the line is longer, it must be from a different
     // source and could be dangerous to remove
     return false;
   }
 
-  if (line.includes("\n") || line.includes("\r") || line.includes("\u2028") || line.includes("\u2029")) {
+  if (
+    line.includes("\n") ||
+    line.includes("\r") ||
+    line.includes("\u2028") ||
+    line.includes("\u2029")
+  ) {
     // If the line contains newlines, something has gone wrong in splitting
     // \u2028 and \u2029 are Unicode line separator characters (line and paragraph separators)
     return false;
@@ -58,11 +64,22 @@ function shouldRemoveLine(line, pattern) {
 }
 
 export function addLineToFile(filePath, line) {
-  if (!fs.existsSync(filePath)) {
-    fs.writeFileSync(filePath, "", "utf-8");
-  }
+  createFileIfNotExists(filePath);
 
   const fileContent = fs.readFileSync(filePath, "utf-8");
-  const updatedContent = fileContent + os.EOL + line;
+  const updatedContent = fileContent + os.EOL + line + os.EOL;
   fs.writeFileSync(filePath, updatedContent, "utf-8");
+}
+
+function createFileIfNotExists(filePath) {
+  if (fs.existsSync(filePath)) {
+    return;
+  }
+
+  const dir = path.dirname(filePath);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+
+  fs.writeFileSync(filePath, "", "utf-8");
 }
