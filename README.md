@@ -8,12 +8,14 @@ The Aikido Safe Chain wraps around the [npm cli](https://github.com/npm/cli), [n
 
 Aikido Safe Chain works on Node.js version 18 and above and supports the following package managers:
 
-- ✅ **npm**
-- ✅ **npx**
-- ✅ **yarn**
-- ✅ **pnpm**
-- ✅ **pnpx**
-- 🚧 **bun** Coming soon
+- ✅ full coverage: **npm >= 10.4.0**:
+- ⚠️ limited to scanning the install command arguments (broader scanning coming soon):
+  - **npm < 10.4.0**
+  - **npx**
+  - **yarn**
+  - **pnpm**
+  - **pnpx**
+- 🚧 **bun**: coming soon
 
 # Usage
 
