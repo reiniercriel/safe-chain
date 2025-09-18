@@ -22,15 +22,17 @@ export function doesExecutableExistOnSystem(executableName) {
   }
 }
 
-export function removeLinesMatchingPattern(filePath, pattern) {
+export function removeLinesMatchingPattern(filePath, pattern, eol) {
   if (!fs.existsSync(filePath)) {
     return;
   }
 
+  eol = eol || os.EOL;
+
   const fileContent = fs.readFileSync(filePath, "utf-8");
   const lines = fileContent.split(/[\r\n\u2028\u2029]+/);
   const updatedLines = lines.filter((line) => !shouldRemoveLine(line, pattern));
-  fs.writeFileSync(filePath, updatedLines.join(os.EOL), "utf-8");
+  fs.writeFileSync(filePath, updatedLines.join(eol), "utf-8");
 }
 
 const maxLineLength = 100;
@@ -43,12 +45,17 @@ function shouldRemoveLine(line, pattern) {
 
   if (line.length > maxLineLength) {
     // safe-chain only adds lines shorter than maxLineLength
-    // so if the line is longer, it must be from a different 
+    // so if the line is longer, it must be from a different
     // source and could be dangerous to remove
     return false;
   }
 
-  if (line.includes("\n") || line.includes("\r") || line.includes("\u2028") || line.includes("\u2029")) {
+  if (
+    line.includes("\n") ||
+    line.includes("\r") ||
+    line.includes("\u2028") ||
+    line.includes("\u2029")
+  ) {
     // If the line contains newlines, something has gone wrong in splitting
     // \u2028 and \u2029 are Unicode line separator characters (line and paragraph separators)
     return false;
@@ -57,12 +64,14 @@ function shouldRemoveLine(line, pattern) {
   return true;
 }
 
-export function addLineToFile(filePath, line) {
+export function addLineToFile(filePath, line, eol) {
   if (!fs.existsSync(filePath)) {
     fs.writeFileSync(filePath, "", "utf-8");
   }
 
+  eol = eol || os.EOL;
+
   const fileContent = fs.readFileSync(filePath, "utf-8");
-  const updatedContent = fileContent + os.EOL + line;
+  const updatedContent = fileContent + eol + line;
   fs.writeFileSync(filePath, updatedContent, "utf-8");
 }

@@ -8,6 +8,7 @@ import { execSync } from "child_process";
 const shellName = "Fish";
 const executableName = "fish";
 const startupFileCommand = "echo ~/.config/fish/config.fish";
+const eol = "\n"; // When fish runs on Windows (e.g., Git Bash or WSL), it expects LF line endings.
 
 function isInstalled() {
   return doesExecutableExistOnSystem(executableName);
@@ -20,14 +21,16 @@ function teardown(tools) {
     // Remove any existing alias for the tool
     removeLinesMatchingPattern(
       startupFile,
-      new RegExp(`^alias\\s+${tool}\\s+`)
+      new RegExp(`^alias\\s+${tool}\\s+`),
+      eol
     );
   }
 
   // Removes the line that sources the safe-chain fish initialization script (~/.safe-chain/scripts/init-fish.fish)
   removeLinesMatchingPattern(
     startupFile,
-    /^source\s+~\/\.safe-chain\/scripts\/init-fish\.fish/
+    /^source\s+~\/\.safe-chain\/scripts\/init-fish\.fish/,
+    eol
   );
 
   return true;
@@ -38,7 +41,8 @@ function setup() {
 
   addLineToFile(
     startupFile,
-    `source ~/.safe-chain/scripts/init-fish.fish # Safe-chain Fish initialization script`
+    `source ~/.safe-chain/scripts/init-fish.fish # Safe-chain Fish initialization script`,
+    eol
   );
 
   return true;
