@@ -30,7 +30,7 @@ export function removeLinesMatchingPattern(filePath, pattern, eol) {
   eol = eol || os.EOL;
 
   const fileContent = fs.readFileSync(filePath, "utf-8");
-  const lines = fileContent.split(/[\r\n\u2028\u2029]+/);
+  const lines = fileContent.split(/[\r\n\u2028\u2029]/);
   const updatedLines = lines.filter((line) => !shouldRemoveLine(line, pattern));
   fs.writeFileSync(filePath, updatedLines.join(eol), "utf-8");
 }

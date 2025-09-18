@@ -222,5 +222,24 @@ describe("Zsh shell integration", () => {
       );
       assert.ok(content.includes("alias ls="));
     });
+
+    it("should respect empty lines and comments", () => {
+      const initialContent = [
+        "#!/bin/zsh",
+        "",
+        "# Some comment",
+        "",
+        "",
+        "",
+        "# Another comment",
+      ].join("\n");
+
+      fs.writeFileSync(mockStartupFile, initialContent, "utf-8");
+
+      zsh.teardown(knownAikidoTools);
+
+      const content = fs.readFileSync(mockStartupFile, "utf-8");
+      assert.strictEqual(content, initialContent);
+    });
   });
 });
