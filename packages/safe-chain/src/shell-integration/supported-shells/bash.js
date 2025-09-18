@@ -9,6 +9,7 @@ import * as os from "os";
 const shellName = "Bash";
 const executableName = "bash";
 const startupFileCommand = "echo ~/.bashrc";
+const eol = "\n"; // When bash runs on Windows (e.g., Git Bash or WSL), it expects LF line endings.
 
 function isInstalled() {
   return doesExecutableExistOnSystem(executableName);
@@ -19,13 +20,18 @@ function teardown(tools) {
 
   for (const { tool } of tools) {
     // Remove any existing alias for the tool
-    removeLinesMatchingPattern(startupFile, new RegExp(`^alias\\s+${tool}=`));
+    removeLinesMatchingPattern(
+      startupFile,
+      new RegExp(`^alias\\s+${tool}=`),
+      eol
+    );
   }
 
   // Removes the line that sources the safe-chain bash initialization script (~/.aikido/scripts/init-posix.sh)
   removeLinesMatchingPattern(
     startupFile,
-    /^source\s+~\/\.safe-chain\/scripts\/init-posix\.sh/
+    /^source\s+~\/\.safe-chain\/scripts\/init-posix\.sh/,
+    eol
   );
 
   return true;
@@ -36,7 +42,8 @@ function setup() {
 
   addLineToFile(
     startupFile,
-    `source ~/.safe-chain/scripts/init-posix.sh # Safe-chain bash initialization script`
+    `source ~/.safe-chain/scripts/init-posix.sh # Safe-chain bash initialization script`,
+    eol
   );
 
   return true;
