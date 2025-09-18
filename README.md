@@ -17,6 +17,8 @@ Aikido Safe Chain works on Node.js version 18 and above and supports the followi
   - **pnpx**
 - 🚧 **bun**: coming soon
 
+Note on the limited support for npm < 10.4.0, npx, yarn, pnpm and pnpx: adding **full support for these package managers is a high priority**. In the meantime, we offer limited support already, which means that the Aikido Safe Chain will scan the package names passed as arguments to the install commands. However, it will not scan the full dependency tree of these packages.
+
 # Usage
 
 ## Installation
