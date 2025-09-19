@@ -37,7 +37,7 @@ function checkChangesWithDryRun(args) {
   // Dry-run can return a non-zero status code in some cases
   //  e.g., when running "npm audit fix --dry-run", it returns exit code 1
   //  when there are vulnerabilities that can be fixed.
-  if (dryRunOutput.status !== 0 && !doesCommandReturnNonZero(args)) {
+  if (dryRunOutput.status !== 0 && !canCommandReturnNonZeroOnSuccess(args)) {
     throw new Error(
       `Dry-run command failed with exit code ${dryRunOutput.status} and output:\n${dryRunOutput.output}`
     );
@@ -55,10 +55,12 @@ function checkChangesWithDryRun(args) {
   return parsedOutput.reverse();
 }
 
-function doesCommandReturnNonZero(args) {
+function canCommandReturnNonZeroOnSuccess(args) {
   if (args.length < 2) {
     return false;
   }
 
+  // `npm audit fix --dry-run` can return exit code 1 when it succesfully ran and
+  // there were vulnerabilities that could be fixed
   return args[0] === "audit" && args[1] === "fix";
 }
