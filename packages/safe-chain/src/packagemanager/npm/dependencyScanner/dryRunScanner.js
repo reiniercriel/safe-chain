@@ -1,4 +1,3 @@
-import { ui } from "../../../environment/userInteraction.js";
 import { parseDryRunOutput } from "../parsing/parseNpmInstallDryRunOutput.js";
 import { dryRunNpmCommandAndOutput } from "../runNpmCommand.js";
 import { hasDryRunArg } from "../utils/npmCommands.js";
