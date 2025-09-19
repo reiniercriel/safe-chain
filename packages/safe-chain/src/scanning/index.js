@@ -21,7 +21,9 @@ export async function scanCommand(args) {
 
   let timedOut = false;
 
-  const spinner = ui.startProcess("Scanning for malicious packages...");
+  const spinner = ui.startProcess(
+    "Safe-chain: Scanning for malicious packages..."
+  );
   let audit;
 
   await Promise.race([
@@ -37,12 +39,14 @@ export async function scanCommand(args) {
         }
 
         if (changes.length > 0) {
-          spinner.setText(`Scanning ${changes.length} package(s)...`);
+          spinner.setText(
+            `Safe-chain: Scanning ${changes.length} package(s)...`
+          );
         }
 
         audit = await auditChanges(changes);
       } catch (error) {
-        spinner.fail(`Error while scanning: ${error.message}`);
+        spinner.fail(`Safe-chain: Error while scanning.`);
         throw error;
       }
     })(),
@@ -52,12 +56,12 @@ export async function scanCommand(args) {
   ]);
 
   if (timedOut) {
-    spinner.fail("Timeout exceeded while scanning.");
+    spinner.fail("Safe-chain: Timeout exceeded while scanning.");
     throw new Error("Timeout exceeded while scanning npm install command.");
   }
 
   if (!audit || audit.isAllowed) {
-    spinner.succeed("No malicious packages detected.");
+    spinner.succeed("Safe-chain: No malicious packages detected.");
   } else {
     printMaliciousChanges(audit.disallowedChanges, spinner);
     await onMalwareFound();
@@ -65,7 +69,7 @@ export async function scanCommand(args) {
 }
 
 function printMaliciousChanges(changes, spinner) {
-  spinner.fail(chalk.bold("Malicious changes detected:"));
+  spinner.fail("Safe-chain: " + chalk.bold("Malicious changes detected:"));
 
   for (const change of changes) {
     ui.writeInformation(` - ${change.name}@${change.version}`);

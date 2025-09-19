@@ -15,6 +15,7 @@ export async function main(args) {
     }
   } catch (error) {
     ui.writeError("Failed to check for malicious packages:", error.message);
+    process.exit(1);
   }
 
   var result = getPackageManager().runCommand(args);

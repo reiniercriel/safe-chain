@@ -37,14 +37,29 @@ function checkChangesWithDryRun(args) {
 
   // Dry-run can return a non-zero status code in some cases
   //  e.g., when running "npm audit fix --dry-run", it returns exit code 1
-  //  when there are vulnurabilities that can be fixed.
+  //  when there are vulnerabilities that can be fixed.
+  if (dryRunOutput.status !== 0 && !doesCommandReturnNonZero(args)) {
+    throw new Error(
+      `Dry-run command failed with exit code ${dryRunOutput.status} and output:\n${dryRunOutput.output}`
+    );
+  }
+
   if (dryRunOutput.status !== 0 && !dryRunOutput.output) {
-    ui.writeError("Detecting changes failed.");
-    return [];
+    throw new Error(
+      `Dry-run command failed with exit code ${dryRunOutput.status} and produced no output.`
+    );
   }
 
   const parsedOutput = parseDryRunOutput(dryRunOutput.output);
 
   // reverse the array to have the top-level packages first
   return parsedOutput.reverse();
+}
+
+function doesCommandReturnNonZero(args) {
+  if (args.length < 2) {
+    return false;
+  }
+
+  return args[0] === "audit" && args[1] === "fix";
 }
