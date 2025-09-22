@@ -57,50 +57,6 @@ The Aikido Safe Chain integrates with your shell to provide a seamless experienc
 
 More information about the shell integration can be found in the [shell integration documentation](docs/shell-integration.md).
 
-## Usage in CI/CD
-
-[Learn more about Safe Chain CI/CD integration in the Aikido docs.](https://help.aikido.dev/code-scanning/aikido-malware-scanning/malware-scanning-with-safe-chain-in-ci-cd-environments)
-
-## Usage in Docker
-
-To use the Aikido Safe Chain in a Docker container, you can follow these steps:
-
-1. **Install the Aikido Safe Chain package** in your Dockerfile:
-
-   ```dockerfile
-   RUN npm install -g @aikidosec/safe-chain
-   ```
-
-2. **Setup the shell integration** by running:
-
-   ```dockerfile
-   RUN safe-chain setup-ci
-   ```
-
-3. **Add the shims directory to your PATH** to ensure the aliases are available in your Docker container:
-
-   ```dockerfile
-   ENV PATH="~/.safe-chain/shims:${PATH}"
-   ```
-
-4. **Verify the installation** by running:
-   ```dockerfile
-   RUN npm install safe-chain-test
-   ```
-
-Example Dockerfile:
-
-```dockerfile
-FROM node:24
-RUN npm install -g @aikidosec/safe-chain
-RUN safe-chain setup-ci
-ENV PATH="~/.safe-chain/shims:${PATH}"
-WORKDIR /app
-
-RUN npm init -y
-RUN npm install safe-chain-test
-```
-
 ## Uninstallation
 
 To uninstall the Aikido Safe Chain, you can run the following command:
@@ -129,3 +85,7 @@ Example usage:
 ```shell
 npm install suspicious-package --safe-chain-malware-action=prompt
 ```
+
+# Usage in CI/CD
+
+[Learn more about Safe Chain CI/CD integration in the Aikido docs.](https://help.aikido.dev/code-scanning/aikido-malware-scanning/malware-scanning-with-safe-chain-in-ci-cd-environments)
