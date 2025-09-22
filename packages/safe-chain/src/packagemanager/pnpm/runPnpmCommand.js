@@ -5,6 +5,12 @@ export function runPnpmCommand(args, toolName = "pnpm") {
   try {
     let result;
 
+    ui.writeInformation(
+      `Executing ${toolName} with arguments:`,
+      args.join(" ")
+    );
+    ui.writeInformation("----------------------------");
+
     if (toolName === "pnpm") {
       result = spawnSync("pnpm", args, { stdio: "inherit" });
     } else if (toolName === "pnpx") {
@@ -12,6 +18,9 @@ export function runPnpmCommand(args, toolName = "pnpm") {
     } else {
       throw new Error(`Unsupported tool name for aikido-pnpm: ${toolName}`);
     }
+
+    ui.writeInformation("----------------------------");
+    ui.writeInformation(`${toolName} process exited with code:`, result.status);
 
     if (result.status !== null) {
       return { status: result.status };
