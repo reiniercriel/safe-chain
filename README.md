@@ -88,4 +88,60 @@ npm install suspicious-package --safe-chain-malware-action=prompt
 
 # Usage in CI/CD
 
-[Learn more about Safe Chain CI/CD integration in the Aikido docs.](https://help.aikido.dev/code-scanning/aikido-malware-scanning/malware-scanning-with-safe-chain-in-ci-cd-environments)
+You can protect your CI/CD pipelines from malicious packages by integrating Aikido Safe Chain into your build process. This ensures that any packages installed during your automated builds are checked for malware before installation.
+
+For optimal protection in CI/CD environments, we recommend using **npm >= 10.4.0** as it provides full dependency tree scanning. Other package managers currently offer limited scanning of install command arguments only.
+
+## Setup
+
+To use Aikido Safe Chain in CI/CD environments, run the following command after installing the package:
+
+```shell
+safe-chain setup-ci
+```
+
+This automatically configures your CI environment to use Aikido Safe Chain for all package manager commands.
+
+## Supported Platforms
+
+- ✅ **GitHub Actions**
+- ✅ **Azure Pipelines**
+
+## GitHub Actions Example
+
+```yaml
+- name: Setup Node.js
+  uses: actions/setup-node@v4
+  with:
+    node-version: "22"
+    cache: "npm"
+
+- name: Setup safe-chain
+  run: |
+    npm i -g ./aikidosec-safe-chain-1.0.0.tgz
+    safe-chain setup-ci
+
+- name: Install dependencies
+  run: |
+    npm ci
+```
+
+## Azure DevOps Example
+
+```yaml
+- task: NodeTool@0
+  inputs:
+    versionSpec: "22.x"
+  displayName: "Install Node.js"
+
+- script: |
+    npm i -g ./aikidosec-safe-chain-1.0.0.tgz
+    safe-chain setup-ci
+  displayName: "Install safe chain"
+
+- script: |
+    npm ci
+  displayName: "npm install and build"
+```
+
+After setup, all subsequent package manager commands in your CI pipeline will automatically be protected by Aikido Safe Chain's malware detection.
