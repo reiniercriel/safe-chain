@@ -1,4 +1,3 @@
-import { ui } from "../../../environment/userInteraction.js";
 import { parseDryRunOutput } from "../parsing/parseNpmInstallDryRunOutput.js";
 import { dryRunNpmCommandAndOutput } from "../runNpmCommand.js";
 import { hasDryRunArg } from "../utils/npmCommands.js";
@@ -37,14 +36,31 @@ function checkChangesWithDryRun(args) {
 
   // Dry-run can return a non-zero status code in some cases
   //  e.g., when running "npm audit fix --dry-run", it returns exit code 1
-  //  when there are vulnurabilities that can be fixed.
+  //  when there are vulnerabilities that can be fixed.
+  if (dryRunOutput.status !== 0 && !canCommandReturnNonZeroOnSuccess(args)) {
+    throw new Error(
+      `Dry-run command failed with exit code ${dryRunOutput.status} and output:\n${dryRunOutput.output}`
+    );
+  }
+
   if (dryRunOutput.status !== 0 && !dryRunOutput.output) {
-    ui.writeError("Detecting changes failed.");
-    return [];
+    throw new Error(
+      `Dry-run command failed with exit code ${dryRunOutput.status} and produced no output.`
+    );
   }
 
   const parsedOutput = parseDryRunOutput(dryRunOutput.output);
 
   // reverse the array to have the top-level packages first
   return parsedOutput.reverse();
+}
+
+function canCommandReturnNonZeroOnSuccess(args) {
+  if (args.length < 2) {
+    return false;
+  }
+
+  // `npm audit fix --dry-run` can return exit code 1 when it succesfully ran and
+  // there were vulnerabilities that could be fixed
+  return args[0] === "audit" && args[1] === "fix";
 }

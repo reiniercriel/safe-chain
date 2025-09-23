@@ -1,6 +1,7 @@
 import { spawnSync } from "child_process";
 import * as os from "os";
 import fs from "fs";
+import path from "path";
 
 export const knownAikidoTools = [
   { tool: "npm", aikidoCommand: "aikido-npm" },
@@ -65,13 +66,24 @@ function shouldRemoveLine(line, pattern) {
 }
 
 export function addLineToFile(filePath, line, eol) {
-  if (!fs.existsSync(filePath)) {
-    fs.writeFileSync(filePath, "", "utf-8");
-  }
+  createFileIfNotExists(filePath);
 
   eol = eol || os.EOL;
 
   const fileContent = fs.readFileSync(filePath, "utf-8");
-  const updatedContent = fileContent + eol + line;
+  const updatedContent = fileContent + eol + line + eol;
   fs.writeFileSync(filePath, updatedContent, "utf-8");
+}
+
+function createFileIfNotExists(filePath) {
+  if (fs.existsSync(filePath)) {
+    return;
+  }
+
+  const dir = path.dirname(filePath);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+
+  fs.writeFileSync(filePath, "", "utf-8");
 }
