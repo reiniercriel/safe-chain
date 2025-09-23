@@ -18,7 +18,7 @@ export function runNpm(args) {
 
 export function dryRunNpmCommandAndOutput(args) {
   try {
-    const npmCommand = `npm ${args.join(" ")} --dry-run`;
+    const npmCommand = `npm ${args.join(" ")} --ignore-scripts --dry-run`;
     const output = execSync(npmCommand, { stdio: "pipe" });
     return { status: 0, output: output.toString() };
   } catch (error) {

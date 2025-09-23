@@ -56,11 +56,13 @@ export async function setup() {
  */
 function setupShell(shell) {
   let success = false;
+  let error;
   try {
     shell.teardown(knownAikidoTools); // First, tear down to prevent duplicate aliases
     success = shell.setup(knownAikidoTools);
-  } catch {
+  } catch (err) {
     success = false;
+    error = err;
   }
 
   if (success) {
@@ -75,6 +77,13 @@ function setupShell(shell) {
         "Setup failed"
       )}. Please check your ${shell.name} configuration.`
     );
+    if (error) {
+      let message = `  Error: ${error.message}`;
+      if (error.code) {
+        message += ` (code: ${error.code})`;
+      }
+      ui.writeError(message);
+    }
   }
 
   return success;
