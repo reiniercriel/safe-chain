@@ -118,7 +118,7 @@ This automatically configures your CI environment to use Aikido Safe Chain for a
 
 - name: Setup safe-chain
   run: |
-    npm i -g ./aikidosec-safe-chain-1.0.0.tgz
+    npm i -g @aikidosec/safe-chain
     safe-chain setup-ci
 
 - name: Install dependencies
@@ -135,7 +135,7 @@ This automatically configures your CI environment to use Aikido Safe Chain for a
   displayName: "Install Node.js"
 
 - script: |
-    npm i -g ./aikidosec-safe-chain-1.0.0.tgz
+    npm i -g @aikidosec/safe-chain
     safe-chain setup-ci
   displayName: "Install safe chain"
 
