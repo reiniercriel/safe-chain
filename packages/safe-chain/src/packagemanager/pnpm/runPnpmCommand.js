@@ -1,15 +1,18 @@
-import { execSync } from "child_process";
 import { ui } from "../../environment/userInteraction.js";
+import { safeSpawnSync } from "../../utils/safeSpawn.js";
 
 export function runPnpmCommand(args, toolName = "pnpm") {
   try {
+    let result;
     if (toolName === "pnpm") {
-      execSync(`pnpm ${args.join(" ")}`, { stdio: "inherit" });
+      result = safeSpawnSync("pnpm", args, { stdio: "inherit" });
     } else if (toolName === "pnpx") {
-      execSync(`pnpx ${args.join(" ")}`, { stdio: "inherit" });
+      result = safeSpawnSync("pnpx", args, { stdio: "inherit" });
     } else {
       throw new Error(`Unsupported tool name for aikido-pnpm: ${toolName}`);
     }
+
+    return { status: result.status };
   } catch (error) {
     if (error.status) {
       return { status: error.status };
@@ -18,5 +21,4 @@ export function runPnpmCommand(args, toolName = "pnpm") {
       return { status: 1 };
     }
   }
-  return { status: 0 };
 }
