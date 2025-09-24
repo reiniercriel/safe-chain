@@ -114,8 +114,10 @@ function modifyPathForCi(shimsDir) {
     );
   }
 
-  // detect azure pipelines
   if (process.env.TF_BUILD) {
+    // In Azure Pipelines, prepending the path is done via a logging command:
+    //  ##vso[task.prependpath]/path/to/add
+    // Logging this to stdout will cause the Azure Pipelines agent to pick it up
     ui.writeInformation("##vso[task.prependpath]" + shimsDir);
   }
 }
