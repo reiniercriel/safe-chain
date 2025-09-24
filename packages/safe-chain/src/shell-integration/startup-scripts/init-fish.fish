@@ -47,11 +47,15 @@ function pnpx
 end
 
 function npm
-    if test (count $argv) -eq 1 -a \( "$argv[1]" = "-v" -o "$argv[1]" = "--version" \)
-        # If args is just -v or --version and nothing else, just run the npm version command
-        # This is because nvm uses this to check the version of npm
-        command npm $argv
-        return
+    # If args is just -v or --version and nothing else, just run the `npm -v` command
+    # This is because nvm uses this to check the version of npm
+    set argc (count $argv)
+    if test $argc -eq 1
+        switch $argv[1]
+            case "-v" "--version"
+                command npm $argv
+                return
+        end
     end
 
     wrapSafeChainCommand "npm" "aikido-npm" $argv
