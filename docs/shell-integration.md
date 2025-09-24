@@ -2,21 +2,21 @@
 
 ## Overview
 
-The shell integration automatically wraps common package manager commands (`npm`, `npx`, `yarn`, `pnpm`, `pnpx`) with Aikido's security scanning functionality. This is achieved by adding shell aliases that redirect these commands to their Aikido-wrapped equivalents.
+The shell integration automatically wraps common package manager commands (`npm`, `npx`, `yarn`, `pnpm`, `pnpx`) with Aikido's security scanning functionality. This is achieved by sourcing startup scripts that define shell functions to wrap these commands with their Aikido-protected equivalents.
 
 ## Supported Shells
 
 Aikido Safe Chain supports integration with the following shells.
 
-| Shell                  | Startup File                 | Alias Format               |
-| ---------------------- | ---------------------------- | -------------------------- |
-| **Bash**               | `~/.bashrc`                  | `alias npm='aikido-npm'`   |
-| **Zsh**                | `~/.zshrc`                   | `alias npm='aikido-npm'`   |
-| **Fish**               | `~/.config/fish/config.fish` | `alias npm "aikido-npm"`   |
-| **PowerShell Core**    | `$PROFILE`                   | `Set-Alias npm aikido-npm` |
-| **Windows PowerShell** | `$PROFILE`                   | `Set-Alias npm aikido-npm` |
+| Shell                  | Startup File                 |
+| ---------------------- | ---------------------------- |
+| **Bash**               | `~/.bashrc`                  |
+| **Zsh**                | `~/.zshrc`                   |
+| **Fish**               | `~/.config/fish/config.fish` |
+| **PowerShell Core**    | `$PROFILE`                   |
+| **Windows PowerShell** | `$PROFILE`                   |
 
-## Commands
+## Setup Commands
 
 ### Setup Shell Integration
 
@@ -26,10 +26,11 @@ safe-chain setup
 
 This command:
 
+- Copies necessary startup scripts to Safe Chain's installation directory (`~/.safe-chain/scripts`)
 - Detects all supported shells on your system
-- Adds aliases for `npm`, `npx`, `yarn`, `pnpm` and `pnpx` to each shell's startup file
+- Sources each shell's startup file to add Safe Chain functions for `npm`, `npx`, `yarn`, `pnpm`, and `pnpx`
 
-❗ After running this command, **you must restart your terminal** for the changes to take effect. This ensures that the aliases are loaded correctly.
+❗ After running this command, **you must restart your terminal** for the changes to take effect. This ensures that the startup scripts are sourced correctly.
 
 ### Remove Shell Integration
 
@@ -40,13 +41,13 @@ safe-chain teardown
 This command:
 
 - Detects all supported shells on your system
-- Removes Aikido aliases from each shell's startup file
+- Removes the Safe Chain scripts from each shell's startup file, restoring the original commands
 
 ❗ After running this command, **you must restart your terminal** to restore the original commands.
 
 ## File Locations
 
-The system modifies the following files based on your shell configuration:
+The system modifies the following files to source Safe Chain startup scripts:
 
 ### Unix/Linux/macOS
 
@@ -64,15 +65,16 @@ The system modifies the following files based on your shell configuration:
 
 ### Common Issues
 
-**Aliases not working after setup:**
+**Shell functions not working after setup:**
 
 - Make sure to restart your terminal
-- Check that the startup file was actually modified
+- Check that the startup file was modified to source Safe Chain scripts
+- Check the sourced file exists at `~/.safe-chain/scripts/`
 - Verify your shell is reading the correct startup file
 
 **Getting 'command not found: aikido-npm' error:**
 
-This means the aliases are working but the Aikido commands aren't installed or available in your PATH:
+This means the shell functions are working but the Aikido commands aren't installed or available in your PATH:
 
 - Make sure Aikido Safe Chain is properly installed on your system
 - Verify the `aikido-npm`, `aikido-npx`, `aikido-yarn`, `aikido-pnpm` and `aikido-pnpx` commands exist
@@ -82,27 +84,40 @@ This means the aliases are working but the Aikido commands aren't installed or a
 
 To verify the integration is working, follow these steps:
 
-1. **Check if aliases were added to your shell startup file:**
+1. **Check if startup scripts were sourced in your shell startup file:**
 
    - **For Bash**: Open `~/.bashrc` in your text editor
    - **For Zsh**: Open `~/.zshrc` in your text editor
    - **For Fish**: Open `~/.config/fish/config.fish` in your text editor
    - **For PowerShell**: Open your PowerShell profile file (run `$PROFILE` in PowerShell to see the path)
 
-   Look for lines like:
+   Look for lines that source the Safe Chain startup scripts from `~/.safe-chain/scripts/`
 
-   - `alias npm='aikido-npm'` (Bash/Zsh)
-   - `alias npm "aikido-npm"` (Fish)
-   - `Set-Alias npm aikido-npm` (PowerShell)
-
-2. **Test that aliases are active in your terminal:**
+2. **Test that shell functions are active in your terminal:**
 
    After restarting your terminal, run these commands:
 
-   - `which npm` - Should show the path to `aikido-npm` instead of the original npm
    - `npm --version` - Should show output from the Aikido-wrapped version
-   - `type npm` - Alternative way to check what command `npm` resolves to
+   - `type npm` - Should show that `npm` is a function
 
-3. **If you need to remove aliases manually:**
+3. **If you need to remove the integration manually:**
 
-   Edit the same startup file from step 1 and delete any lines containing `aikido-npm`, `aikido-npx`, `aikido-yarn`, `aikido-pnpm` or `aikido-pnpx`.
+   Edit the same startup file from step 1 and delete any lines that source Safe Chain scripts from `~/.safe-chain/scripts/`.
+
+## Manual Setup
+
+For advanced users who prefer manual configuration, you can create wrapper functions directly in your shell's startup file. Shell functions take precedence over commands in PATH, so defining an `npm` function will intercept all `npm` calls:
+
+```bash
+# Example for Bash/Zsh
+npm() {
+  if command -v aikido-npm > /dev/null 2>&1; then
+    aikido-npm "$@"
+  else
+    echo "Warning: safe-chain is not installed. npm will run without protection."
+    command npm "$@"
+  fi
+}
+```
+
+Repeat this pattern for `npx`, `yarn`, `pnpm`, and `pnpx` using their respective `aikido-*` commands. After adding these functions, restart your terminal to apply the changes.

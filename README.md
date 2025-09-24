@@ -4,7 +4,7 @@ The Aikido Safe Chain **prevents developers from installing malware** on their w
 
 The Aikido Safe Chain wraps around the [npm cli](https://github.com/npm/cli), [npx](https://github.com/npm/cli/blob/latest/docs/content/commands/npx.md), [yarn](https://yarnpkg.com/), [pnpm](https://pnpm.io/), and [pnpx](https://pnpm.io/cli/dlx) to provide extra checks before installing new packages. This tool will detect when a package contains malware and prompt you to exit, preventing npm, npx, yarn, pnpm or pnpx from downloading or running the malware.
 
-![demo](https://aikido-production-staticfiles-public.s3.eu-west-1.amazonaws.com/safe-pkg.gif)
+![demo](./docs/safe-package-manager-demo.png)
 
 Aikido Safe Chain works on Node.js version 18 and above and supports the following package managers:
 
