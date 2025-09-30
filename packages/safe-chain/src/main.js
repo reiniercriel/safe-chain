@@ -5,7 +5,6 @@ import { ui } from "./environment/userInteraction.js";
 import { getPackageManager } from "./packagemanager/currentPackageManager.js";
 import { initializeCliArguments } from "./config/cliArguments.js";
 import { createSafeChainProxy } from "./registryProxy/registryProxy.js";
-import chalk from "chalk";
 
 export async function main(args) {
   const proxy = createSafeChainProxy();
@@ -26,26 +25,7 @@ export async function main(args) {
   var result = await getPackageManager().runCommand(args);
 
   await proxy.stopServer();
-  const blockedRequests = proxy.getBlockedRequests();
-  if (blockedRequests.length > 0) {
-    ui.emptyLine();
-
-    ui.writeInformation(
-      `Safe-chain: ${chalk.bold(
-        `blocked ${blockedRequests.length} malicious package downloads`
-      )}:`
-    );
-
-    for (const req of blockedRequests) {
-      ui.writeInformation(` - ${req.packageName}@${req.version} (${req.url})`);
-    }
-
-    ui.emptyLine();
-    ui.writeError("Exiting without installing malicious packages.");
-    ui.emptyLine();
-
-    process.exit(1);
-  }
+  proxy.verifyNoMaliciousPackages();
 
   process.exit(result.status);
 }

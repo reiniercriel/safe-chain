@@ -4,6 +4,8 @@ import { mitmConnect } from "./mitmRequestHandler.js";
 import { getCaCertPath } from "./certUtils.js";
 import { auditChanges } from "../scanning/audit/index.js";
 import { knownRegistries, parsePackageFromUrl } from "./parsePackageFromUrl.js";
+import { ui } from "../environment/userInteraction.js";
+import chalk from "chalk";
 
 const state = {
   port: null,
@@ -18,6 +20,7 @@ export function createSafeChainProxy() {
     startServer: () => startServer(server),
     stopServer: () => stopServer(server),
     getBlockedRequests: () => state.blockedRequests,
+    verifyNoMaliciousPackages,
   };
 }
 
@@ -116,4 +119,28 @@ async function isAllowedUrl(url) {
   }
 
   return true;
+}
+
+function verifyNoMaliciousPackages() {
+  if (state.blockedRequests.length === 0) {
+    return;
+  }
+
+  ui.emptyLine();
+
+  ui.writeInformation(
+    `Safe-chain: ${chalk.bold(
+      `blocked ${state.blockedRequests.length} malicious package downloads`
+    )}:`
+  );
+
+  for (const req of state.blockedRequests) {
+    ui.writeInformation(` - ${req.packageName}@${req.version} (${req.url})`);
+  }
+
+  ui.emptyLine();
+  ui.writeError("Exiting without installing malicious packages.");
+  ui.emptyLine();
+
+  process.exit(1);
 }
