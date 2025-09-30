@@ -1,6 +1,5 @@
 import https from "https";
 import { generateCertForHost } from "./certUtils.js";
-import chalk from "chalk";
 
 export function mitmConnect(req, clientSocket, isAllowed) {
   const { hostname } = new URL(`http://${req.url}`);
