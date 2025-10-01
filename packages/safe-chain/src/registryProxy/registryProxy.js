@@ -81,9 +81,14 @@ function startServer(server) {
 
 function stopServer(server) {
   return new Promise((resolve) => {
-    server.close(() => {
+    try {
+      server.close(() => {
+        resolve();
+      });
+    } catch {
       resolve();
-    });
+    }
+    setTimeout(() => resolve(), 1000);
   });
 }
 
