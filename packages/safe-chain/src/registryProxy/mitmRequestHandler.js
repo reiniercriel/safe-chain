@@ -17,7 +17,8 @@ function createHttpsServer(hostname, isAllowed) {
   const cert = generateCertForHost(hostname);
 
   async function handleRequest(req, res) {
-    const targetUrl = `https://${hostname}${req.url}`;
+    const pathAndQuery = getRequestPathAndQuery(req.url);
+    const targetUrl = `https://${hostname}${pathAndQuery}`;
 
     if (!(await isAllowed(targetUrl))) {
       res.writeHead(403, "Forbidden - blocked by safe-chain");
@@ -36,6 +37,14 @@ function createHttpsServer(hostname, isAllowed) {
     },
     handleRequest
   );
+}
+
+function getRequestPathAndQuery(url) {
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    const parsedUrl = new URL(url);
+    return parsedUrl.pathname + parsedUrl.search + parsedUrl.hash;
+  }
+  return url;
 }
 
 function forwardRequest(req, hostname, res) {
