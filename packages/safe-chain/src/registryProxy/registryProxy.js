@@ -42,7 +42,7 @@ export function mergeSafeChainProxyEnvironmentVariables(env) {
     const upperKey = key.toUpperCase();
 
     if (!proxyEnv[upperKey]) {
-      proxyEnv[upperKey] = env[key];
+      proxyEnv[key] = env[key];
     }
   }
 
@@ -104,7 +104,8 @@ function handleConnect(req, clientSocket, head) {
 async function isAllowedUrl(url) {
   const { packageName, version } = parsePackageFromUrl(url);
 
-  // This happens when the URL is not a tarball download url.
+  // packageName and version are undefined when the URL is not a package download
+  // In that case, we can allow the request to proceed
   if (!packageName || !version) {
     return true;
   }
@@ -123,6 +124,7 @@ async function isAllowedUrl(url) {
 
 function verifyNoMaliciousPackages() {
   if (state.blockedRequests.length === 0) {
+    // No malicious packages were blocked, so nothing to block
     return;
   }
 

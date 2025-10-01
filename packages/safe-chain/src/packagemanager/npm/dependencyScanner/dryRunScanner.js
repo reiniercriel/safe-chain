@@ -9,7 +9,7 @@ export function dryRunScanner(scannerOptions) {
   };
 }
 
-async function scanDependencies(scannerOptions, args) {
+function scanDependencies(scannerOptions, args) {
   let dryRunArgs = args;
 
   if (scannerOptions?.dryRunCommand) {

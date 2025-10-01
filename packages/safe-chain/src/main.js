@@ -27,5 +27,5 @@ export async function main(args) {
   await proxy.stopServer();
   proxy.verifyNoMaliciousPackages();
 
-  process.exit(result.status);
+  return result.status;
 }
