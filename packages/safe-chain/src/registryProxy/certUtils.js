@@ -24,7 +24,7 @@ export function generateCertForHost(hostname) {
   cert.serialNumber = "01";
   cert.validity.notBefore = new Date();
   cert.validity.notAfter = new Date();
-  cert.validity.notAfter.setDate(cert.validity.notBefore.getDate() + 1);
+  cert.validity.notAfter.setHours(cert.validity.notBefore.getHours() + 1);
 
   const attrs = [{ name: "commonName", value: hostname }];
   cert.setSubject(attrs);
