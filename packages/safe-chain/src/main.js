@@ -5,6 +5,7 @@ import { ui } from "./environment/userInteraction.js";
 import { getPackageManager } from "./packagemanager/currentPackageManager.js";
 import { initializeCliArguments } from "./config/cliArguments.js";
 import { createSafeChainProxy } from "./registryProxy/registryProxy.js";
+import chalk from "chalk";
 
 export async function main(args) {
   const proxy = createSafeChainProxy();
@@ -26,6 +27,13 @@ export async function main(args) {
 
   await proxy.stopServer();
   proxy.verifyNoMaliciousPackages();
+
+  ui.emptyLine();
+  ui.writeInformation(
+    `${chalk.green(
+      "✔"
+    )} Safe-chain: Command completed, no malicious packages found.`
+  );
 
   return result.status;
 }

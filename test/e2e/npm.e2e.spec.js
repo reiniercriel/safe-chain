@@ -31,7 +31,7 @@ describe("E2E: npm coverage", () => {
     const result = await shell.runCommand("npm i axios");
 
     assert.ok(
-      result.output.includes("No malicious packages detected."),
+      result.output.includes("no malicious packages found."),
       `Output did not include expected text. Output was:\n${result.output}`
     );
   });
