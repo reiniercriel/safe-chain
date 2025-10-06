@@ -16,24 +16,36 @@ export async function main(args) {
     args = initializeCliArguments(args);
 
     if (shouldScanCommand(args)) {
-      await scanCommand(args);
+      const resultCode = await scanCommand(args);
+
+      // Returning the exit code back to the caller allows the promise
+      //  to be awaited in the bin files and return the correct exit code
+      if (resultCode !== 0) {
+        return resultCode;
+      }
     }
+
+    var result = await getPackageManager().runCommand(args);
+
+    proxy.verifyNoMaliciousPackages();
+
+    ui.emptyLine();
+    ui.writeInformation(
+      `${chalk.green(
+        "✔"
+      )} Safe-chain: Command completed, no malicious packages found.`
+    );
+
+    // Returning the exit code back to the caller allows the promise
+    //  to be awaited in the bin files and return the correct exit code
+    return result.status;
   } catch (error) {
     ui.writeError("Failed to check for malicious packages:", error.message);
-    process.exit(1);
+
+    // Returning the exit code back to the caller allows the promise
+    //  to be awaited in the bin files and return the correct exit code
+    return 1;
+  } finally {
+    await proxy.stopServer();
   }
-
-  var result = await getPackageManager().runCommand(args);
-
-  await proxy.stopServer();
-  proxy.verifyNoMaliciousPackages();
-
-  ui.emptyLine();
-  ui.writeInformation(
-    `${chalk.green(
-      "✔"
-    )} Safe-chain: Command completed, no malicious packages found.`
-  );
-
-  return result.status;
 }

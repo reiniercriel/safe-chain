@@ -62,9 +62,11 @@ export async function scanCommand(args) {
 
   if (!audit || audit.isAllowed) {
     spinner.stop();
+    return 0;
   } else {
     printMaliciousChanges(audit.disallowedChanges, spinner);
     await onMalwareFound();
+    return 1;
   }
 }
 
