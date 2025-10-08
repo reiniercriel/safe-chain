@@ -1,10 +1,14 @@
-import { execSync } from "child_process";
 import { ui } from "../../environment/userInteraction.js";
+import { safeSpawn } from "../../utils/safeSpawn.js";
+import { mergeSafeChainProxyEnvironmentVariables } from "../../registryProxy/registryProxy.js";
 
-export function runNpx(args) {
+export async function runNpx(args) {
   try {
-    const npxCommand = `npx ${args.join(" ")}`;
-    execSync(npxCommand, { stdio: "inherit" });
+    const result = await safeSpawn("npx", args, {
+      stdio: "inherit",
+      env: mergeSafeChainProxyEnvironmentVariables(process.env),
+    });
+    return { status: result.status };
   } catch (error) {
     if (error.status) {
       return { status: error.status };
@@ -13,5 +17,4 @@ export function runNpx(args) {
       return { status: 1 };
     }
   }
-  return { status: 0 };
 }

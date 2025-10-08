@@ -61,10 +61,11 @@ export async function scanCommand(args) {
   }
 
   if (!audit || audit.isAllowed) {
-    spinner.succeed("Safe-chain: No malicious packages detected.");
+    spinner.stop();
+    return 0;
   } else {
     printMaliciousChanges(audit.disallowedChanges, spinner);
-    await onMalwareFound();
+    return await onMalwareFound();
   }
 }
 
@@ -88,11 +89,11 @@ async function onMalwareFound() {
 
     if (continueInstall) {
       ui.writeWarning("Continuing with the installation despite the risks...");
-      return;
+      return 0;
     }
   }
 
   ui.writeError("Exiting without installing malicious packages.");
   ui.emptyLine();
-  process.exit(1);
+  return 1;
 }

@@ -23,11 +23,23 @@ export async function safeSpawn(command, args, options = {}) {
   return new Promise((resolve, reject) => {
     const child = spawn(fullCommand, { ...options, shell: true });
 
+    // When stdio is piped, we need to collect the output
+    let stdout = "";
+    let stderr = "";
+
+    child.stdout?.on("data", (data) => {
+      stdout += data.toString();
+    });
+
+    child.stderr?.on("data", (data) => {
+      stderr += data.toString();
+    });
+
     child.on("close", (code) => {
       resolve({
         status: code,
-        stdout: Buffer.from(""),
-        stderr: Buffer.from(""),
+        stdout: stdout,
+        stderr: stderr,
       });
     });
 

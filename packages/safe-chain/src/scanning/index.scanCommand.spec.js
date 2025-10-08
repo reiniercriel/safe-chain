@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, it, mock } from "node:test";
+import { beforeEach, describe, it, mock } from "node:test";
 import { setTimeout } from "node:timers/promises";
 import {
   MALWARE_ACTION_PROMPT,
@@ -13,6 +13,7 @@ describe("scanCommand", async () => {
     setText: () => {},
     succeed: () => {},
     fail: () => {},
+    stop: () => {},
   }));
   const mockConfirm = mock.fn(() => true);
   let malwareAction = MALWARE_ACTION_PROMPT;
@@ -87,30 +88,37 @@ describe("scanCommand", async () => {
 
   const { scanCommand } = await import("./index.js");
 
+  beforeEach(() => {
+    // Reset malware action back to prompt mode for other tests
+    malwareAction = MALWARE_ACTION_PROMPT;
+  });
+
   it("should succeed when there are no changes", async () => {
-    let successMessageWasSet = false;
+    let progressWasStopped = false;
     mockStartProcess.mock.mockImplementationOnce(() => ({
       setText: () => {},
-      succeed: () => {
-        successMessageWasSet = true;
-      },
+      succeed: () => {},
       fail: () => {},
+      stop: () => {
+        progressWasStopped = true;
+      },
     }));
     mockGetDependencyUpdatesForCommand.mock.mockImplementation(() => []);
 
     await scanCommand(["install", "lodash"]);
 
-    assert.equal(successMessageWasSet, true);
+    assert.equal(progressWasStopped, true);
   });
 
   it("should succeed when changes are not malicious", async () => {
-    let successMessageWasSet = false;
+    let progressWasStopped = false;
     mockStartProcess.mock.mockImplementationOnce(() => ({
       setText: () => {},
-      succeed: () => {
-        successMessageWasSet = true;
-      },
+      succeed: () => {},
       fail: () => {},
+      stop: () => {
+        progressWasStopped = true;
+      },
     }));
     mockGetDependencyUpdatesForCommand.mock.mockImplementation(() => [
       { name: "lodash", version: "4.17.21" },
@@ -118,7 +126,7 @@ describe("scanCommand", async () => {
 
     await scanCommand(["install", "lodash"]);
 
-    assert.equal(successMessageWasSet, true);
+    assert.equal(progressWasStopped, true);
   });
 
   it("should throw an error when timing out", async () => {
@@ -129,6 +137,7 @@ describe("scanCommand", async () => {
       fail: () => {
         failureMessageWasSet = true;
       },
+      stop: () => {},
     }));
     getScanTimeoutMock.mock.mockImplementationOnce(() => 100);
     mockGetDependencyUpdatesForCommand.mock.mockImplementation(async () => {
@@ -149,6 +158,7 @@ describe("scanCommand", async () => {
       fail: () => {
         failureMessageWasSet = true;
       },
+      stop: () => {},
     }));
     mockGetDependencyUpdatesForCommand.mock.mockImplementation(() => [
       { name: "malicious", version: "1.0.0" },
@@ -173,6 +183,7 @@ describe("scanCommand", async () => {
       fail: (message) => {
         failureMessages.push(message);
       },
+      stop: () => {},
     }));
     getScanTimeoutMock.mock.mockImplementationOnce(() => 100);
     mockGetDependencyUpdatesForCommand.mock.mockImplementation(async () => {
@@ -194,46 +205,29 @@ describe("scanCommand", async () => {
   it("should exit immediately when malicious changes are detected in block mode", async () => {
     // Set malware action to block mode for this test
     malwareAction = MALWARE_ACTION_BLOCK;
-    
+
     // Reset mock call count
     mockConfirm.mock.resetCalls();
-    
+
     let failureMessageWasSet = false;
-    let exitCode = null;
-    
+
     mockStartProcess.mock.mockImplementationOnce(() => ({
       setText: () => {},
       succeed: () => {},
       fail: () => {
         failureMessageWasSet = true;
       },
+      stop: () => {},
     }));
-    
+
     mockGetDependencyUpdatesForCommand.mock.mockImplementation(() => [
       { name: "malicious", version: "1.0.0" },
     ]);
 
-    // Mock process.exit
-    const originalExit = process.exit;
-    process.exit = mock.fn((code) => {
-      exitCode = code;
-      throw new Error("Process exit called"); // Prevent actual exit
-    });
-
-    try {
-      await assert.rejects(
-        scanCommand(["install", "malicious"]),
-        /Process exit called/
-      );
-    } finally {
-      // Restore original process.exit
-      process.exit = originalExit;
-      // Reset malware action back to prompt mode for other tests
-      malwareAction = MALWARE_ACTION_PROMPT;
-    }
+    const result = await scanCommand(["install", "malicious"]);
 
     assert.equal(failureMessageWasSet, true);
-    assert.equal(exitCode, 1);
+    assert.equal(result, 1);
     // Confirm should not have been called in block mode
     assert.equal(mockConfirm.mock.callCount(), 0);
   });
@@ -241,19 +235,19 @@ describe("scanCommand", async () => {
   it("should exit immediately when malicious changes are detected in block mode without prompting", async () => {
     // Set malware action to block mode for this test
     malwareAction = MALWARE_ACTION_BLOCK;
-    
+
     // Reset mock call count
     mockConfirm.mock.resetCalls();
-    
-    let processExited = false;
+
     let userWasPrompted = false;
-    
+
     mockStartProcess.mock.mockImplementationOnce(() => ({
       setText: () => {},
       succeed: () => {},
       fail: () => {},
+      stop: () => {},
     }));
-    
+
     mockGetDependencyUpdatesForCommand.mock.mockImplementation(() => [
       { name: "malicious", version: "1.0.0" },
     ]);
@@ -263,26 +257,9 @@ describe("scanCommand", async () => {
       return false;
     });
 
-    // Mock process.exit
-    const originalExit = process.exit;
-    process.exit = mock.fn(() => {
-      processExited = true;
-      throw new Error("Process exit called"); // Prevent actual exit
-    });
+    const result = await scanCommand(["install", "malicious"]);
 
-    try {
-      await assert.rejects(
-        scanCommand(["install", "malicious"]),
-        /Process exit called/
-      );
-    } finally {
-      // Restore original process.exit
-      process.exit = originalExit;
-      // Reset malware action back to prompt mode for other tests
-      malwareAction = MALWARE_ACTION_PROMPT;
-    }
-
-    assert.equal(processExited, true);
+    assert.equal(result, 1);
     assert.equal(userWasPrompted, false);
   });
 });
