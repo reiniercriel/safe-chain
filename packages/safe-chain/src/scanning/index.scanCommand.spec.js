@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, it, mock } from "node:test";
+import { beforeEach, describe, it, mock } from "node:test";
 import { setTimeout } from "node:timers/promises";
 import {
   MALWARE_ACTION_PROMPT,
@@ -87,6 +87,11 @@ describe("scanCommand", async () => {
   });
 
   const { scanCommand } = await import("./index.js");
+
+  beforeEach(() => {
+    // Reset malware action back to prompt mode for other tests
+    malwareAction = MALWARE_ACTION_PROMPT;
+  });
 
   it("should succeed when there are no changes", async () => {
     let progressWasStopped = false;
@@ -205,7 +210,6 @@ describe("scanCommand", async () => {
     mockConfirm.mock.resetCalls();
 
     let failureMessageWasSet = false;
-    let exitCode = null;
 
     mockStartProcess.mock.mockImplementationOnce(() => ({
       setText: () => {},
@@ -220,27 +224,10 @@ describe("scanCommand", async () => {
       { name: "malicious", version: "1.0.0" },
     ]);
 
-    // Mock process.exit
-    const originalExit = process.exit;
-    process.exit = mock.fn((code) => {
-      exitCode = code;
-      throw new Error("Process exit called"); // Prevent actual exit
-    });
-
-    try {
-      await assert.rejects(
-        scanCommand(["install", "malicious"]),
-        /Process exit called/
-      );
-    } finally {
-      // Restore original process.exit
-      process.exit = originalExit;
-      // Reset malware action back to prompt mode for other tests
-      malwareAction = MALWARE_ACTION_PROMPT;
-    }
+    const result = await scanCommand(["install", "malicious"]);
 
     assert.equal(failureMessageWasSet, true);
-    assert.equal(exitCode, 1);
+    assert.equal(result, 1);
     // Confirm should not have been called in block mode
     assert.equal(mockConfirm.mock.callCount(), 0);
   });
@@ -252,7 +239,6 @@ describe("scanCommand", async () => {
     // Reset mock call count
     mockConfirm.mock.resetCalls();
 
-    let processExited = false;
     let userWasPrompted = false;
 
     mockStartProcess.mock.mockImplementationOnce(() => ({
@@ -271,26 +257,9 @@ describe("scanCommand", async () => {
       return false;
     });
 
-    // Mock process.exit
-    const originalExit = process.exit;
-    process.exit = mock.fn(() => {
-      processExited = true;
-      throw new Error("Process exit called"); // Prevent actual exit
-    });
+    const result = await scanCommand(["install", "malicious"]);
 
-    try {
-      await assert.rejects(
-        scanCommand(["install", "malicious"]),
-        /Process exit called/
-      );
-    } finally {
-      // Restore original process.exit
-      process.exit = originalExit;
-      // Reset malware action back to prompt mode for other tests
-      malwareAction = MALWARE_ACTION_PROMPT;
-    }
-
-    assert.equal(processExited, true);
+    assert.equal(result, 1);
     assert.equal(userWasPrompted, false);
   });
 });
