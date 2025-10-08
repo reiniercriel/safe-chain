@@ -7,6 +7,7 @@ import { knownRegistries, parsePackageFromUrl } from "./parsePackageFromUrl.js";
 import { ui } from "../environment/userInteraction.js";
 import chalk from "chalk";
 
+const SERVER_STOP_TIMEOUT_MS = 1000;
 const state = {
   port: null,
   blockedRequests: [],
@@ -19,12 +20,15 @@ export function createSafeChainProxy() {
   return {
     startServer: () => startServer(server),
     stopServer: () => stopServer(server),
-    getBlockedRequests: () => state.blockedRequests,
     verifyNoMaliciousPackages,
   };
 }
 
 function getSafeChainProxyEnvironmentVariables() {
+  if (!state.port) {
+    return {};
+  }
+
   return {
     HTTPS_PROXY: `http://localhost:${state.port}`,
     GLOBAL_AGENT_HTTP_PROXY: `http://localhost:${state.port}`,
@@ -63,6 +67,7 @@ function createProxyServer() {
 
 function startServer(server) {
   return new Promise((resolve, reject) => {
+    // Passing port 0 makes the OS assign an available port
     server.listen(0, () => {
       const address = server.address();
       if (address && typeof address === "object") {
@@ -88,7 +93,7 @@ function stopServer(server) {
     } catch {
       resolve();
     }
-    setTimeout(() => resolve(), 1000);
+    setTimeout(() => resolve(), SERVER_STOP_TIMEOUT_MS);
   });
 }
 
@@ -130,7 +135,7 @@ async function isAllowedUrl(url) {
 function verifyNoMaliciousPackages() {
   if (state.blockedRequests.length === 0) {
     // No malicious packages were blocked, so nothing to block
-    return;
+    return true;
   }
 
   ui.emptyLine();
@@ -149,5 +154,5 @@ function verifyNoMaliciousPackages() {
   ui.writeError("Exiting without installing malicious packages.");
   ui.emptyLine();
 
-  process.exit(1);
+  return false;
 }

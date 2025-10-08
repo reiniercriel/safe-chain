@@ -65,8 +65,7 @@ export async function scanCommand(args) {
     return 0;
   } else {
     printMaliciousChanges(audit.disallowedChanges, spinner);
-    await onMalwareFound();
-    return 1;
+    return await onMalwareFound();
   }
 }
 
@@ -90,11 +89,11 @@ async function onMalwareFound() {
 
     if (continueInstall) {
       ui.writeWarning("Continuing with the installation despite the risks...");
-      return;
+      return 0;
     }
   }
 
   ui.writeError("Exiting without installing malicious packages.");
   ui.emptyLine();
-  process.exit(1);
+  return 1;
 }

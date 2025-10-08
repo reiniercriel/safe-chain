@@ -16,18 +16,20 @@ export async function main(args) {
     args = initializeCliArguments(args);
 
     if (shouldScanCommand(args)) {
-      const resultCode = await scanCommand(args);
+      const commandScanResult = await scanCommand(args);
 
       // Returning the exit code back to the caller allows the promise
       //  to be awaited in the bin files and return the correct exit code
-      if (resultCode !== 0) {
-        return resultCode;
+      if (commandScanResult !== 0) {
+        return commandScanResult;
       }
     }
 
-    var result = await getPackageManager().runCommand(args);
+    const packageManagerResult = await getPackageManager().runCommand(args);
 
-    proxy.verifyNoMaliciousPackages();
+    if (!proxy.verifyNoMaliciousPackages()) {
+      return 1;
+    }
 
     ui.emptyLine();
     ui.writeInformation(
@@ -38,7 +40,7 @@ export async function main(args) {
 
     // Returning the exit code back to the caller allows the promise
     //  to be awaited in the bin files and return the correct exit code
-    return result.status;
+    return packageManagerResult.status;
   } catch (error) {
     ui.writeError("Failed to check for malicious packages:", error.message);
 

@@ -22,6 +22,8 @@ export async function safeSpawn(command, args, options = {}) {
   const fullCommand = buildCommand(command, args);
   return new Promise((resolve, reject) => {
     const child = spawn(fullCommand, { ...options, shell: true });
+
+    // When stdio is piped, we need to collect the output
     let stdout = "";
     let stderr = "";
 
