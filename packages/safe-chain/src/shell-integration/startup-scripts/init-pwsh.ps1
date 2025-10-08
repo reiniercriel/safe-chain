@@ -68,6 +68,14 @@ function pnpx {
     Invoke-WrappedCommand "pnpx" "aikido-pnpx" $args
 }
 
+function bun {
+    Invoke-WrappedCommand "bun" "aikido-bun" $args
+}
+
+function bunx {
+    Invoke-WrappedCommand "bunx" "aikido-bunx" $args
+}
+
 function npm {
     # If args is just -v or --version and nothing else, just run the npm version command
     # This is because nvm uses this to check the version of npm

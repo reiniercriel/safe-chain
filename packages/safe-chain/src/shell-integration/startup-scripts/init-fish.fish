@@ -46,6 +46,14 @@ function pnpx
     wrapSafeChainCommand "pnpx" "aikido-pnpx" $argv
 end
 
+function bun
+    wrapSafeChainCommand "bun" "aikido-bun" $argv
+end
+
+function bunx
+    wrapSafeChainCommand "bunx" "aikido-bunx" $argv
+end
+
 function npm
     # If args is just -v or --version and nothing else, just run the `npm -v` command
     # This is because nvm uses this to check the version of npm
