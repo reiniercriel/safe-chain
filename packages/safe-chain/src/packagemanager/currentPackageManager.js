@@ -1,3 +1,7 @@
+import {
+  createBunPackageManager,
+  createBunxPackageManager,
+} from "./bun/createBunPackageManager.js";
 import { createNpmPackageManager } from "./npm/createPackageManager.js";
 import { createNpxPackageManager } from "./npx/createPackageManager.js";
 import {
@@ -21,6 +25,10 @@ export function initializePackageManager(packageManagerName, version) {
     state.packageManagerName = createPnpmPackageManager();
   } else if (packageManagerName === "pnpx") {
     state.packageManagerName = createPnpxPackageManager();
+  } else if (packageManagerName === "bun") {
+    state.packageManagerName = createBunPackageManager();
+  } else if (packageManagerName === "bunx") {
+    state.packageManagerName = createBunxPackageManager();
   } else {
     throw new Error("Unsupported package manager: " + packageManagerName);
   }

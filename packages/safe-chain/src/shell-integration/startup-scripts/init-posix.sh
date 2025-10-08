@@ -42,6 +42,14 @@ function pnpx() {
   wrapSafeChainCommand "pnpx" "aikido-pnpx" "$@"
 }
 
+function bun() {
+  wrapSafeChainCommand "bun" "aikido-bun" "$@"
+}
+
+function bunx() {
+  wrapSafeChainCommand "bunx" "aikido-bunx" "$@"
+}
+
 function npm() {
   if [[ "$1" == "-v" || "$1" == "--version" ]] && [[ $# -eq 1 ]]; then
     # If args is just -v or --version and nothing else, just run the npm version command

@@ -46,6 +46,9 @@ RUN volta install npm@${NPM_VERSION}
 RUN volta install yarn@${YARN_VERSION}
 RUN volta install pnpm@${PNPM_VERSION}
 
+# Install Bun
+RUN curl -fsSL https://bun.sh/install | bash
+
 # Copy and install Safe chain
 COPY --from=builder /app/*.tgz /pkgs/
 RUN npm install -g /pkgs/*.tgz

@@ -12,6 +12,8 @@
     "aikido-yarn": "bin/aikido-yarn.js",
     "aikido-pnpm": "bin/aikido-pnpm.js",
     "aikido-pnpx": "bin/aikido-pnpx.js",
+    "aikido-bun": "bin/aikido-bun.js",
+    "aikido-bunx": "bin/aikido-bunx.js",
     "safe-chain": "bin/safe-chain.js"
   },
   "type": "module",

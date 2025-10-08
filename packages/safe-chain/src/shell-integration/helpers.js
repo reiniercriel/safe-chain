@@ -9,8 +9,9 @@ export const knownAikidoTools = [
   { tool: "yarn", aikidoCommand: "aikido-yarn" },
   { tool: "pnpm", aikidoCommand: "aikido-pnpm" },
   { tool: "pnpx", aikidoCommand: "aikido-pnpx" },
-  // When adding a new tool here, also update the expected alias in the tests (setup.spec.js, teardown.spec.js)
-  // and add the documentation for the new tool in the README.md
+  { tool: "bun", aikidoCommand: "aikido-bun" },
+  { tool: "bunx", aikidoCommand: "aikido-bunx" },
+  // When adding a new tool here, also update the documentation for the new tool in the README.md
 ];
 
 /**
@@ -18,15 +19,15 @@ export const knownAikidoTools = [
  * Example: "npm, npx, yarn, pnpm, and pnpx commands"
  */
 export function getPackageManagerList() {
-  const tools = knownAikidoTools.map(t => t.tool);
+  const tools = knownAikidoTools.map((t) => t.tool);
   if (tools.length <= 1) {
-    return `${tools[0] || ''} commands`;
+    return `${tools[0] || ""} commands`;
   }
   if (tools.length === 2) {
     return `${tools[0]} and ${tools[1]} commands`;
   }
   const lastTool = tools.pop();
-  return `${tools.join(', ')}, and ${lastTool} commands`;
+  return `${tools.join(", ")}, and ${lastTool} commands`;
 }
 
 export function doesExecutableExistOnSystem(executableName) {
