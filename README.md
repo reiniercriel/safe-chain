@@ -4,20 +4,21 @@
 >
 > Starting from version 1.1.0, Aikido Safe Chain now provides complete protection for all package managers. We've changed how we block malicious packages: instead of checking which packages are being installed, we run a lightweight proxy server that intercepts and blocks downloads of packages containing malware. This means full dependency tree protection for all package managers, not just npm.
 
-The Aikido Safe Chain **prevents developers from installing malware** on their workstations through npm, npx, yarn, pnpm and pnpx. It's **free** to use and does not require any token.
+The Aikido Safe Chain **prevents developers from installing malware** on their workstations through npm, npx, yarn, pnpm, pnpx, bun, and bunx. It's **free** to use and does not require any token.
 
-The Aikido Safe Chain wraps around the [npm cli](https://github.com/npm/cli), [npx](https://github.com/npm/cli/blob/latest/docs/content/commands/npx.md), [yarn](https://yarnpkg.com/), [pnpm](https://pnpm.io/), and [pnpx](https://pnpm.io/cli/dlx) to provide extra checks before installing new packages. This tool will detect when a package contains malware and prompt you to exit, preventing npm, npx, yarn, pnpm or pnpx from downloading or running the malware.
+The Aikido Safe Chain wraps around the [npm cli](https://github.com/npm/cli), [npx](https://github.com/npm/cli/blob/latest/docs/content/commands/npx.md), [yarn](https://yarnpkg.com/), [pnpm](https://pnpm.io/), [pnpx](https://pnpm.io/cli/dlx), [bun](https://bun.sh/), and [bunx](https://bun.sh/docs/cli/bunx) to provide extra checks before installing new packages. This tool will detect when a package contains malware and prompt you to exit, preventing npm, npx, yarn, pnpm, pnpx, bun, or bunx from downloading or running the malware.
 
 ![demo](./docs/safe-package-manager-demo.png)
 
 Aikido Safe Chain works on Node.js version 18 and above and supports the following package managers:
 
-- ✅ **npm**:
+- ✅ **npm**
 - ✅ **npx**
 - ✅ **yarn**
 - ✅ **pnpm**
 - ✅ **pnpx**
 - ✅ **bun**
+- ✅ **bunx**
 
 # Usage
 
@@ -34,20 +35,20 @@ Installing the Aikido Safe Chain is easy. You just need 3 simple steps:
    safe-chain setup
    ```
 3. **❗Restart your terminal** to start using the Aikido Safe Chain.
-   - This step is crucial as it ensures that the shell aliases for npm, npx, yarn, pnpm and pnpx are loaded correctly. If you do not restart your terminal, the aliases will not be available.
+   - This step is crucial as it ensures that the shell aliases for npm, npx, yarn, pnpm, pnpx, bun, and bunx are loaded correctly. If you do not restart your terminal, the aliases will not be available.
 4. **Verify the installation** by running:
    ```shell
    npm install safe-chain-test
    ```
    - The output should show that Aikido Safe Chain is blocking the installation of this package as it is flagged as malware.
 
-When running `npm`, `npx`, `yarn`, `pnpm` or `pnpx` commands, the Aikido Safe Chain will automatically check for malware in the packages you are trying to install. If any malware is detected, it will prompt you to exit the command.
+When running `npm`, `npx`, `yarn`, `pnpm`, `pnpx`, `bun`, or `bunx` commands, the Aikido Safe Chain will automatically check for malware in the packages you are trying to install. If any malware is detected, it will prompt you to exit the command.
 
 ## How it works
 
-The Aikido Safe Chain works by intercepting the npm, npx, yarn, pnpm and pnpx commands and verifying the packages against **[Aikido Intel - Open Sources Threat Intelligence](https://intel.aikido.dev/?tab=malware)**.
+The Aikido Safe Chain works by intercepting the npm, npx, yarn, pnpm, pnpx, bun, and bunx commands and verifying the packages against **[Aikido Intel - Open Sources Threat Intelligence](https://intel.aikido.dev/?tab=malware)**.
 
-The Aikido Safe Chain integrates with your shell to provide a seamless experience when using npm, npx, yarn, pnpm and pnpx commands. It sets up aliases for these commands so that they are wrapped by the Aikido Safe Chain commands, which perform malware checks before executing the original commands. We currently support:
+The Aikido Safe Chain integrates with your shell to provide a seamless experience when using npm, npx, yarn, pnpm, pnpx, bun, and bunx commands. It sets up aliases for these commands so that they are wrapped by the Aikido Safe Chain commands, which perform malware checks before executing the original commands. We currently support:
 
 - ✅ **Bash**
 - ✅ **Zsh**
