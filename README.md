@@ -1,5 +1,9 @@
 # Aikido Safe Chain
 
+> 🚀 **Version 1.1.0: Full Package Manager Support**
+>
+> Starting from version 1.1.0, Aikido Safe Chain now provides complete protection for all package managers. We've changed how we block malicious packages: instead of checking which packages are being installed, we run a lightweight proxy server that intercepts and blocks downloads of packages containing malware. This means full dependency tree protection for all package managers, not just npm.
+
 The Aikido Safe Chain **prevents developers from installing malware** on their workstations through npm, npx, yarn, pnpm and pnpx. It's **free** to use and does not require any token.
 
 The Aikido Safe Chain wraps around the [npm cli](https://github.com/npm/cli), [npx](https://github.com/npm/cli/blob/latest/docs/content/commands/npx.md), [yarn](https://yarnpkg.com/), [pnpm](https://pnpm.io/), and [pnpx](https://pnpm.io/cli/dlx) to provide extra checks before installing new packages. This tool will detect when a package contains malware and prompt you to exit, preventing npm, npx, yarn, pnpm or pnpx from downloading or running the malware.
@@ -8,16 +12,12 @@ The Aikido Safe Chain wraps around the [npm cli](https://github.com/npm/cli), [n
 
 Aikido Safe Chain works on Node.js version 18 and above and supports the following package managers:
 
-- ✅ full coverage: **npm >= 10.4.0**:
-- ⚠️ limited to scanning the install command arguments (broader scanning coming soon):
-  - **npm < 10.4.0**
-  - **npx**
-  - **yarn**
-  - **pnpm**
-  - **pnpx**
-- 🚧 **bun**: coming soon
-
-Note on the limited support for npm < 10.4.0, npx, yarn, pnpm and pnpx: adding **full support for these package managers is a high priority**. In the meantime, we offer limited support already, which means that the Aikido Safe Chain will scan the package names passed as arguments to the install commands. However, it will not scan the full dependency tree of these packages.
+- ✅ **npm**:
+- ✅ **npx**
+- ✅ **yarn**
+- ✅ **pnpm**
+- ✅ **pnpx**
+- ✅ **bun**
 
 # Usage
 
