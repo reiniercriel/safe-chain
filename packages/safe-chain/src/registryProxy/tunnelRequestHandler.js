@@ -35,7 +35,9 @@ function tunnelRequestToDestination(req, clientSocket, head) {
     ui.writeError(
       `Safe-chain: error connecting to ${hostname}:${port} - ${err.message}`
     );
-    clientSocket.end("HTTP/1.1 502 Bad Gateway\r\n\r\n");
+    if (clientSocket.writable) {
+      clientSocket.end("HTTP/1.1 502 Bad Gateway\r\n\r\n");
+    }
   });
 }
 
@@ -76,8 +78,12 @@ function tunnelRequestViaProxy(req, clientSocket, head, proxyUrl) {
       ui.writeError(
         `Safe-chain: proxy CONNECT failed: ${response.split("\r\n")[0]}`
       );
-      clientSocket.end("HTTP/1.1 502 Bad Gateway\r\n\r\n");
-      proxySocket.end();
+      if (clientSocket.writable) {
+        clientSocket.end("HTTP/1.1 502 Bad Gateway\r\n\r\n");
+      }
+      if (proxySocket.writable) {
+        proxySocket.end();
+      }
     }
   });
 
@@ -88,11 +94,15 @@ function tunnelRequestViaProxy(req, clientSocket, head, proxyUrl) {
           proxy.port || 8080
         } - ${err.message}`
       );
-      clientSocket.end("HTTP/1.1 502 Bad Gateway\r\n\r\n");
+      if (clientSocket.writable) {
+        clientSocket.end("HTTP/1.1 502 Bad Gateway\r\n\r\n");
+      }
     }
   });
 
   clientSocket.on("error", () => {
-    proxySocket.end();
+    if (proxySocket.writable) {
+      proxySocket.end();
+    }
   });
 }
