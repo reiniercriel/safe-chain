@@ -23,7 +23,9 @@ export async function runYarnCommand(args) {
 }
 
 async function fixYarnProxyEnvironmentVariables(env) {
-  // Yarn ignores standard proxy environment variables HTTPS_PROXY and NODE_EXTRA_CA_CERTS
+  // Yarn ignores standard proxy environment variable HTTPS_PROXY
+  // It does respect NODE_EXTRA_CA_CERTS for custom CA certificates though.
+  // Don't use YARN_HTTPS_CA_FILE_PATH though, as it causes to ignore all system CAs
 
   // Yarn v2/v3 and v4+ use different environment variables for proxy and CA certs
   // When setting all variables, yarn returns an error about conflicting variables
@@ -35,10 +37,8 @@ async function fixYarnProxyEnvironmentVariables(env) {
 
   if (majorVersion >= 4) {
     env.YARN_HTTPS_PROXY = env.HTTPS_PROXY;
-    env.YARN_HTTPS_CA_FILE_PATH = env.NODE_EXTRA_CA_CERTS;
   } else if (majorVersion === 2 || majorVersion === 3) {
     env.YARN_HTTPS_PROXY = env.HTTPS_PROXY;
-    env.YARN_CA_FILE_PATH = env.NODE_EXTRA_CA_CERTS;
   }
 }
 
