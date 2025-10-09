@@ -1,4 +1,4 @@
-import { spawnSync, spawn } from "child_process";
+import { spawn } from "child_process";
 
 function escapeArg(arg) {
   // If argument contains spaces or quotes, wrap in double quotes and escape double quotes
