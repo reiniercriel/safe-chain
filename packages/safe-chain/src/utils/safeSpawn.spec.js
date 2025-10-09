@@ -2,7 +2,7 @@ import { describe, it, beforeEach, afterEach, mock } from "node:test";
 import assert from "node:assert";
 
 describe("safeSpawn", () => {
-  let safeSpawnSync, safeSpawn;
+  let safeSpawn;
   let spawnCalls = [];
 
   beforeEach(async () => {
@@ -35,7 +35,6 @@ describe("safeSpawn", () => {
 
     // Import after mocking
     const safeSpawnModule = await import("./safeSpawn.js");
-    safeSpawnSync = safeSpawnModule.safeSpawnSync;
     safeSpawn = safeSpawnModule.safeSpawn;
   });
 
@@ -45,14 +44,10 @@ describe("safeSpawn", () => {
 
   // Helper to run either sync or async variant
   async function runSafeSpawn(variant, command, args, options) {
-    if (variant === "sync") {
-      return safeSpawnSync(command, args, options);
-    } else {
-      return await safeSpawn(command, args, options);
-    }
+    return await safeSpawn(command, args, options);
   }
 
-  for (let variant of ["sync", "async"]) {
+  for (let variant of ["async"]) {
     it(`should pass basic command and arguments correctly (${variant})`, async () => {
       await runSafeSpawn(variant, "echo", ["hello"]);
 

@@ -13,11 +13,6 @@ function buildCommand(command, args) {
   return `${command} ${escapedArgs.join(" ")}`;
 }
 
-export function safeSpawnSync(command, args, options = {}) {
-  const fullCommand = buildCommand(command, args);
-  return spawnSync(fullCommand, { ...options, shell: true });
-}
-
 export async function safeSpawn(command, args, options = {}) {
   const fullCommand = buildCommand(command, args);
   return new Promise((resolve, reject) => {
