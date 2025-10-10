@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import chalk from "chalk";
+import { createRequire } from "module";
 import { ui } from "../src/environment/userInteraction.js";
 import { setup } from "../src/shell-integration/setup.js";
 import { teardown } from "../src/shell-integration/teardown.js";
@@ -26,6 +27,8 @@ if (command === "setup") {
   teardown();
 } else if (command === "setup-ci") {
   setupCi();
+} else if (command === "--version" || command === "-v" || command === "-v") {
+  ui.writeInformation(`Current safe-chain version: ${getVersion()}`);
 } else {
   ui.writeError(`Unknown command: ${command}.`);
   ui.emptyLine();
@@ -43,13 +46,15 @@ function writeHelp() {
   ui.writeInformation(
     `Available commands: ${chalk.cyan("setup")}, ${chalk.cyan(
       "teardown"
-    )}, ${chalk.cyan("help")}`
+    )}, ${chalk.cyan("setup-ci")}, ${chalk.cyan("help")}, ${chalk.cyan(
+      "--version"
+    )}`
   );
   ui.emptyLine();
   ui.writeInformation(
     `- ${chalk.cyan(
       "safe-chain setup"
-    )}: This will setup your shell to wrap safe-chain around npm, npx, yarn, pnpm and pnpx.`
+    )}: This will setup your shell to wrap safe-chain around npm, npx, yarn, pnpm, pnpx, bun and bunx.`
   );
   ui.writeInformation(
     `- ${chalk.cyan(
@@ -61,5 +66,16 @@ function writeHelp() {
       "safe-chain setup-ci"
     )}: This will setup safe-chain for CI environments by creating shims and modifying the PATH.`
   );
+  ui.writeInformation(
+    `- ${chalk.cyan(
+      "safe-chain --version"
+    )} (or ${chalk.cyan("-v")}): Display the current version of safe-chain.`
+  );
   ui.emptyLine();
+}
+
+function getVersion() {
+  const require = createRequire(import.meta.url);
+  const packageJson = require("../package.json");
+  return packageJson.version;
 }
