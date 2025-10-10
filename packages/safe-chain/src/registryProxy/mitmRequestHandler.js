@@ -5,6 +5,12 @@ import { HttpsProxyAgent } from "https-proxy-agent";
 export function mitmConnect(req, clientSocket, isAllowed) {
   const { hostname } = new URL(`http://${req.url}`);
 
+  clientSocket.on("error", () => {
+    // NO-OP
+    // This can happen if the client TCP socket sends RST instead of FIN.
+    // Not subscribing to 'close' event will cause node to throw and crash.
+  });
+
   const server = createHttpsServer(hostname, isAllowed);
 
   // Establish the connection
