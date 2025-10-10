@@ -24,6 +24,12 @@ export function tunnelRequest(req, clientSocket, head) {
 function tunnelRequestToDestination(req, clientSocket, head) {
   const { port, hostname } = new URL(`http://${req.url}`);
 
+  clientSocket.on("error", () => {
+    // NO-OP
+    // This can happen if the client TCP socket sends RST instead of FIN.
+    // Not subscribing to 'close' event will cause node to throw and crash.
+  });
+
   const serverSocket = net.connect(port || 443, hostname, () => {
     clientSocket.write("HTTP/1.1 200 Connection Established\r\n\r\n");
     serverSocket.write(head);
