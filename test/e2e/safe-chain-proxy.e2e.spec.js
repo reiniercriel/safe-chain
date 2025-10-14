@@ -65,14 +65,14 @@ describe("E2E: Safe chain proxy", () => {
     // storage: ./storage
     // log: { type: file, path: ./verdaccio.log, level: info }
     await configShell.runCommand(
-      "echo 'log: { type: file, path: /verdaccio.log, level: trace, colors: false }' >> ~/.verdaccio-config.yaml"
+      "echo 'storage: ./storage' >> ~/verdaccio-config.yaml"
     );
     await configShell.runCommand(
-      "echo 'storage: ./storage' >> ~/.verdaccio-config.yaml"
+      "echo 'log: { type: file, path: /verdaccio.log, level: trace }' >> ~/verdaccio-config.yaml"
     );
 
     // Start a local npm registry (verdaccio) inside the container
-    container.dockerExec("npx -y verdaccio -c ~/.verdaccio-config.yaml", true);
+    container.dockerExec("npx -y verdaccio -c ~/verdaccio-config.yaml", true);
 
     // Polling until verdaccio is ready (max 60 seconds)
     let verdaccioStarted = false;
