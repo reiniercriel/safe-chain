@@ -62,6 +62,9 @@ describe("E2E: Safe chain proxy", () => {
     // Start a local npm registry (verdaccio) inside the container
     container.dockerExec("npx -y verdaccio", true);
 
+    const shell1 = await container.openShell("bash");
+    await shell1.runCommand("safe-chain teardown");
+
     let verdaccioStarted = false;
     // Wait for verdaccio to be ready (max 60 seconds)
     for (let i = 0; i < 120; i++) {
