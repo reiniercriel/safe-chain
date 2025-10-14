@@ -57,4 +57,35 @@ describe("E2E: Safe chain proxy", () => {
       "Proxy log does not contain expected entries"
     );
   });
+
+  it(`safe-chain proxy allows to request through a local http registry`, async () => {
+    // Start a local npm registry (verdaccio) inside the container
+    container.dockerExec("npx -y verdaccio", true);
+
+    // Wait for verdaccio to be ready (max 30 seconds)
+    for (let i = 0; i < 60; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      try {
+        const curlOutput = container.dockerExec(
+          "curl -I http://localhost:4873/"
+        );
+        if (curlOutput.includes("200 OK")) {
+          break;
+        }
+      } catch {
+        // ignore, this means docker exec returned -1 and verdaccio is not yet ready
+      }
+    }
+
+    const shell = await container.openShell("bash");
+    const result = await shell.runCommand(
+      "npm --registry http://localhost:4873 install react"
+    );
+
+    // Check if the installation was successful
+    assert(
+      result.output.includes("added"),
+      "npm install did not complete successfully, output: " + result.output
+    );
+  });
 });

@@ -60,6 +60,26 @@ export class DockerTestContainer {
     }
   }
 
+  dockerExec(command, daemon = false) {
+    if (!this.isRunning) {
+      throw new Error("Container is not running");
+    }
+
+    try {
+      const dockerExecCommand = `docker exec ${daemon ? "-d " : " "}${
+        this.containerName
+      } bash -c "${command}"`;
+      const output = execSync(dockerExecCommand, {
+        encoding: "utf-8",
+        stdio: "pipe",
+        timeout: 10000,
+      });
+      return output;
+    } catch (error) {
+      throw new Error(`Failed to execute command: ${error.message}`);
+    }
+  }
+
   async openShell(shell) {
     let ptyProcess = pty.spawn(
       "docker",
