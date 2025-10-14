@@ -62,6 +62,7 @@ describe("E2E: Safe chain proxy", () => {
     // Start a local npm registry (verdaccio) inside the container
     container.dockerExec("npx -y verdaccio", true);
 
+    let verdaccioStarted = false;
     // Wait for verdaccio to be ready (max 60 seconds)
     for (let i = 0; i < 120; i++) {
       await new Promise((resolve) => setTimeout(resolve, 500));
@@ -70,11 +71,15 @@ describe("E2E: Safe chain proxy", () => {
           "curl -I http://localhost:4873/"
         );
         if (curlOutput.includes("200 OK")) {
+          verdaccioStarted = true;
           break;
         }
       } catch {
         // ignore, this means docker exec returned -1 and verdaccio is not yet ready
       }
+    }
+    if (!verdaccioStarted) {
+      throw new Error("Verdaccio did not start in time");
     }
 
     const shell = await container.openShell("bash");
