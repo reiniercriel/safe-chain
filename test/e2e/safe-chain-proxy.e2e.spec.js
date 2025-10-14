@@ -76,6 +76,16 @@ log: { type: file, path: ./verdaccio.log, level: trace, colors: false }
     await configShell.runCommand(
       `echo 'storage: ./storage' >> ~/.verdaccio-config.yaml`
     );
+    await configShell.runCommand(`echo 'auth:' >> ~/.verdaccio-config.yaml`);
+    await configShell.runCommand(
+      `echo '  htpasswd:' >> ~/.verdaccio-config.yaml`
+    );
+    await configShell.runCommand(
+      `echo '    file: ./htpasswd' >> ~/.verdaccio-config.yaml`
+    );
+    await configShell.runCommand(
+      `echo '    max_users: 100' >> ~/.verdaccio-config.yaml`
+    );
     await configShell.runCommand(`echo 'uplinks:' >> ~/.verdaccio-config.yaml`);
     await configShell.runCommand(`echo '  npmjs:' >> ~/.verdaccio-config.yaml`);
     await configShell.runCommand(
