@@ -116,6 +116,8 @@ export class DockerTestContainer {
 
         const timeout = setTimeout(() => {
           // Fallback in case the command doesn't finish in a reasonable time
+          // oxlint-disable-next-line no-console - having this log in CI helps diagnose issues
+          console.log("Command timeout reached");
           resolve({ allData, output: parseShellOutput(allData), command });
           ptyProcess.removeListener("data", handleInput);
         }, 10000);
