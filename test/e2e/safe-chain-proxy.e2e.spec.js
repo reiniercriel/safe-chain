@@ -68,7 +68,7 @@ describe("E2E: Safe chain proxy", () => {
       await new Promise((resolve) => setTimeout(resolve, 500));
       try {
         const curlOutput = container.dockerExec(
-          "curl -I http://localhost:4873/"
+          "curl -I http://localhost:4873/lodash"
         );
         if (curlOutput.includes("200 OK")) {
           verdaccioStarted = true;
@@ -87,6 +87,8 @@ describe("E2E: Safe chain proxy", () => {
     const result = await shell.runCommand(
       "npm install lodash --registry=http://localhost:4873"
     );
+
+    console.log("NPM install output:", result.output);
 
     // Check if the installation was successful
     assert(
