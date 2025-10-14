@@ -72,6 +72,7 @@ describe("E2E: Safe chain proxy", () => {
         );
         if (curlOutput.includes("200 OK")) {
           verdaccioStarted = true;
+          console.log("Verdaccio started, after " + i * 500 + "ms");
           break;
         }
       } catch {
@@ -79,10 +80,10 @@ describe("E2E: Safe chain proxy", () => {
       }
     }
     if (!verdaccioStarted) {
-      throw new Error("Verdaccio did not start in time");
+      assert.fail("Verdaccio did not start in time");
     }
 
-    const shell = await container.openShell("bash");
+    const shell = await container.openShell("zsh");
     const result = await shell.runCommand(
       "npm --registry http://localhost:4873 install react"
     );
