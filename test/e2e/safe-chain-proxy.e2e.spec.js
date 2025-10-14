@@ -60,58 +60,55 @@ describe("E2E: Safe chain proxy", () => {
 
   it(`safe-chain proxy allows to request through a local http registry`, async () => {
     const configShell = await container.openShell("bash");
-    await configShell.runCommand("touch /.verdaccio-config.yaml");
-    // verdaccio.yaml
-    /*
-storage: ./storage
-uplinks:
-  npmjs:
-    url: https://registry.npmjs.org/
-packages:
-  "**":
-    access: $all
-    proxy: npmjs
-log: { type: file, path: ./verdaccio.log, level: trace, colors: false }
-    */
-    await configShell.runCommand(
-      `echo 'storage: ./storage' >> /.verdaccio-config.yaml`
-    );
-    await configShell.runCommand(`echo 'auth:' >> /.verdaccio-config.yaml`);
-    await configShell.runCommand(
-      `echo '  htpasswd:' >> /.verdaccio-config.yaml`
-    );
-    await configShell.runCommand(
-      `echo '    file: ./htpasswd' >> /.verdaccio-config.yaml`
-    );
-    await configShell.runCommand(
-      `echo '    max_users: 100' >> /.verdaccio-config.yaml`
-    );
-    await configShell.runCommand(`echo 'uplinks:' >> /.verdaccio-config.yaml`);
-    await configShell.runCommand(`echo '  npmjs:' >> /.verdaccio-config.yaml`);
-    await configShell.runCommand(
-      `echo '    url: https://registry.npmjs.org/' >> /.verdaccio-config.yaml`
-    );
-    await configShell.runCommand(`echo 'packages:' >> /.verdaccio-config.yaml`);
-    await configShell.runCommand(`echo '  "**":' >> /.verdaccio-config.yaml`);
-    await configShell.runCommand(
-      `echo '    access: $all' >> /.verdaccio-config.yaml`
-    );
-    await configShell.runCommand(
-      `echo '    proxy: npmjs' >> /.verdaccio-config.yaml`
-    );
-    await configShell.runCommand(
-      `echo 'log: { type: file, path: ./verdaccio.log, level: trace, colors: false }' >> /.verdaccio-config.yaml`
-    );
+    //     await configShell.runCommand("touch /.verdaccio-config.yaml");
+    //     // verdaccio.yaml
+    //     /*
+    // storage: ./storage
+    // uplinks:
+    //   npmjs:
+    //     url: https://registry.npmjs.org/
+    // packages:
+    //   "**":
+    //     access: $all
+    //     proxy: npmjs
+    // log: { type: file, path: ./verdaccio.log, level: trace, colors: false }
+    //     */
+    //     await configShell.runCommand(
+    //       `echo 'storage: ./storage' >> /.verdaccio-config.yaml`
+    //     );
+    //     await configShell.runCommand(`echo 'auth:' >> /.verdaccio-config.yaml`);
+    //     await configShell.runCommand(
+    //       `echo '  htpasswd:' >> /.verdaccio-config.yaml`
+    //     );
+    //     await configShell.runCommand(
+    //       `echo '    file: ./htpasswd' >> /.verdaccio-config.yaml`
+    //     );
+    //     await configShell.runCommand(
+    //       `echo '    max_users: 100' >> /.verdaccio-config.yaml`
+    //     );
+    //     await configShell.runCommand(`echo 'uplinks:' >> /.verdaccio-config.yaml`);
+    //     await configShell.runCommand(`echo '  npmjs:' >> /.verdaccio-config.yaml`);
+    //     await configShell.runCommand(
+    //       `echo '    url: https://registry.npmjs.org/' >> /.verdaccio-config.yaml`
+    //     );
+    //     await configShell.runCommand(`echo 'packages:' >> /.verdaccio-config.yaml`);
+    //     await configShell.runCommand(`echo '  "**":' >> /.verdaccio-config.yaml`);
+    //     await configShell.runCommand(
+    //       `echo '    access: $all' >> /.verdaccio-config.yaml`
+    //     );
+    //     await configShell.runCommand(
+    //       `echo '    proxy: npmjs' >> /.verdaccio-config.yaml`
+    //     );
+    //     await configShell.runCommand(
+    //       `echo 'log: { type: file, path: ./verdaccio.log, level: trace, colors: false }' >> /.verdaccio-config.yaml`
+    //     );
 
     // Start a local npm registry (verdaccio) inside the container
-    container.dockerExec(
-      "npx -y verdaccio --listen 4873 -c /verdaccio-config.yaml",
-      true
-    );
+    container.dockerExec("npx -y verdaccio --listen 4873", true);
 
-    // Polling until verdaccio is ready (max 60 seconds)
+    // Polling until verdaccio is ready (max 30 seconds)
     let verdaccioStarted = false;
-    for (let i = 0; i < 120; i++) {
+    for (let i = 0; i < 30; i++) {
       await new Promise((resolve) => setTimeout(resolve, 500));
       try {
         const curlOutput = container.dockerExec(
@@ -137,12 +134,12 @@ log: { type: file, path: ./verdaccio.log, level: trace, colors: false }
 
     console.log("NPM install output:", result.output);
 
-    const verdaccioLog = await container.openShell("bash");
-    const { output: logOutput } = await verdaccioLog.runCommand(
-      "cat /verdaccio.log"
-    );
+    // const verdaccioLog = await container.openShell("bash");
+    // const { output: logOutput } = await verdaccioLog.runCommand(
+    //   "cat /verdaccio.log"
+    // );
 
-    console.log("Verdaccio log output:", logOutput);
+    // console.log("Verdaccio log output:", logOutput);
 
     // Check if the installation was successful
     assert(
