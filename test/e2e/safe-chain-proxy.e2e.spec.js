@@ -106,7 +106,10 @@ log: { type: file, path: ./verdaccio.log, level: trace, colors: false }
     );
 
     // Start a local npm registry (verdaccio) inside the container
-    container.dockerExec("npx -y verdaccio -c ~/verdaccio-config.yaml", true);
+    container.dockerExec(
+      "npx -y verdaccio --listen 4873 -c ~/verdaccio-config.yaml",
+      true
+    );
 
     // Polling until verdaccio is ready (max 60 seconds)
     let verdaccioStarted = false;
