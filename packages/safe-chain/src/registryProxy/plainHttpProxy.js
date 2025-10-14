@@ -30,6 +30,22 @@ export function handleHttpProxyRequest(req, res) {
           // Stream error while piping response
           // Response headers already sent, can't send error status
         });
+
+        proxyRes.on("close", () => {
+          console.log("Proxy response stream closed");
+          // Clean up if the proxy response stream closes
+          if (!res.writableEnded) {
+            res.end();
+          }
+        });
+
+        proxyRes.on("end", () => {
+          console.log("Proxy response stream ended");
+          // End of proxy response
+          if (!res.writableEnded) {
+            res.end();
+          }
+        });
       }
     )
     .on("error", (err) => {
