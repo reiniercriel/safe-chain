@@ -62,13 +62,37 @@ describe("E2E: Safe chain proxy", () => {
     const configShell = await container.openShell("bash");
     await configShell.runCommand("touch ~/.verdaccio-config.yaml");
     // verdaccio.yaml
-    // storage: ./storage
-    // log: { type: file, path: ./verdaccio.log, level: info }
+    /*
+storage: ./storage
+uplinks:
+  npmjs:
+    url: https://registry.npmjs.org/
+packages:
+  "**":
+    access: $all
+    proxy: npmjs
+log: { type: file, path: ./verdaccio.log, level: trace, colors: false }
+    */
     await configShell.runCommand(
-      "echo 'storage: ./storage' >> ~/verdaccio-config.yaml"
+      `echo 'storage: ./storage' >> ~/.verdaccio-config.yaml`
+    );
+    await configShell.runCommand(`echo 'uplinks:' >> ~/.verdaccio-config.yaml`);
+    await configShell.runCommand(`echo '  npmjs:' >> ~/.verdaccio-config.yaml`);
+    await configShell.runCommand(
+      `echo '    url: https://registry.npmjs.org/' >> ~/.verdaccio-config.yaml`
     );
     await configShell.runCommand(
-      "echo 'log: { type: file, path: /verdaccio.log, level: trace }' >> ~/verdaccio-config.yaml"
+      `echo 'packages:' >> ~/.verdaccio-config.yaml`
+    );
+    await configShell.runCommand(`echo '  "**":' >> ~/.verdaccio-config.yaml`);
+    await configShell.runCommand(
+      `echo '    access: $all' >> ~/.verdaccio-config.yaml`
+    );
+    await configShell.runCommand(
+      `echo '    proxy: npmjs' >> ~/.verdaccio-config.yaml`
+    );
+    await configShell.runCommand(
+      `echo 'log: { type: file, path: ./verdaccio.log, level: trace, colors: false }' >> ~/.verdaccio-config.yaml`
     );
 
     // Start a local npm registry (verdaccio) inside the container
