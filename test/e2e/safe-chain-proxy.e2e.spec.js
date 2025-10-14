@@ -62,8 +62,8 @@ describe("E2E: Safe chain proxy", () => {
     // Start a local npm registry (verdaccio) inside the container
     container.dockerExec("npx -y verdaccio", true);
 
-    // Wait for verdaccio to be ready (max 30 seconds)
-    for (let i = 0; i < 60; i++) {
+    // Wait for verdaccio to be ready (max 60 seconds)
+    for (let i = 0; i < 120; i++) {
       await new Promise((resolve) => setTimeout(resolve, 500));
       try {
         const curlOutput = container.dockerExec(
