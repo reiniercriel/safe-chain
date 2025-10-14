@@ -83,9 +83,9 @@ describe("E2E: Safe chain proxy", () => {
       assert.fail("Verdaccio did not start in time");
     }
 
-    const shell = await container.openShell("zsh");
+    const shell = await container.openShell("bash");
     const result = await shell.runCommand(
-      "npm --registry http://localhost:4873 install react"
+      "npm install lodash --registry=http://localhost:4873"
     );
 
     // Check if the installation was successful
