@@ -61,12 +61,14 @@ describe("E2E: Safe chain proxy", () => {
   it(`safe-chain proxy allows to request through a local http registry`, async () => {
     const configShell = await container.openShell("bash");
     await configShell.runCommand("touch ~/.verdaccio-config.yaml");
-    await configShell.runCommand("echo 'log:' >> ~/.verdaccio-config.yaml");
+    // verdaccio.yaml
+    // storage: ./storage
+    // log: { type: file, path: ./verdaccio.log, level: info }
     await configShell.runCommand(
-      "echo '  type: file' >> ~/.verdaccio-config.yaml"
+      "echo 'log: { type: file, path: /verdaccio.log, level: info }' >> ~/.verdaccio-config.yaml"
     );
     await configShell.runCommand(
-      "echo '  path: /verdaccio.log' >> ~/.verdaccio-config.yaml"
+      "echo 'storage: ./storage' >> ~/.verdaccio-config.yaml"
     );
 
     // Start a local npm registry (verdaccio) inside the container
