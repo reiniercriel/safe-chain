@@ -59,14 +59,21 @@ describe("E2E: Safe chain proxy", () => {
   });
 
   it(`safe-chain proxy allows to request through a local http registry`, async () => {
+    const configShell = await container.openShell("bash");
+    await configShell.runCommand("touch ~/.verdaccio-config.yaml");
+    await configShell.runCommand("echo 'log:' >> ~/.verdaccio-config.yaml");
+    await configShell.runCommand(
+      "echo '  type: file' >> ~/.verdaccio-config.yaml"
+    );
+    await configShell.runCommand(
+      "echo '  path: /verdaccio.log' >> ~/.verdaccio-config.yaml"
+    );
+
     // Start a local npm registry (verdaccio) inside the container
-    container.dockerExec("npx -y verdaccio", true);
+    container.dockerExec("npx -y verdaccio -c ~/.verdaccio-config.yaml", true);
 
-    const shell1 = await container.openShell("bash");
-    await shell1.runCommand("safe-chain teardown");
-
+    // Polling until verdaccio is ready (max 60 seconds)
     let verdaccioStarted = false;
-    // Wait for verdaccio to be ready (max 60 seconds)
     for (let i = 0; i < 120; i++) {
       await new Promise((resolve) => setTimeout(resolve, 500));
       try {
@@ -75,7 +82,7 @@ describe("E2E: Safe chain proxy", () => {
         );
         if (curlOutput.includes("200 OK")) {
           verdaccioStarted = true;
-          console.log("Verdaccio started, after " + i * 500 + "ms");
+          console.log("Verdaccio started, after " + i * 500 + "ms", curlOutput);
           break;
         }
       } catch {
@@ -92,6 +99,13 @@ describe("E2E: Safe chain proxy", () => {
     );
 
     console.log("NPM install output:", result.output);
+
+    const verdaccioLog = await container.openShell("bash");
+    const { output: logOutput } = await verdaccioLog.runCommand(
+      "cat /verdaccio.log"
+    );
+
+    console.log("Verdaccio log output:", logOutput);
 
     // Check if the installation was successful
     assert(
