@@ -16,7 +16,6 @@ const state = {
 
 export function createSafeChainProxy() {
   const server = createProxyServer();
-  server.on("connect", handleConnect);
 
   return {
     startServer: () => startServer(server),
@@ -55,7 +54,12 @@ export function mergeSafeChainProxyEnvironmentVariables(env) {
 }
 
 function createProxyServer() {
-  const server = http.createServer(handleHttpProxyRequest);
+  const server = http.createServer(
+    handleHttpProxyRequest // This handles plain HTTP requests
+  );
+
+  // This handles HTTPS requests via the CONNECT method
+  server.on("connect", handleConnect);
 
   return server;
 }
