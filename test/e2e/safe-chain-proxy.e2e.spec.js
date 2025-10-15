@@ -90,6 +90,12 @@ describe("E2E: Safe chain proxy", () => {
 
     console.log("NPM install output:\n", result.output);
 
+    const curlOutput = container.dockerExec(
+      "curl -I http://localhost:4873/lodash/-/lodash-4.17.21.tgz"
+    );
+
+    console.log("Curl output:\n", curlOutput);
+
     // // Check if the installation was successful
     // assert(
     //   result.output.includes("added"),
