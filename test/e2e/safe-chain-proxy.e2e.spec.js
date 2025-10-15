@@ -63,7 +63,7 @@ describe("E2E: Safe chain proxy", () => {
 
     // Polling until verdaccio is ready (max 30 seconds)
     let verdaccioStarted = false;
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 60; i++) {
       await new Promise((resolve) => setTimeout(resolve, 500));
       try {
         const curlOutput = container.dockerExec(
@@ -71,7 +71,10 @@ describe("E2E: Safe chain proxy", () => {
         );
         if (curlOutput.includes("200 OK")) {
           verdaccioStarted = true;
-          console.log("Verdaccio started, after " + i * 500 + "ms", curlOutput);
+          console.log(
+            "Verdaccio started, after " + i * 500 + "ms\n",
+            curlOutput
+          );
           break;
         }
       } catch {
@@ -82,19 +85,10 @@ describe("E2E: Safe chain proxy", () => {
       assert.fail("Verdaccio did not start in time");
     }
 
-    // const shell = await container.openShell("bash");
-    // const result = await shell.runCommand(
-    //   "npm install lodash --registry=http://localhost:4873"
-    // );
+    const shell = await container.openShell("bash");
+    const result = await shell.runCommand("npm install lodash");
 
-    // console.log("NPM install output:", result.output);
-
-    // // const verdaccioLog = await container.openShell("bash");
-    // // const { output: logOutput } = await verdaccioLog.runCommand(
-    // //   "cat /verdaccio.log"
-    // // );
-
-    // // console.log("Verdaccio log output:", logOutput);
+    console.log("NPM install output:\n", result.output);
 
     // // Check if the installation was successful
     // assert(
