@@ -14,8 +14,8 @@ describe("E2E: Safe chain proxy", () => {
     container = new DockerTestContainer();
     await container.start();
 
-    // const installationShell = await container.openShell("zsh");
-    // await installationShell.runCommand("safe-chain setup");
+    const installationShell = await container.openShell("zsh");
+    await installationShell.runCommand("safe-chain setup");
   });
 
   afterEach(async () => {
