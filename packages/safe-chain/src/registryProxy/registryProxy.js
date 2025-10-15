@@ -55,7 +55,10 @@ export function mergeSafeChainProxyEnvironmentVariables(env) {
 
 function createProxyServer() {
   const server = http.createServer(
-    handleHttpProxyRequest // This handles plain HTTP requests
+    // This handles direct HTTP requests (non-CONNECT requests)
+    // This is normally http-only traffic, but we also handle
+    // https for clients that don't properly use CONNECT
+    handleHttpProxyRequest
   );
 
   // This handles HTTPS requests via the CONNECT method

@@ -4,6 +4,9 @@ import * as https from "https";
 export function handleHttpProxyRequest(req, res) {
   const url = new URL(req.url);
 
+  // The protocol for the plainHttpProxy should usually only be http:
+  // but when the client for some reason sends an https: request directly
+  // instead of using the CONNECT method, we should handle it gracefully.
   let protocol;
   if (url.protocol === "http:") {
     protocol = http;
