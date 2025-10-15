@@ -1,6 +1,7 @@
 import * as http from "http";
 import { tunnelRequest } from "./tunnelRequestHandler.js";
 import { mitmConnect } from "./mitmRequestHandler.js";
+import { handleHttpProxyRequest } from "./plainHttpProxy.js";
 import { getCaCertPath } from "./certUtils.js";
 import { auditChanges } from "../scanning/audit/index.js";
 import { knownRegistries, parsePackageFromUrl } from "./parsePackageFromUrl.js";
@@ -15,7 +16,6 @@ const state = {
 
 export function createSafeChainProxy() {
   const server = createProxyServer();
-  server.on("connect", handleConnect);
 
   return {
     startServer: () => startServer(server),
@@ -54,13 +54,15 @@ export function mergeSafeChainProxyEnvironmentVariables(env) {
 }
 
 function createProxyServer() {
-  const server = http.createServer((_, res) => {
-    res.writeHead(400, "Bad Request");
-    res.write(
-      "Safe-chain proxy: Direct http not supported. Only CONNECT requests are allowed."
-    );
-    res.end();
-  });
+  const server = http.createServer(
+    // This handles direct HTTP requests (non-CONNECT requests)
+    // This is normally http-only traffic, but we also handle
+    // https for clients that don't properly use CONNECT
+    handleHttpProxyRequest
+  );
+
+  // This handles HTTPS requests via the CONNECT method
+  server.on("connect", handleConnect);
 
   return server;
 }
