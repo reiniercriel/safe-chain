@@ -23,9 +23,17 @@ export function handleHttpProxyRequest(req, res) {
         res.writeHead(proxyRes.statusCode, proxyRes.headers);
         proxyRes.pipe(res);
 
+        proxyRes.on("error", () => {
+          // Proxy response stream error
+          // Clean up client response stream
+          if (res.writable) {
+            res.end();
+          }
+        });
+
         proxyRes.on("close", () => {
           // Clean up if the proxy response stream closes
-          if (!res.writableEnded) {
+          if (res.writable) {
             res.end();
           }
         });
@@ -51,9 +59,7 @@ export function handleHttpProxyRequest(req, res) {
   res.on("close", () => {
     // Client disconnected
     // Abort the proxy request to avoid unnecessary work
-    if (!res.writableEnded) {
-      proxyRequest.destroy();
-    }
+    proxyRequest.destroy();
   });
 
   req.pipe(proxyRequest);
