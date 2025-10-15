@@ -86,7 +86,9 @@ describe("E2E: Safe chain proxy", () => {
     }
 
     const shell = await container.openShell("bash");
-    const result = await shell.runCommand("npm install lodash");
+    const result = await shell.runCommand(
+      "npm install lodash --registry http://localhost:4873"
+    );
 
     console.log("NPM install output:\n", result.output);
 
