@@ -25,6 +25,10 @@ export async function resolvePackageVersion(packageName, versionRange) {
     return distTags[versionRange];
   }
 
+  if (!packageInfo.versions) {
+    return null;
+  }
+
   // If the version range is not a dist-tag, we need to resolve the highest version matching the range.
   // This is useful for ranges like "^1.0.0" or "~2.3.4".
   const availableVersions = Object.keys(packageInfo.versions);
