@@ -50,6 +50,14 @@ function bunx() {
   wrapSafeChainCommand "bunx" "aikido-bunx" "$@"
 }
 
+function pip() {
+  wrapSafeChainCommand "pip" "aikido-pip" "$@"
+}
+
+function pip3() {
+  wrapSafeChainCommand "pip3" "aikido-pip" "$@"
+}
+
 function npm() {
   if [[ "$1" == "-v" || "$1" == "--version" ]] && [[ $# -eq 1 ]]; then
     # If args is just -v or --version and nothing else, just run the npm version command
