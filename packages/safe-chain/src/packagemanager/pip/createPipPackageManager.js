@@ -19,7 +19,6 @@ export function createPipPackageManager(command = "pip") {
 
 async function runPipCommand(command, args) {
   try {
-    console.log("**createPipPackageManager.js** Running pip command");
     const result = await safeSpawn(command, args, {
       stdio: "inherit",
       env: mergeSafeChainProxyEnvironmentVariables(process.env),

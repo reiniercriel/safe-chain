@@ -1,32 +1,22 @@
 import { parse } from "semver";
 
-export const knownNpmRegistries = ["registry.npmjs.org"];
-export const knownYarnRegistries = ["registry.yarnpkg.com"];
+export const knownJsRegistries = ["registry.npmjs.org","registry.yarnpkg.com"];
 export const knownPipRegistries = ["files.pythonhosted.org", "pypi.org", "pypi.python.org", "pythonhosted.org"];
 
 export function parsePackageFromUrl(url) {
   let registry;
 
-  for (const knownRegistry of knownNpmRegistries) {
+  for (const knownRegistry of knownJsRegistries) {
     if (url.includes(knownRegistry)) {
       registry = knownRegistry;
-      return parseNpmYarnPackageFromUrl(url, registry);
+      return parseJsPackageFromUrl(url, registry);
     }
   }
 
   for (const knownRegistry of knownPipRegistries) {
-    console.log("**parsePackageFromUrl.js** Checking pip registry:", knownRegistry);
     if (url.includes(knownRegistry)) {
-      console.log("**parsePackageFromUrl.js** Matched pip registry:", knownRegistry);
       registry = knownRegistry;
       return parsePipPackageFromUrl(url, registry);
-    }
-  }
-
-  for (const knownRegistry of knownYarnRegistries) {
-    if (url.includes(knownRegistry)) {
-      registry = knownRegistry;
-      return parseNpmYarnPackageFromUrl(url, registry);
     }
   }
 
@@ -34,7 +24,7 @@ export function parsePackageFromUrl(url) {
   return { packageName: undefined, version: undefined };
 }
 
-function parseNpmYarnPackageFromUrl(url, registry) {
+function parseJsPackageFromUrl(url, registry) {
   let packageName, version;
   if (!registry || !url.endsWith(".tgz")) {
     return { packageName, version };
@@ -70,7 +60,6 @@ function parseNpmYarnPackageFromUrl(url, registry) {
     }
   }
 
-  console.log("**parsePackageFromUrl.js** Parsed package:", { packageName, version });
   return { packageName, version };
 }
 
@@ -79,7 +68,6 @@ function parsePipPackageFromUrl(url, registry) {
 
   // Basic validation
   if (!registry || typeof url !== "string") {
-    console.log("**parsePackageFromUrl.js** Invalid registry or URL");
     return { packageName, version};
   }
 
@@ -88,14 +76,12 @@ function parsePipPackageFromUrl(url, registry) {
   try {
     u = new URL(url);
   } catch {
-    console.log("**parsePackageFromUrl.js** Malformed URL:", url);
     return { packageName, version};
   }
 
   // Get the last path segment (filename) and decode it (strip query & fragment automatically)
   const lastSegment = u.pathname.split("/").filter(Boolean).pop();
   if (!lastSegment){
-    console.log("**parsePackageFromUrl.js** No filename in URL path:", url);
     return { packageName, version};
   }
 
@@ -115,7 +101,6 @@ function parsePipPackageFromUrl(url, registry) {
       if (version === "latest" || !packageName || !version) {
         return { packageName: undefined, version: undefined };
       }
-      console.log("**parsePackageFromUrl.js** Parsed package:", { packageName, version });
       return { packageName, version };
     }
   }
@@ -131,12 +116,10 @@ function parsePipPackageFromUrl(url, registry) {
       if (version === "latest" || !packageName || !version) {
         return { packageName: undefined, version: undefined };
       }
-      console.log("**parsePackageFromUrl.js** Parsed package:", { packageName, version });
       return { packageName, version };
     }
   }
 
   // Unknown file type or invalid
-  console.log("**parsePackageFromUrl.js** Unknown file type for URL:", url);
   return { packageName: undefined, version: undefined };
 }

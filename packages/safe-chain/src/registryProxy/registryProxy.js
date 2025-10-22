@@ -4,7 +4,7 @@ import { mitmConnect } from "./mitmRequestHandler.js";
 import { handleHttpProxyRequest } from "./plainHttpProxy.js";
 import { getCaCertPath } from "./certUtils.js";
 import { auditChanges } from "../scanning/audit/index.js";
-import { knownNpmRegistries, knownYarnRegistries, knownPipRegistries, parsePackageFromUrl } from "./parsePackageFromUrl.js";
+import { knownJsRegistries, knownPipRegistries, parsePackageFromUrl } from "./parsePackageFromUrl.js";
 import { ui } from "../environment/userInteraction.js";
 import chalk from "chalk";
 
@@ -109,8 +109,7 @@ function handleConnect(req, clientSocket, head) {
   // It establishes a tunnel to the server identified by the request URL
 
   console.log("**registryProxy.js** Handling CONNECT request for:", req.url);
-  if ((knownNpmRegistries.some((reg) => req.url.includes(reg))) 
-    || (knownYarnRegistries.some((reg) => req.url.includes(reg)))
+  if ((knownJsRegistries.some((reg) => req.url.includes(reg))) 
     || (knownPipRegistries.some((reg) => req.url.includes(reg)))) {
     mitmConnect(req, clientSocket, isAllowedUrl);    
   } else {
@@ -125,7 +124,6 @@ async function isAllowedUrl(url) {
   // packageName and version are undefined when the URL is not a package download
   // In that case, we can allow the request to proceed
   if (!packageName || !version) {
-    console.log("**registryProxy.js** Non-package URL, allowing:", url);
     return true;
   }
 
@@ -134,7 +132,6 @@ async function isAllowedUrl(url) {
   ]);
 
   if (!auditResult.isAllowed) {
-    console.log("**registryProxy.js** Blocking malicious package:", { packageName, version, url });
     state.blockedRequests.push({ packageName, version, url });
     return false;
   }
