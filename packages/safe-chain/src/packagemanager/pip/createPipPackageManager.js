@@ -1,6 +1,11 @@
-import { ui } from "../../environment/userInteraction.js";
-import { safeSpawn } from "../../utils/safeSpawn.js";
-import { mergeSafeChainProxyEnvironmentVariables } from "../../registryProxy/registryProxy.js";
+import { commandArgumentScanner } from "./dependencyScanner/commandArgumentScanner.js";
+import { nullScanner } from "./dependencyScanner/nullScanner.js";
+import { runPip } from "./runPipCommand.js";
+import {
+  getPipCommandForArgs,
+  pipInstallCommand,
+  pipUninstallCommand,
+} from "./utils/pipCommands.js";
 
 /**
  * Creates a package manager interface for Python's pip package installer
@@ -8,28 +13,40 @@ import { mergeSafeChainProxyEnvironmentVariables } from "../../registryProxy/reg
  * @param {string} [command="pip"] - The pip command to use (e.g., "pip", "pip3") defaults to "pip"
  */
 export function createPipPackageManager(command = "pip") {
-  return {
-    runCommand: (args) => runPipCommand(command, args),
+  function isSupportedCommand(args) {
+    const scanner = findDependencyScannerForCommand(
+      commandScannerMapping,
+      args
+    );
+    return scanner.shouldScan(args);
+  }
 
-    // For pip, set proxy server
-    isSupportedCommand: () => false,
-    getDependencyUpdatesForCommand: () => [],
+  function getDependencyUpdatesForCommand(args) {
+    const scanner = findDependencyScannerForCommand(
+      commandScannerMapping,
+      args
+    );
+    return scanner.scan(args);
+  }
+
+  return {
+    runCommand: (args) => runPip(command, args),
+    isSupportedCommand,
+    getDependencyUpdatesForCommand,
   };
 }
 
-async function runPipCommand(command, args) {
-  try {
-    const result = await safeSpawn(command, args, {
-      stdio: "inherit",
-      env: mergeSafeChainProxyEnvironmentVariables(process.env),
-    });
-    return { status: result.status };
-  } catch (error) {
-    if (error.status) {
-      return { status: error.status };
-    } else {
-      ui.writeError("Error executing command:", error.message);
-      return { status: 1 };
-    }
+const commandScannerMapping = {
+  [pipInstallCommand]: commandArgumentScanner(),
+  [pipUninstallCommand]: nullScanner(), // Uninstall doesn't need scanning
+};
+
+function findDependencyScannerForCommand(scanners, args) {
+  const command = getPipCommandForArgs(args);
+  if (!command) {
+    return nullScanner();
   }
+
+  const scanner = scanners[command];
+  return scanner ? scanner : nullScanner();
 }
