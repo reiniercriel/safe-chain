@@ -33,6 +33,11 @@ function getSafeChainProxyEnvironmentVariables() {
     HTTPS_PROXY: `http://localhost:${state.port}`,
     GLOBAL_AGENT_HTTP_PROXY: `http://localhost:${state.port}`,
     NODE_EXTRA_CA_CERTS: getCaCertPath(),
+
+    // Following env vars point pip and Python's requests/urllib at a CA bundle file.
+    PIP_CERT: getCaCertPath(),
+    REQUESTS_CA_BUNDLE: getCaCertPath(),
+    SSL_CERT_FILE: getCaCertPath(),
   };
 }
 
