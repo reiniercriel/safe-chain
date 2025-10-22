@@ -19,5 +19,10 @@
   "license": "AGPL-3.0-or-later",
   "devDependencies": {
     "oxlint": "^1.22.0"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "lodash": "^4.17.21",
+    "webpack": "^5.102.1"
   }
 }

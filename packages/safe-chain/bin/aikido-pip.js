@@ -2,6 +2,7 @@
 
 import { main } from "../src/main.js";
 import { initializePackageManager } from "../src/packagemanager/currentPackageManager.js";
+import { setEcoSystem } from "../src/config/settings.js";
 
 // Defaults
 let packageManagerName = "pip";
@@ -31,6 +32,9 @@ if (targetVersionMajor && String(targetVersionMajor).trim() === "3") {
 }
 
 console.log("** aikido-pip ** Final arguments (after processing):", argv);
+
+// Set eco system
+setEcoSystem("py");
 
 initializePackageManager(packageManagerName);
 var exitCode = await main(argv);

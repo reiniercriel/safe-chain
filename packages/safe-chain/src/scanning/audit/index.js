@@ -7,6 +7,7 @@ export async function auditChanges(changes) {
   const allowedChanges = [];
   const disallowedChanges = [];
 
+  console.log("**audit/index.js** Auditing changes:", changes);
   var malwarePackages = await getPackagesWithMalware(
     changes.filter(
       (change) => change.type === "add" || change.type === "change"

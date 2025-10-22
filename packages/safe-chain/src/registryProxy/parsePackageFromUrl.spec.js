@@ -112,3 +112,81 @@ describe("parsePackageFromUrl", () => {
     });
   });
 });
+
+describe("parsePackageFromUrl - pip URLs", () => {
+  const pipTestCases = [
+    // Valid pip URLs
+    {
+      url: "https://files.pythonhosted.org/packages/xx/yy/foobar-1.2.3.tar.gz",
+      expected: { packageName: "foobar", version: "1.2.3" },
+    },
+    {
+      url: "https://pypi.org/packages/source/f/foobar/foobar-1.2.3.tar.gz",
+      expected: { packageName: "foobar", version: "1.2.3" },
+    },
+    {
+      url: "https://pypi.org/packages/source/f/foo-bar/foo-bar-0.9.0.tar.gz",
+      expected: { packageName: "foo-bar", version: "0.9.0" },
+    },
+    {
+      url: "https://pypi.org/packages/source/f/foo_bar/foo_bar-2.0.0-py3-none-any.whl",
+      expected: { packageName: "foo_bar", version: "2.0.0" },
+    },
+    {
+      url: "https://files.pythonhosted.org/packages/xx/yy/foo_bar-2.0.0-py3-none-any.whl",
+      expected: { packageName: "foo_bar", version: "2.0.0" },
+    },
+    {
+      url: "https://pypi.org/packages/source/f/foo.bar/foo.bar-1.0.0.tar.gz",
+      expected: { packageName: "foo.bar", version: "1.0.0" },
+    },
+    {
+      url: "https://pypi.org/packages/source/f/foo_bar/foo_bar-2.0.0b1.tar.gz",
+      expected: { packageName: "foo_bar", version: "2.0.0b1" },
+    },
+    {
+      url: "https://pypi.org/packages/source/f/foo_bar/foo_bar-2.0.0rc1.tar.gz",
+      expected: { packageName: "foo_bar", version: "2.0.0rc1" },
+    },
+    {
+      url: "https://pypi.org/packages/source/f/foo_bar/foo_bar-2.0.0.post1.tar.gz",
+      expected: { packageName: "foo_bar", version: "2.0.0.post1" },
+    },
+    {
+      url: "https://pypi.org/packages/source/f/foo_bar/foo_bar-2.0.0.dev1.tar.gz",
+      expected: { packageName: "foo_bar", version: "2.0.0.dev1" },
+    },
+    {
+      url: "https://pypi.org/packages/source/f/foo_bar/foo_bar-2.0.0a1.tar.gz",
+      expected: { packageName: "foo_bar", version: "2.0.0a1" },
+    },
+    {
+      url: "https://pypi.org/packages/source/f/foo_bar/foo_bar-2.0.0-cp38-cp38-manylinux1_x86_64.whl",
+      expected: { packageName: "foo_bar", version: "2.0.0" },
+    },
+    // Invalid pip URLs
+    {
+      url: "https://pypi.org/simple/",
+      expected: { packageName: undefined, version: undefined },
+    },
+    {
+      url: "https://pypi.org/project/foobar/",
+      expected: { packageName: undefined, version: undefined },
+    },
+    {
+      url: "https://files.pythonhosted.org/packages/xx/yy/foobar-latest.tar.gz",
+      expected: { packageName: undefined, version: undefined },
+    },
+    {
+      url: "https://pypi.org/packages/source/f/foo_bar/foo_bar-latest.tar.gz",
+      expected: { packageName: undefined, version: undefined },
+    },
+  ];
+
+  pipTestCases.forEach(({ url, expected }, index) => {
+    it(`should parse pip URL ${index + 1}: ${url}`, () => {
+      const result = parsePackageFromUrl(url);
+      assert.deepEqual(result, expected);
+    });
+  });
+});
