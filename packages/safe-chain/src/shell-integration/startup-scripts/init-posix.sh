@@ -51,12 +51,13 @@ function bunx() {
 }
 
 function pip() {
-  wrapSafeChainCommand "pip" "aikido-pip" "$@"
+  wrapSafeChainCommand "pip" "aikido-pip" --target-version-major "2" "$@"
 }
 
 function pip3() {
-  wrapSafeChainCommand "pip3" "aikido-pip" "$@"
+  wrapSafeChainCommand "pip3" "aikido-pip" --target-version-major "3" "$@"
 }
+
 
 function npm() {
   if [[ "$1" == "-v" || "$1" == "--version" ]] && [[ $# -eq 1 ]]; then

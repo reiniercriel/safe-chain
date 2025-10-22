@@ -2,9 +2,14 @@ import { ui } from "../../environment/userInteraction.js";
 import { safeSpawn } from "../../utils/safeSpawn.js";
 import { mergeSafeChainProxyEnvironmentVariables } from "../../registryProxy/registryProxy.js";
 
-export function createPipPackageManager() {
+/**
+ * Creates a package manager interface for Python's pip package installer
+ * 
+ * @param {string} [command="pip"] - The pip command to use (e.g., "pip", "pip3") defaults to "pip"
+ */
+export function createPipPackageManager(command = "pip") {
   return {
-    runCommand: (args) => runPipCommand("pip3", args),
+    runCommand: (args) => runPipCommand(command, args),
 
     // For pip, set proxy server
     isSupportedCommand: () => false,

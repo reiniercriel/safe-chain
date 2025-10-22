@@ -12,6 +12,7 @@ export async function main(args) {
   await proxy.startServer();
 
   try {
+    console.log(chalk.blueBright.bold("main.js: Scanning for malicious packages..."));
     // This parses all the --safe-chain arguments and removes them from the args array
     args = initializeCliArguments(args);
 
