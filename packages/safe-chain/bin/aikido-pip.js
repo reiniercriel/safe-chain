@@ -10,6 +10,8 @@ let targetVersionMajor;
 // Copy argv so we can mutate while parsing
 const argv = process.argv.slice(2);
 
+console.log("** aikido-pip ** Original arguments:", process.argv.slice(2));
+
 for (let i = 0; i < argv.length; i++) {
 	const a = argv[i];
 
@@ -27,6 +29,8 @@ for (let i = 0; i < argv.length; i++) {
 if (targetVersionMajor && String(targetVersionMajor).trim() === "3") {
   packageManagerName = "pip3";
 }
+
+console.log("** aikido-pip ** Final arguments (after processing):", argv);
 
 initializePackageManager(packageManagerName);
 var exitCode = await main(argv);
