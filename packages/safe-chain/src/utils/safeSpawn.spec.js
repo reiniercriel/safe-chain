@@ -33,6 +33,12 @@ describe("safeSpawn", () => {
       },
     });
 
+    mock.module("os", {
+      namedExports: {
+        platform: () => "win32",
+      },
+    });
+
     // Import after mocking
     const safeSpawnModule = await import("./safeSpawn.js");
     safeSpawn = safeSpawnModule.safeSpawn;

@@ -1,4 +1,5 @@
 import { spawn, execSync } from "child_process";
+import os from "os";
 
 function escapeArg(arg) {
   // Shell metacharacters that need escaping
@@ -42,7 +43,7 @@ export async function safeSpawn(command, args, options = {}) {
     // array args (safer, no escaping needed).
     // See: https://nodejs.org/api/child_process.html#child_processspawncommand-args-options
     let child;
-    if (process.platform === "win32") {
+    if (os.platform() === "win32") {
       const fullCommand = buildCommand(command, args);
       child = spawn(fullCommand, { ...options, shell: true });
     } else {
