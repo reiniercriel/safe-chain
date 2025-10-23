@@ -1,26 +1,18 @@
 /**
- * Parses package specifications from pip install arguments
- * 
- * Only returns packages with exact version specifiers (== or ===) to ensure
- * we can check specific versions against the malware database.
- * 
  * Supported formats that will be returned:
  * - package_name (no version)
  * - package_name==version (exact version)
  * - package_name===version (exact version, PEP 440)
  * 
- * Skipped formats (won't be returned):
- * - package_name>=version (range specifier)
- * - package_name<=version (range specifier)
- * - package_name>version (range specifier)
- * - package_name<version (range specifier)
- * - package_name~=version (compatible release)
- * - package_name!=version (exclusion)
+ * "Ranges". Because they don't specify an exact version, the following formats are skipped and we will rely solely on the mitm scanner:
+ * - package_name>=version
+ * - package_name<=version
+ * - package_name>version
+ * - package_name<version
+ * - package_name~=version
+ * - package_name!=version
  * - git+https://... (VCS URLs - returned without version)
  * - -r requirements.txt (handled by flag skipping)
- * 
- * @param {string[]} args - pip install command arguments
- * @returns {Array<{name: string, version?: string, type: string}>} Array of package specifications with exact versions only
  */
 export function parsePackagesFromInstallArgs(args) {
   const packages = [];
@@ -34,14 +26,13 @@ export function parsePackagesFromInstallArgs(args) {
       continue;
     }
 
-    // Skip the command itself (install, uninstall, etc.)
+    // Skip the command itself (install, etc.)
     if (i === 0 && !arg.startsWith("-")) {
       continue;
     }
 
     // Skip flags and their values
     if (arg.startsWith("-")) {
-      // Flags that take a value - skip the next arg for those
       if (isPipOptionWithParameter(arg)) {
         skipNext = true;
       }
@@ -57,8 +48,10 @@ export function parsePackagesFromInstallArgs(args) {
   return packages;
 }
 
-// Check if a pip flag takes a parameter
 function isPipOptionWithParameter(arg) {
+
+  // Check if a pip flag takes a parameter
+  // TODO it would be better to query pip itself for this info
   const optionsWithParameters = [
     // Install options
     "-r",
@@ -107,10 +100,7 @@ function isPipOptionWithParameter(arg) {
   return optionsWithParameters.includes(arg);
 }
 
-// Parse a single pip requirement spec
-// Always returns { name, version } where version defaults to "latest" if not specified
 function parsePipSpec(spec) {
-
   // Ignore obvious URLs and paths
   // These cannot be scanned from the malware database
   const lower = spec.toLowerCase();

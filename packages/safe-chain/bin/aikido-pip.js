@@ -8,20 +8,19 @@ import { setEcoSystem } from "../src/config/settings.js";
 let packageManagerName = "pip";
 let targetVersionMajor;
 
-// Copy argv so we can mutate while parsing
+// Copy argv so we can modify it
 const argv = process.argv.slice(2);
 
 for (let i = 0; i < argv.length; i++) {
-	const a = argv[i];
+  const a = argv[i];
 
-  // --target-version-major
-	if (a === "--target-version-major" && i + 1 < argv.length) {
-    console.log("Setting targetVersionMajor from CLI arg:", argv[i + 1]);
-		targetVersionMajor = argv[i + 1];
-		argv.splice(i, 2);
-		i -= 1;
-		continue;
-	}
+  // --target-version-major tells us which pip version is being used (2 or 3)
+  if (a === "--target-version-major" && i + 1 < argv.length) {
+    targetVersionMajor = argv[i + 1];
+    argv.splice(i, 2);
+    i -= 1;
+    continue;
+  }
 }
 
 // If the user explicitly called python3, prefer pip3
@@ -29,12 +28,10 @@ if (targetVersionMajor && String(targetVersionMajor).trim() === "3") {
   packageManagerName = "pip3";
 }
 
-console.log("** aikido-pip ** Final arguments (after processing):", argv);
-
 // Set eco system
 setEcoSystem("py");
 
 initializePackageManager(packageManagerName);
-var exitCode = await main(argv);
+const exitCode = await main(argv);
 
 process.exit(exitCode);

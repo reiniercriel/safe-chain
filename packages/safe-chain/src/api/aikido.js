@@ -3,16 +3,22 @@ import { getEcoSystem } from "../config/settings.js";
 
 const malwareDatabaseUrls = {
   js: "https://malware-list.aikido.dev/malware_predictions.json",
-  python: "https://malware-list.aikido.dev/malware_predictions_python.json",
+  py: "https://malware-list.aikido.dev/malware_predictions_python.json",
 };
 
 export async function fetchMalwareDatabase() {
   const ecosystem = getEcoSystem() || "js";
-  if (ecosystem === "py") {
-    console.log("**aikido.js** Using 'python' ecosystem for malware database fetch");
-  }
   const malwareDatabaseUrl = malwareDatabaseUrls[ecosystem];
   const response = await fetch(malwareDatabaseUrl);
+  
+  // Python malware database doesn't exist yet, return empty database
+  if (!response.ok && ecosystem === "py" && response.status === 403) {
+    return {
+      malwareDatabase: [],
+      version: undefined,
+    };
+  }
+  
   if (!response.ok) {
     throw new Error(`Error fetching ${ecosystem} malware database: ${response.statusText}`);
   }
@@ -30,14 +36,17 @@ export async function fetchMalwareDatabase() {
 
 export async function fetchMalwareDatabaseVersion() {
   const ecosystem = getEcoSystem() || "js";
-  if (ecosystem === "py") {
-    console.log("**aikido.js** Using 'python' ecosystem for malware database fetch");
-  }
 
   const malwareDatabaseUrl = malwareDatabaseUrls[ecosystem];
   const response = await fetch(malwareDatabaseUrl, {
     method: "HEAD",
   });
+  
+  // Python malware database doesn't exist yet, return undefined
+  if (!response.ok && ecosystem === "py" && response.status === 403) {
+    return undefined;
+  }
+  
   if (!response.ok) {
     throw new Error(
       `Error fetching ${ecosystem} malware database version: ${response.statusText}`

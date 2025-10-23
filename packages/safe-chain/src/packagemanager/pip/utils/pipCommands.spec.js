@@ -6,7 +6,6 @@ import {
   pipInstallCommand,
   pipDownloadCommand,
   pipWheelCommand,
-  pipUninstallCommand,
 } from "./pipCommands.js";
 
 test("getPipCommandForArgs", async (t) => {
@@ -80,9 +79,5 @@ test("command constants", async (t) => {
 
   await t.test("should have correct wheel command", () => {
     assert.strictEqual(pipWheelCommand, "wheel");
-  });
-
-  await t.test("should have correct uninstall command", () => {
-    assert.strictEqual(pipUninstallCommand, "uninstall");
   });
 });
