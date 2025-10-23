@@ -1,22 +1,33 @@
 import { spawn, execSync } from "child_process";
 import os from "os";
 
-function escapeArg(arg) {
-  // Shell metacharacters that need escaping
-  // These characters have special meaning in shells and need to be quoted
-  const shellMetaChars = /[ "&'|;<>()$`\\!*?[\]{}~#]/;
-
+function sanitizeShellArgument(arg) {
   // If argument contains shell metacharacters, wrap in double quotes
   // and escape characters that are special even inside double quotes
-  if (shellMetaChars.test(arg)) {
+  if (hasShellMetaChars(arg)) {
     // Inside double quotes, we need to escape: " $ ` \
-    return '"' + arg.replace(/(["`$\\])/g, "\\$1") + '"';
+    return '"' + escapeDoubleQuoteContent(arg) + '"';
   }
   return arg;
 }
 
+function hasShellMetaChars(arg) {
+  // Shell metacharacters that need escaping
+  // These characters have special meaning in shells and need to be quoted
+  // Whenever one of these characters is present, we should quote the argument
+  // Characters: space, ", &, ', |, ;, <, >, (, ), $, `, \, !, *, ?, [, ], {, }, ~, #
+  const shellMetaChars = /[ "&'|;<>()$`\\!*?[\]{}~#]/;
+  return shellMetaChars.test(arg);
+}
+
+function escapeDoubleQuoteContent(arg) {
+  // Escape special characters for shell safety
+  // This escapes ", $, `, and \ by prefixing them with a backslash
+  return arg.replace(/(["`$\\])/g, "\\$1");
+}
+
 function buildCommand(command, args) {
-  const escapedArgs = args.map(escapeArg);
+  const escapedArgs = args.map(sanitizeShellArgument);
 
   return `${command} ${escapedArgs.join(" ")}`;
 }

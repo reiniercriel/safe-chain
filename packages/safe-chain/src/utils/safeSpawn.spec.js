@@ -112,4 +112,76 @@ describe("safeSpawn", () => {
     );
     assert.strictEqual(spawnCalls[0].options.shell, true);
   });
+
+  it("should escape dollar signs to prevent variable expansion", async () => {
+    await safeSpawn("echo", ["$HOME/test"]);
+
+    assert.strictEqual(spawnCalls.length, 1);
+    assert.strictEqual(spawnCalls[0].command, 'echo "\\$HOME/test"');
+  });
+
+  it("should escape backticks to prevent command substitution", async () => {
+    await safeSpawn("echo", ["file`whoami`.txt"]);
+
+    assert.strictEqual(spawnCalls.length, 1);
+    assert.strictEqual(spawnCalls[0].command, 'echo "file\\`whoami\\`.txt"');
+  });
+
+  it("should escape backslashes properly", async () => {
+    await safeSpawn("echo", ["path\\with\\backslash"]);
+
+    assert.strictEqual(spawnCalls.length, 1);
+    assert.strictEqual(
+      spawnCalls[0].command,
+      'echo "path\\\\with\\\\backslash"'
+    );
+  });
+
+  it("should handle multiple special characters in one argument", async () => {
+    await safeSpawn("cmd", ['test "quoted" $var `cmd` & more']);
+
+    assert.strictEqual(spawnCalls.length, 1);
+    assert.strictEqual(
+      spawnCalls[0].command,
+      'cmd "test \\"quoted\\" \\$var \\`cmd\\` & more"'
+    );
+  });
+
+  it("should handle pipe character", async () => {
+    await safeSpawn("echo", ["foo|bar"]);
+
+    assert.strictEqual(spawnCalls.length, 1);
+    assert.strictEqual(spawnCalls[0].command, 'echo "foo|bar"');
+  });
+
+  it("should handle parentheses", async () => {
+    await safeSpawn("echo", ["(test)"]);
+
+    assert.strictEqual(spawnCalls.length, 1);
+    assert.strictEqual(spawnCalls[0].command, 'echo "(test)"');
+  });
+
+  it("should handle angle brackets for redirection", async () => {
+    await safeSpawn("echo", ["foo>output.txt"]);
+
+    assert.strictEqual(spawnCalls.length, 1);
+    assert.strictEqual(spawnCalls[0].command, 'echo "foo>output.txt"');
+  });
+
+  it("should handle wildcard characters", async () => {
+    await safeSpawn("echo", ["*.txt"]);
+
+    assert.strictEqual(spawnCalls.length, 1);
+    assert.strictEqual(spawnCalls[0].command, 'echo "*.txt"');
+  });
+
+  it("should handle multiple arguments with mixed escaping needs", async () => {
+    await safeSpawn("cmd", ["safe", "needs space", "$dangerous", "also-safe"]);
+
+    assert.strictEqual(spawnCalls.length, 1);
+    assert.strictEqual(
+      spawnCalls[0].command,
+      'cmd safe "needs space" "\\$dangerous" also-safe'
+    );
+  });
 });
