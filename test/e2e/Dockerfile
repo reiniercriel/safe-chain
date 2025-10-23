@@ -29,6 +29,9 @@ ARG PNPM_VERSION=latest
 SHELL ["/bin/bash", "-c"]
 ENV BASH_ENV=~/.bashrc
 
+# Install a proxy
+RUN apt-get update && apt-get install tinyproxy -y
+
 # Install zsh
 RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/v1.2.1/zsh-in-docker.sh)"
 # Install fish
@@ -42,6 +45,9 @@ RUN volta install node@${NODE_VERSION}
 RUN volta install npm@${NPM_VERSION}
 RUN volta install yarn@${YARN_VERSION}
 RUN volta install pnpm@${PNPM_VERSION}
+
+# Install Bun
+RUN curl -fsSL https://bun.sh/install | bash
 
 # Copy and install Safe chain
 COPY --from=builder /app/*.tgz /pkgs/

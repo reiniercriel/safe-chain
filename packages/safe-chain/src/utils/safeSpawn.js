@@ -9,7 +9,7 @@ function escapeArg(arg) {
   // and escape characters that are special even inside double quotes
   if (shellMetaChars.test(arg)) {
     // Inside double quotes, we need to escape: " $ ` \
-    return '"' + arg.replace(/(["`$\\])/g, '\\$1') + '"';
+    return '"' + arg.replace(/(["`$\\])/g, "\\$1") + '"';
   }
   return arg;
 }
@@ -50,11 +50,23 @@ export async function safeSpawn(command, args, options = {}) {
       child = spawn(fullPath, args, options);
     }
 
+    // When stdio is piped, we need to collect the output
+    let stdout = "";
+    let stderr = "";
+
+    child.stdout?.on("data", (data) => {
+      stdout += data.toString();
+    });
+
+    child.stderr?.on("data", (data) => {
+      stderr += data.toString();
+    });
+
     child.on("close", (code) => {
       resolve({
         status: code,
-        stdout: Buffer.from(""),
-        stderr: Buffer.from(""),
+        stdout: stdout,
+        stderr: stderr,
       });
     });
 

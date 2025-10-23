@@ -3,7 +3,7 @@
 import { main } from "../src/main.js";
 import { initializePackageManager } from "../src/packagemanager/currentPackageManager.js";
 
-const packageManagerName = "pnpm";
+const packageManagerName = "bunx";
 initializePackageManager(packageManagerName);
 var exitCode = await main(process.argv.slice(2));
 

@@ -1,3 +1,4 @@
+// oxlint-disable no-console
 import { auditChanges } from "@aikidosec/safe-chain/scanning";
 
 // Bun Security Scanner for Safe-Chain

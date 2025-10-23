@@ -2,7 +2,7 @@ import { describe, it, before, beforeEach, afterEach } from "node:test";
 import { DockerTestContainer } from "./DockerTestContainer.js";
 import assert from "node:assert";
 
-describe("E2E: yarn coverage", () => {
+describe("E2E: bun coverage", () => {
   let container;
 
   before(async () => {
@@ -15,12 +15,7 @@ describe("E2E: yarn coverage", () => {
     await container.start();
 
     const installationShell = await container.openShell("zsh");
-    await installationShell.runCommand("safe-chain setup-ci");
-
-    // Add $HOME/.safe-chain/shims to PATH for the test commands
-    await installationShell.runCommand(
-      "echo 'export PATH=\"$HOME/.safe-chain/shims:$PATH\"' >> ~/.zshrc"
-    );
+    await installationShell.runCommand("safe-chain setup");
   });
 
   afterEach(async () => {
@@ -32,8 +27,8 @@ describe("E2E: yarn coverage", () => {
   });
 
   it(`safe-chain succesfully installs safe packages`, async () => {
-    const shell = await container.openShell("zsh");
-    const result = await shell.runCommand("yarn add axios");
+    const shell = await container.openShell("bash");
+    const result = await shell.runCommand("bun i axios");
 
     assert.ok(
       result.output.includes("no malicious packages found."),
@@ -41,12 +36,16 @@ describe("E2E: yarn coverage", () => {
     );
   });
 
-  it(`safe-chain blocks installation of malicious packages`, async () => {
-    const shell = await container.openShell("zsh");
-    const result = await shell.runCommand("yarn add safe-chain-test");
+  it(`safe-chain blocks download of malicious packages already in package.json`, async () => {
+    const shell = await container.openShell("bash");
+    await shell.runCommand(
+      'echo \'{"name":"test-project","version":"1.0.0","dependencies":{"safe-chain-test":"0.0.1-security"}}\' > package.json'
+    );
+
+    var result = await shell.runCommand("bun install");
 
     assert.ok(
-      result.output.includes("Malicious changes detected:"),
+      result.output.includes("blocked 1 malicious package downloads"),
       `Output did not include expected text. Output was:\n${result.output}`
     );
     assert.ok(
@@ -57,20 +56,15 @@ describe("E2E: yarn coverage", () => {
       result.output.includes("Exiting without installing malicious packages."),
       `Output did not include expected text. Output was:\n${result.output}`
     );
-
-    const listResult = await shell.runCommand("yarn list");
-    assert.ok(
-      !listResult.output.includes("safe-chain-test"),
-      `Malicious package was installed despite safe-chain protection. Output of 'yarn list' was:\n${listResult.output}`
-    );
   });
 
-  it("safe-chain blocks yarn dlx from executing malicious packages", async () => {
-    const shell = await container.openShell("zsh");
-    const result = await shell.runCommand("yarn dlx safe-chain-test");
+  it("safe-chain blocks bunx from downloading malicious packages", async () => {
+    const shell = await container.openShell("bash");
+
+    const result = await shell.runCommand("bunx safe-chain-test");
 
     assert.ok(
-      result.output.includes("Malicious changes detected:"),
+      result.output.includes("blocked 1 malicious package downloads"),
       `Output did not include expected text. Output was:\n${result.output}`
     );
     assert.ok(

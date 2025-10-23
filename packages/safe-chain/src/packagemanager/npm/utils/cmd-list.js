@@ -1,6 +1,6 @@
 // Based on https://github.com/npm/cli/blob/latest/lib/utils/cmd-list.js
 
-import abbrev from "abbrev";
+import { abbrevs } from "./abbrevs-generated.js";
 
 const commands = [
   "access",
@@ -157,8 +157,6 @@ export function deref(c) {
   if (aliases[c]) {
     return aliases[c];
   }
-
-  const abbrevs = abbrev(commands.concat(Object.keys(aliases)));
 
   // first deref the abbrev, if there is one
   // then resolve any aliases
