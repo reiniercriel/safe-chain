@@ -4,7 +4,8 @@ import { runPip } from "./runPipCommand.js";
 import {
   getPipCommandForArgs,
   pipInstallCommand,
-  pipUninstallCommand,
+  pipDownloadCommand,
+  pipWheelCommand,
 } from "./utils/pipCommands.js";
 
 /**
@@ -38,7 +39,9 @@ export function createPipPackageManager(command = "pip") {
 
 const commandScannerMapping = {
   [pipInstallCommand]: commandArgumentScanner(),
-  [pipUninstallCommand]: nullScanner(), // Uninstall doesn't need scanning
+  [pipDownloadCommand]: commandArgumentScanner(), // download also fetches packages from PyPI
+  [pipWheelCommand]: commandArgumentScanner(), // wheel downloads and builds packages
+  // Other commands (uninstall, list, etc.) will use nullScanner() by default
 };
 
 function findDependencyScannerForCommand(scanners, args) {

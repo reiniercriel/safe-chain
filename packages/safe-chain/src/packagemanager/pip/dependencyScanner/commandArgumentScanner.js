@@ -1,3 +1,6 @@
+import { parsePackagesFromInstallArgs } from "../parsing/parsePackagesFromInstallArgs.js";
+import { hasDryRunArg } from "../utils/pipCommands.js";
+
 /**
  * Scanner for pip command arguments to detect package installations
  * 
@@ -9,19 +12,40 @@ export function commandArgumentScanner(options = {}) {
   const { ignoreDryRun = false } = options;
 
   function shouldScan(args) {
-    // For now, pip scanning is not yet implemented
-    // This would need to detect 'install' commands and package arguments
-    return false;
+    return shouldScanDependencies(args, ignoreDryRun);
   }
 
   function scan(args) {
-    // Future implementation would parse pip install arguments
-    // and return array of {name, version, type} objects
-    return [];
+    return scanDependencies(args);
   }
 
   return {
     shouldScan,
     scan,
   };
+}
+
+function shouldScanDependencies(args, ignoreDryRun) {
+  return ignoreDryRun || !hasDryRunArg(args);
+}
+
+function scanDependencies(args) {
+  return checkChangesFromArgs(args);
+}
+
+/**
+ * Extracts package changes from pip command arguments
+ * 
+ * Unlike npm, pip's parser already returns exact versions (== or ===)
+ * or "latest" for unversioned packages, so no version resolution is needed.
+ * 
+ * @param {string[]} args - Command line arguments
+ * @returns {Array<{name: string, version: string, type: string}>} Package changes
+ */
+export function checkChangesFromArgs(args) {
+  const packageUpdates = parsePackagesFromInstallArgs(args);
+  
+  // Parser already provides exact versions or "latest", no need to resolve
+  // Just return the packages with type "add"
+  return packageUpdates;
 }

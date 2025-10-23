@@ -1,17 +1,26 @@
 /**
  * Parses package specifications from pip install arguments
  * 
- * Pip supports various package specification formats:
- * - package_name
- * - package_name==version
- * - package_name>=version
- * - package_name~=version
- * - git+https://...
- * - -r requirements.txt
- * - . (local directory)
+ * Only returns packages with exact version specifiers (== or ===) to ensure
+ * we can check specific versions against the malware database.
+ * 
+ * Supported formats that will be returned:
+ * - package_name (no version)
+ * - package_name==version (exact version)
+ * - package_name===version (exact version, PEP 440)
+ * 
+ * Skipped formats (won't be returned):
+ * - package_name>=version (range specifier)
+ * - package_name<=version (range specifier)
+ * - package_name>version (range specifier)
+ * - package_name<version (range specifier)
+ * - package_name~=version (compatible release)
+ * - package_name!=version (exclusion)
+ * - git+https://... (VCS URLs - returned without version)
+ * - -r requirements.txt (handled by flag skipping)
  * 
  * @param {string[]} args - pip install command arguments
- * @returns {Array<{name: string, version?: string, type: string}>} Array of package specifications
+ * @returns {Array<{name: string, version?: string, type: string}>} Array of package specifications with exact versions only
  */
 export function parsePackagesFromInstallArgs(args) {
   const packages = [];
@@ -32,31 +41,126 @@ export function parsePackagesFromInstallArgs(args) {
 
     // Skip flags and their values
     if (arg.startsWith("-")) {
-      // Some flags take a value, skip the next arg for those
-      if (arg === "-r" || arg === "--requirement" || 
-          arg === "-c" || arg === "--constraint" ||
-          arg === "-e" || arg === "--editable" ||
-          arg === "-t" || arg === "--target" ||
-          arg === "-i" || arg === "--index-url" ||
-          arg === "--extra-index-url") {
+      // Flags that take a value - skip the next arg for those
+      if (isPipOptionWithParameter(arg)) {
         skipNext = true;
       }
       continue;
     }
 
-    // TODO: Implement full parsing logic
-    // For now, this is a placeholder that would need to handle:
-    // - Version specifiers (==, >=, <=, ~=, !=, <, >)
-    // - VCS urls (git+, hg+, svn+, bzr+)
-    // - Local file paths
-    // - Requirements files (-r, --requirement)
-    // - Extras (package[extra1,extra2])
-
-    packages.push({
-      name: arg,
-      type: "add",
-    });
+    const parsed = parsePipSpec(arg);
+    if (parsed) {
+      packages.push({ ...parsed, type: "add" });
+    }
   }
 
   return packages;
+}
+
+// Check if a pip flag takes a parameter
+function isPipOptionWithParameter(arg) {
+  const optionsWithParameters = [
+    // Install options
+    "-r",
+    "--requirement",
+    "-c",
+    "--constraint",
+    "-e",
+    "--editable",
+    "-t",
+    "--target",
+    "--platform",
+    "--python-version",
+    "--implementation",
+    "--abi",
+    "--root",
+    "--prefix",
+    "--src",
+    "--upgrade-strategy",
+    "--progress-bar",
+    "--root-user-action",
+    "--report",
+    "--group",
+    // Package index options
+    "-i",
+    "--index-url",
+    "--extra-index-url",
+    "-f",
+    "--find-links",
+    // General options
+    "--python",
+    "--log",
+    "--keyring-provider",
+    "--proxy",
+    "--retries",
+    "--timeout",
+    "--exists-action",
+    "--trusted-host",
+    "--cert",
+    "--client-cert",
+    "--cache-dir",
+    "--use-feature",
+    "--use-deprecated",
+    "--resume-retries",
+  ];
+
+  return optionsWithParameters.includes(arg);
+}
+
+// Parse a single pip requirement spec
+// Always returns { name, version } where version defaults to "latest" if not specified
+function parsePipSpec(spec) {
+
+  // Ignore obvious URLs and paths
+  // These cannot be scanned from the malware database
+  const lower = spec.toLowerCase();
+  if (
+    lower.startsWith("git+") ||
+    lower.startsWith("hg+") ||
+    lower.startsWith("svn+") ||
+    lower.startsWith("bzr+") ||
+    lower.startsWith("http:") ||
+    lower.startsWith("https:") ||
+    lower.startsWith("file:") ||
+    spec.startsWith("./") ||
+    spec.startsWith("../") ||
+    spec.startsWith("/")
+  ) {
+    return { name: spec, version: "latest" };
+  }
+
+  // Strip extras: package[extra1,extra2]
+  const extrasStart = spec.indexOf("[");
+  const extrasEnd = extrasStart >= 0 ? spec.indexOf("]", extrasStart) : -1;
+  let base = spec;
+  if (extrasStart >= 0 && extrasEnd > extrasStart) {
+    base = spec.slice(0, extrasStart) + spec.slice(extrasEnd + 1);
+  }
+
+  // Split on first occurrence of a comparator or comma spec
+  // Support multi-constraint lists like ">=1,<2" by detecting the first comparator
+  const comparatorRegex = /(===|==|!=|~=|>=|<=|<|>)/;
+  const m = base.match(comparatorRegex);
+  if (!m) {
+    // No comparator => just a name, use "latest" as version
+    return { name: base, version: "latest" };
+  }
+
+  const idx = m.index;
+  const name = base.slice(0, idx);
+  const versionPart = base.slice(idx); // e.g. '==2.28.0' or '>=1,<2'
+
+  // Normalize whitespace inside versionPart
+  const versionWithOperator = versionPart.replace(/\s+/g, "");
+  
+  // Only return packages with exact version specifiers (== or ===)
+  // Skip range specifiers (<, >, <=, >=, ~=, !=) since they don't provide a specific version
+  if (!versionWithOperator.startsWith("==")) {
+    return null;
+  }
+  
+  // Strip the == or === operator to get just the version number
+  const version = versionWithOperator.replace(/^===?/, "");
+  
+  return { name, version };
 }

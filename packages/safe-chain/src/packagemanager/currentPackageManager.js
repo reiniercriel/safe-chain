@@ -9,7 +9,7 @@ import {
   createPnpxPackageManager,
 } from "./pnpm/createPackageManager.js";
 import { createYarnPackageManager } from "./yarn/createPackageManager.js";
-import { createPipPackageManager } from "./pip/createPipPackageManager.js";
+import { createPipPackageManager } from "./pip/createPackageManager.js";
 
 const state = {
   packageManagerName: null,

@@ -1,11 +1,13 @@
 /**
  * Pip command constants
+ * 
+ * Note: Unlike npm, pip does not support command aliases or abbreviations.
+ * Commands must be spelled out fully (e.g., "install", not "i" or "add").
  */
 export const pipInstallCommand = "install";
+export const pipDownloadCommand = "download";
+export const pipWheelCommand = "wheel";
 export const pipUninstallCommand = "uninstall";
-export const pipListCommand = "list";
-export const pipShowCommand = "show";
-export const pipFreeze = "freeze";
 
 /**
  * Gets the pip command from the arguments array
@@ -26,4 +28,14 @@ export function getPipCommandForArgs(args) {
   }
 
   return null;
+}
+
+/**
+ * Checks if the arguments contain the --dry-run flag
+ * 
+ * @param {string[]} args - Command line arguments
+ * @returns {boolean} True if --dry-run is present
+ */
+export function hasDryRunArg(args) {
+  return args.some((arg) => arg === "--dry-run");
 }
