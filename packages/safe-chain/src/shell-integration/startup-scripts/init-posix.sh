@@ -50,15 +50,6 @@ function bunx() {
   wrapSafeChainCommand "bunx" "aikido-bunx" "$@"
 }
 
-function pip() {
-  wrapSafeChainCommand "pip" "aikido-pip" --target-version-major "2" "$@"
-}
-
-function pip3() {
-  wrapSafeChainCommand "pip3" "aikido-pip" --target-version-major "3" "$@"
-}
-
-
 function npm() {
   if [[ "$1" == "-v" || "$1" == "--version" ]] && [[ $# -eq 1 ]]; then
     # If args is just -v or --version and nothing else, just run the npm version command
@@ -68,4 +59,12 @@ function npm() {
   fi
 
   wrapSafeChainCommand "npm" "aikido-npm" "$@"
+}
+
+function pip() {
+  wrapSafeChainCommand "pip" "aikido-pip" --target-version-major "2" "$@"
+}
+
+function pip3() {
+  wrapSafeChainCommand "pip3" "aikido-pip" --target-version-major "3" "$@"
 }

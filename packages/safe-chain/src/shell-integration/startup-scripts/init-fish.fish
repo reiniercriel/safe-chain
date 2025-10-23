@@ -68,3 +68,13 @@ function npm
 
     wrapSafeChainCommand "npm" "aikido-npm" $argv
 end
+
+function pip
+    # Default to Python 2 major version when explicitly calling pip
+    wrapSafeChainCommand "pip" "aikido-pip" --target-version-major "2" $argv
+end
+
+function pip3
+    # Route to Python 3 when calling pip3
+    wrapSafeChainCommand "pip3" "aikido-pip" --target-version-major "3" $argv
+end

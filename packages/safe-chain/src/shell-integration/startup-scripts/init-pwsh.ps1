@@ -86,3 +86,15 @@ function npm {
     
     Invoke-WrappedCommand "npm" "aikido-npm" $args
 }
+
+function pip {
+    # Default to Python 2 major version when explicitly calling pip
+    $forward = @("--target-version-major", "2") + $args
+    Invoke-WrappedCommand "pip" "aikido-pip" $forward
+}
+
+function pip3 {
+    # Route to Python 3 when calling pip3
+    $forward = @("--target-version-major", "3") + $args
+    Invoke-WrappedCommand "pip3" "aikido-pip" $forward
+}
