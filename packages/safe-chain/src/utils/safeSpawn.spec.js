@@ -22,7 +22,7 @@ describe("safeSpawn", () => {
             },
           };
         },
-        execSync: (cmd, opts) => {
+        execSync: (cmd) => {
           // Simulate 'command -v' returning full path
           const match = cmd.match(/command -v (.+)/);
           if (match) {
