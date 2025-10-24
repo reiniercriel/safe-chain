@@ -26,6 +26,10 @@ function writeError(message, ...optionalParams) {
   console.error(message, ...optionalParams);
 }
 
+function writeVerboseInformation(message, ...optionalParams) {
+  writeInformation(message, ...optionalParams);
+}
+
 function startProcess(message) {
   if (isCi()) {
     return {
@@ -89,6 +93,7 @@ async function confirm(config) {
 
 export const ui = {
   writeInformation,
+  writeVerboseInformation,
   writeWarning,
   writeError,
   emptyLine,
