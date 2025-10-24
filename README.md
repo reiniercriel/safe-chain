@@ -1,6 +1,6 @@
 # Aikido Safe Chain
 
-The Aikido Safe Chain **prevents developers from installing malware** on their workstations through npm, npx, yarn, pnpm, pnpx, bun, bunx, and pip. It's **free** to use and does not require any token.
+The Aikido Safe Chain **prevents developers from installing malware** on their workstations while developing in the Python ecosystem (through pip or pip3) or in the Javascript ecosystem (through npm, npx, yarn, pnpm, pnpx, bun and bunx). It's **free** to use and does not require any token.
 
 The Aikido Safe Chain wraps around the [npm cli](https://github.com/npm/cli), [npx](https://github.com/npm/cli/blob/latest/docs/content/commands/npx.md), [yarn](https://yarnpkg.com/), [pnpm](https://pnpm.io/), [pnpx](https://pnpm.io/cli/dlx), [bun](https://bun.sh/), [bunx](https://bun.sh/docs/cli/bunx), and [pip](https://pip.pypa.io/) to provide extra checks before installing new packages. This tool will detect when a package contains malware and prompt you to exit, preventing npm, npx, yarn, pnpm, pnpx, bun, bunx, or pip from downloading or running the malware.
 
@@ -32,7 +32,7 @@ Installing the Aikido Safe Chain is easy. You just need 3 simple steps:
    safe-chain setup
    ```
 3. **❗Restart your terminal** to start using the Aikido Safe Chain.
-  - This step is crucial as it ensures that the shell aliases for npm, npx, yarn, pnpm, pnpx, bun, bunx, and pip/pip3 are loaded correctly. If you do not restart your terminal, the aliases will not be available.
+  - This step is crucial as it ensures that the shell aliases for npm, npx, yarn, pnpm, pnpx, bun, bunx, and pip are loaded correctly. If you do not restart your terminal, the aliases will not be available.
 4. **Verify the installation** by running:
    ```shell
    npm install safe-chain-test
