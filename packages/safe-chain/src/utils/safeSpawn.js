@@ -43,3 +43,35 @@ export async function safeSpawn(command, args, options = {}) {
     });
   });
 }
+
+/**
+ * To avoid any regression issues on the JS ecosystem,
+ * a py-friendly safeSpawn that avoids shell interpolation
+ * issues (e.g., '<', '>' in version specs).
+ * 
+ * TL;DR: add support for shell::false
+ */
+export async function safeSpawnPy(command, args, options = {}) {
+  return new Promise((resolve) => {
+    const child = spawn(command, args, { ...options, shell: false });
+
+    let stdout = "";
+    let stderr = "";
+
+    child.stdout?.on("data", (data) => {
+      stdout += data.toString();
+    });
+
+    child.stderr?.on("data", (data) => {
+      stderr += data.toString();
+    });
+
+    child.on("close", (code) => {
+      resolve({ status: code, stdout, stderr });
+    });
+
+    child.on("error", (error) => {
+      resolve({ status: 1, stdout: "", stderr: error.message || String(error) });
+    });
+  });
+}

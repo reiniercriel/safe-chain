@@ -1,11 +1,11 @@
 import { ui } from "../../environment/userInteraction.js";
-import { safeSpawn } from "../../utils/safeSpawn.js";
+import { safeSpawnPy } from "../../utils/safeSpawn.js";
 import { mergeSafeChainProxyEnvironmentVariables } from "../../registryProxy/registryProxy.js";
 
 
 export async function runPip(command, args) {
   try {
-    const result = await safeSpawn(command, args, {
+  const result = await safeSpawnPy(command, args, {
       stdio: "inherit",
       env: mergeSafeChainProxyEnvironmentVariables(process.env),
     });
@@ -24,7 +24,7 @@ export async function dryRunPipCommandAndOutput(command, args) {
   try {
     // Note: pip supports --dry-run for the "install" command only; "download" and "wheel" do not.
     // We don't mutate args here — callers should include --dry-run when appropriate.
-    const result = await safeSpawn(
+    const result = await safeSpawnPy(
       command,
       args,
       {

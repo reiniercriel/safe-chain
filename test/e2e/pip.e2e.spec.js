@@ -65,4 +65,24 @@ describe("E2E: pip coverage", () => {
       `Output did not include expected text. Output was:\n${result.output}`
     );
   });
+
+  it(`pip3 install with extras such as requests[socks]`, async () => {
+    const shell = await container.openShell("zsh");
+    const result = await shell.runCommand('pip3 install "requests[socks]==2.32.3"');
+
+    assert.ok(
+      result.output.includes("no malicious packages found."),
+      `Output did not include expected text. Output was:\n${result.output}`
+    );
+  });
+
+  it(`pip3 install with range version specifier`, async () => {
+    const shell = await container.openShell("zsh");
+    const result = await shell.runCommand('pip3 install "Jinja2>=3.1,<3.2"');
+
+    assert.ok(
+      result.output.includes("no malicious packages found."),
+      `Output did not include expected text. Output was:\n${result.output}`
+    );
+  });
 });
