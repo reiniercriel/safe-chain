@@ -4,9 +4,11 @@ import assert from "node:assert";
 describe("safeSpawn", () => {
   let safeSpawn;
   let spawnCalls = [];
+  let os;
 
   beforeEach(async () => {
     spawnCalls = [];
+    os = "win32"; // Test Windows behavior by default
 
     // Mock child_process module to capture what command string gets built
     mock.module("child_process", {
@@ -35,7 +37,7 @@ describe("safeSpawn", () => {
 
     mock.module("os", {
       namedExports: {
-        platform: () => "win32",
+        platform: () => os,
       },
     });
 
@@ -183,5 +185,30 @@ describe("safeSpawn", () => {
       spawnCalls[0].command,
       'cmd safe "needs space" "\\$dangerous" also-safe'
     );
+  });
+
+  it("should reject command names with special characters", async () => {
+    await assert.rejects(async () => await safeSpawn("npm; echo hacked", []), {
+      message: "Invalid command name: npm; echo hacked",
+    });
+  });
+
+  it("should reject command names with spaces", async () => {
+    await assert.rejects(async () => await safeSpawn("npm install", []), {
+      message: "Invalid command name: npm install",
+    });
+  });
+
+  it("should reject command names with slashes", async () => {
+    await assert.rejects(async () => await safeSpawn("../../malicious", []), {
+      message: "Invalid command name: ../../malicious",
+    });
+  });
+
+  it("should accept valid command names with letters, numbers, underscores and hyphens", async () => {
+    await safeSpawn("valid_command-123", []);
+
+    assert.strictEqual(spawnCalls.length, 1);
+    assert.strictEqual(spawnCalls[0].command, "valid_command-123");
   });
 });

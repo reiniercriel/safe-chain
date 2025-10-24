@@ -27,6 +27,10 @@ function escapeDoubleQuoteContent(arg) {
 }
 
 function buildCommand(command, args) {
+  if (args.length === 0) {
+    return command;
+  }
+
   const escapedArgs = args.map(sanitizeShellArgument);
 
   return `${command} ${escapedArgs.join(" ")}`;
@@ -48,6 +52,11 @@ function resolveCommandPath(command) {
 }
 
 export async function safeSpawn(command, args, options = {}) {
+  // command should always be alphanumeric or _ or - to avoid injection
+  if (!/^[a-zA-Z0-9_-]+$/.test(command)) {
+    throw new Error(`Invalid command name: ${command}`);
+  }
+
   return new Promise((resolve, reject) => {
     // Windows requires shell: true because .bat and .cmd files are not executable
     // without a terminal. On Unix/macOS, we resolve the full path first, then use
