@@ -111,7 +111,6 @@ function handleConnect(req, clientSocket, head) {
   // CONNECT method is used for HTTPS requests
   // It establishes a tunnel to the server identified by the request URL
 
-  console.log("**registryProxy.js** Handling CONNECT request for:", req.url);
   if ((knownJsRegistries.some((reg) => req.url.includes(reg))) 
     || (knownPipRegistries.some((reg) => req.url.includes(reg)))) {
     mitmConnect(req, clientSocket, isAllowedUrl);    
