@@ -101,8 +101,7 @@ function isPipOptionWithParameter(arg) {
 }
 
 function parsePipSpec(spec) {
-  // Ignore obvious URLs and paths
-  // These cannot be scanned from the malware database
+  // Ignore obvious URLs and paths, rely on mitm scanner
   const lower = spec.toLowerCase();
   if (
     lower.startsWith("git+") ||
@@ -116,7 +115,7 @@ function parsePipSpec(spec) {
     spec.startsWith("../") ||
     spec.startsWith("/")
   ) {
-    return { name: spec, version: "latest" };
+    return null;
   }
 
   // Strip extras: package[extra1,extra2]

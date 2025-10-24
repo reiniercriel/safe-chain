@@ -147,6 +147,9 @@ function sendHttpsRequestThroughTunnel(socket, verb, url) {
       {
         socket: socket,
         servername: url.hostname,
+        // Tests should focus on tunnel behavior, not system CA state;
+        // disable CA verification to avoid flakiness on machines without full roots.
+        rejectUnauthorized: false,
       },
       () => {
         tlsSocket.write(

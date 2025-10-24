@@ -15,7 +15,7 @@ Aikido Safe Chain works on Node.js version 18 and above and supports the followi
 - ✅ **pnpx**
 - ✅ **bun**
 - ✅ **bunx**
-- ✅ **pip** (pip and pip3)
+- ✅ **pip**
 
 # Usage
 
@@ -39,7 +39,7 @@ Installing the Aikido Safe Chain is easy. You just need 3 simple steps:
    ```
    - The output should show that Aikido Safe Chain is blocking the installation of this package as it is flagged as malware.
 
-When running `npm`, `npx`, `yarn`, `pnpm`, `pnpx`, `bun`, `bunx`, or `pip` (including `pip3`) commands, the Aikido Safe Chain will automatically check for malware in the packages you are trying to install. If any malware is detected, it will prompt you to exit the command.
+When running `npm`, `npx`, `yarn`, `pnpm`, `pnpx`, `bun`, `bunx`, or `pip` commands, the Aikido Safe Chain will automatically check for malware in the packages you are trying to install. If any malware is detected, it will prompt you to exit the command.
 
 You can check the installed version by running:
 ```shell
@@ -60,7 +60,7 @@ The Aikido Safe Chain integrates with your shell to provide a seamless experienc
 
 More information about the shell integration can be found in the [shell integration documentation](docs/shell-integration.md).
 
-### Python / pip support
+### Python support
 
 - Supports `pip` and `pip3` commands.
 - Scans Python packages fetched by `pip install`, `pip download`, and `pip wheel`.

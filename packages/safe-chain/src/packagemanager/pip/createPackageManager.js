@@ -7,10 +7,6 @@ import {
   pipWheelCommand,
 } from "./utils/pipCommands.js";
 
-/**
- * Creates a package manager
- * @param {string} [command="pip"] - The pip command to use (e.g., "pip", "pip3") defaults to "pip"
- */
 export function createPipPackageManager(command = "pip") {
   function isSupportedCommand(args) {
     const scanner = findDependencyScannerForCommand(

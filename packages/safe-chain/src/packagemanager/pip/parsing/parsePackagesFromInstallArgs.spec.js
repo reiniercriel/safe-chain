@@ -40,9 +40,8 @@ describe("parsePackagesFromInstallArgs", () => {
     ]);
   });
 
-  it("should parse multiple constraints", () => {
+  it("should skip ranges", () => {
     const result = parsePackagesFromInstallArgs(["install", "requests>=2,<3"]);
-    // Range specifiers should be skipped since they don't provide exact versions
     assert.deepEqual(result, []);
   });
 
@@ -69,7 +68,7 @@ describe("parsePackagesFromInstallArgs", () => {
     ]);
   });
 
-  it("should treat VCS/URL/path specs as names (no version)", () => {
+  it("should skip VCS/URL/path)", () => {
     const result = parsePackagesFromInstallArgs([
       "install",
       "git+https://github.com/pallets/flask.git",
@@ -77,12 +76,7 @@ describe("parsePackagesFromInstallArgs", () => {
       "file:/tmp/pkg.whl",
       "./localpkg",
     ]);
-    assert.deepEqual(result, [
-      { name: "git+https://github.com/pallets/flask.git", version: "latest", type: "add" },
-      { name: "https://files.pythonhosted.org/packages/foo/bar.whl", version: "latest", type: "add" },
-      { name: "file:/tmp/pkg.whl", version: "latest", type: "add" },
-      { name: "./localpkg", version: "latest", type: "add" },
-    ]);
+    assert.deepEqual(result, []);
   });
 
   it("should return empty array for no packages", () => {
