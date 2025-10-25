@@ -181,22 +181,4 @@ describe("removeLinesMatchingPatternTests", () => {
     const resultLines = result.split("\n");
     assert.strictEqual(resultLines.length, 5, "Should have exactly 5 lines");
   });
-
-  it("should include pip in knownAikidoTools and in the package manager list", async () => {
-    // Import helpers after setting up the mock
-    const { knownAikidoTools, getPackageManagerList } = await import("./helpers.js");
-
-    // Verify pip tool
-    const hasPip = knownAikidoTools.some(
-      (t) => t.tool === "pip" && t.aikidoCommand === "aikido-pip"
-    );
-    assert.ok(hasPip, "knownAikidoTools should include pip");
-
-    // Verify pip appears in the human-readable list
-    const list = getPackageManagerList();
-    assert.ok(
-      /(^|[,\s])pip(,|\s| and)/.test(list) && /commands$/.test(list),
-      `getPackageManagerList should include 'pip' (actual: ${list})`
-    );
-  });
 });

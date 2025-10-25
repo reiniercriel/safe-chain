@@ -1,5 +1,3 @@
-import { parse } from "semver";
-
 export const knownJsRegistries = ["registry.npmjs.org","registry.yarnpkg.com"];
 export const knownPipRegistries = ["files.pythonhosted.org", "pypi.org", "pypi.python.org", "pythonhosted.org"];
 
