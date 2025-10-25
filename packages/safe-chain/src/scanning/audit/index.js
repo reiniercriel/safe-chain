@@ -14,6 +14,7 @@ export async function auditChanges(changes) {
   );
 
   for (const change of changes) {
+    console.log(" Safe-chain: auditing package:", change);
     const malwarePackage = malwarePackages.find(
       (pkg) => pkg.name === change.name && pkg.version === change.version
     );

@@ -60,3 +60,11 @@ function npm() {
 
   wrapSafeChainCommand "npm" "aikido-npm" "$@"
 }
+
+function pip() {
+  wrapSafeChainCommand "pip" "aikido-pip" --target-version-major "2" "$@"
+}
+
+function pip3() {
+  wrapSafeChainCommand "pip3" "aikido-pip" --target-version-major "3" "$@"
+}

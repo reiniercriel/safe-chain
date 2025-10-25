@@ -140,6 +140,59 @@ describe("registryProxy.mitm", () => {
     // Same hostname should get the same certificate (fingerprint)
     assert.strictEqual(cert1.fingerprint, cert2.fingerprint);
   });
+
+  // --- Pip registry MITM and env var tests ---
+  it("should set pip CA trust environment variables", () => {
+    const envVars = mergeSafeChainProxyEnvironmentVariables([]);
+    const caPath = getCaCertPath();
+    assert.strictEqual(envVars.PIP_CERT, caPath);
+    assert.strictEqual(envVars.REQUESTS_CA_BUNDLE, caPath);
+    assert.strictEqual(envVars.SSL_CERT_FILE, caPath);
+  });
+
+  it("should intercept HTTPS requests to pypi.org for pip package", async () => {
+    const response = await makeRegistryRequest(
+      proxyHost,
+      proxyPort,
+      "pypi.org",
+      "/packages/source/f/foo_bar/foo_bar-2.0.0.tar.gz"
+    );
+    assert.notStrictEqual(response.statusCode, 403);
+    assert.ok(typeof response.body === "string");
+  });
+
+  it("should intercept HTTPS requests to files.pythonhosted.org for pip wheel", async () => {
+    const response = await makeRegistryRequest(
+      proxyHost,
+      proxyPort,
+      "files.pythonhosted.org",
+      "/packages/xx/yy/foo_bar-2.0.0-py3-none-any.whl"
+    );
+    assert.notStrictEqual(response.statusCode, 403);
+    assert.ok(typeof response.body === "string");
+  });
+
+  it("should handle pip package with a1 version", async () => {
+    const response = await makeRegistryRequest(
+      proxyHost,
+      proxyPort,
+      "pypi.org",
+      "/packages/source/f/foo_bar/foo_bar-2.0.0a1.tar.gz"
+    );
+    assert.notStrictEqual(response.statusCode, 403);
+    assert.ok(typeof response.body === "string");
+  });
+
+  it("should handle pip package with latest version (should not block)", async () => {
+    const response = await makeRegistryRequest(
+      proxyHost,
+      proxyPort,
+      "pypi.org",
+      "/packages/source/f/foo_bar/foo_bar-latest.tar.gz"
+    );
+    assert.notStrictEqual(response.statusCode, 403);
+    assert.ok(typeof response.body === "string");
+  });
 });
 
 async function makeRegistryRequest(proxyHost, proxyPort, targetHost, path) {

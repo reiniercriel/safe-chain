@@ -11,6 +11,7 @@ export const knownAikidoTools = [
   { tool: "pnpx", aikidoCommand: "aikido-pnpx" },
   { tool: "bun", aikidoCommand: "aikido-bun" },
   { tool: "bunx", aikidoCommand: "aikido-bunx" },
+  { tool: "pip", aikidoCommand: "aikido-pip" },
   // When adding a new tool here, also update the documentation for the new tool in the README.md
 ];
 

@@ -87,3 +87,73 @@ describe("safeSpawn", () => {
     assert.strictEqual(spawnCalls[0].options.shell, true);
   });
 });
+
+describe("safeSpawnPy", () => {
+  let safeSpawnPy;
+  let spawnCalls = [];
+
+  beforeEach(async () => {
+    spawnCalls = [];
+
+    // Mock child_process for argument-array spawn signature
+    mock.module("child_process", {
+      namedExports: {
+        spawn: (command, args = [], options = {}) => {
+          spawnCalls.push({ command, args, options });
+          const stdoutListeners = [];
+          const stderrListeners = [];
+          const stdout = { on: (event, cb) => { if (event === "data") stdoutListeners.push(cb); } };
+          const stderr = { on: (event, cb) => { if (event === "data") stderrListeners.push(cb); } };
+          const obj = {
+            stdout,
+            stderr,
+            on: (event, callback) => {
+              if (event === 'close') {
+                // Emit one chunk to stdout and stderr to verify piping works, then close with success
+                setTimeout(() => {
+                  stdoutListeners.forEach((cb) => cb(Buffer.from("STDOUT-TEST")));
+                  stderrListeners.forEach((cb) => cb(Buffer.from("")));
+                  callback(0);
+                }, 0);
+              }
+            }
+          };
+          return obj;
+        },
+      },
+    });
+
+    // Import after mocking; use a query to avoid ESM cache collisions with previous import
+    const safeSpawnModule = await import("./safeSpawn.js?py");
+    safeSpawnPy = safeSpawnModule.safeSpawnPy;
+  });
+
+  afterEach(() => {
+    mock.reset();
+  });
+
+  it("spawns without a shell and preserves args (inherit)", async () => {
+    const result = await safeSpawnPy("pip3", ["install", "Jinja2>=3.1,<3.2"], { stdio: "inherit" });
+
+    // Verifies no throw and status 0
+    assert.strictEqual(result.status, 0);
+
+    // Verify spawn signature
+    assert.strictEqual(spawnCalls.length, 1);
+    assert.strictEqual(spawnCalls[0].command, "pip3");
+    assert.deepStrictEqual(spawnCalls[0].args, ["install", "Jinja2>=3.1,<3.2"]);
+    assert.strictEqual(spawnCalls[0].options.shell, false);
+    assert.strictEqual(spawnCalls[0].options.stdio, "inherit");
+  });
+
+  it("captures stdout when stdio=pipe", async () => {
+    const result = await safeSpawnPy("pip3", ["install", "idna!=3.5,>=3.0", "--dry-run"], { stdio: "pipe" });
+
+    assert.strictEqual(result.status, 0);
+    assert.match(result.stdout || "", /STDOUT-TEST/);
+
+    assert.strictEqual(spawnCalls.length, 1);
+    assert.strictEqual(spawnCalls[0].options.shell, false);
+    assert.strictEqual(spawnCalls[0].options.stdio, "pipe");
+  });
+});

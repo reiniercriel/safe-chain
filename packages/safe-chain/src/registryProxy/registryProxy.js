@@ -4,7 +4,7 @@ import { mitmConnect } from "./mitmRequestHandler.js";
 import { handleHttpProxyRequest } from "./plainHttpProxy.js";
 import { getCaCertPath } from "./certUtils.js";
 import { auditChanges } from "../scanning/audit/index.js";
-import { knownRegistries, parsePackageFromUrl } from "./parsePackageFromUrl.js";
+import { knownJsRegistries, knownPipRegistries, parsePackageFromUrl } from "./parsePackageFromUrl.js";
 import { ui } from "../environment/userInteraction.js";
 import chalk from "chalk";
 
@@ -33,6 +33,14 @@ function getSafeChainProxyEnvironmentVariables() {
     HTTPS_PROXY: `http://localhost:${state.port}`,
     GLOBAL_AGENT_HTTP_PROXY: `http://localhost:${state.port}`,
     NODE_EXTRA_CA_CERTS: getCaCertPath(),
+
+    // Following env vars point pip and Python's requests/urllib at a CA Cert file.
+    // pip checks PIP_CERT first
+    // If pip uses requests library internally, it needs REQUESTS_CA_BUNDLE
+    // Other Python packages or pip's fallback SSL code may use SSL_CERT_FILE
+    PIP_CERT: getCaCertPath(),
+    REQUESTS_CA_BUNDLE: getCaCertPath(),
+    SSL_CERT_FILE: getCaCertPath(),
   };
 }
 
@@ -103,10 +111,9 @@ function handleConnect(req, clientSocket, head) {
   // CONNECT method is used for HTTPS requests
   // It establishes a tunnel to the server identified by the request URL
 
-  if (knownRegistries.some((reg) => req.url.includes(reg))) {
-    // For npm and yarn registries, we want to intercept and inspect the traffic
-    // so we can block packages with malware
-    mitmConnect(req, clientSocket, isAllowedUrl);
+  if ((knownJsRegistries.some((reg) => req.url.includes(reg))) 
+    || (knownPipRegistries.some((reg) => req.url.includes(reg)))) {
+    mitmConnect(req, clientSocket, isAllowedUrl);    
   } else {
     // For other hosts, just tunnel the request to the destination tcp socket
     tunnelRequest(req, clientSocket, head);
