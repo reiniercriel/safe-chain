@@ -7,7 +7,7 @@ export function getPipCommandForArgs(args) {
     return null;
   }
 
-  // The first non-flag argument is typically the command
+  // The first non-flag argument is the command
   for (const arg of args) {
     if (!arg.startsWith("-")) {
       return arg;

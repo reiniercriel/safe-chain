@@ -29,6 +29,7 @@ if (targetVersionMajor && String(targetVersionMajor).trim() === "3") {
 }
 
 // Set eco system
+// This can be used in other parts of the code to determine which eco system we are working with
 setEcoSystem("py");
 
 initializePackageManager(packageManagerName);
