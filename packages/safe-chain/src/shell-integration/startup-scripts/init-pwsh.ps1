@@ -99,8 +99,9 @@ function pip3 {
 function python {
     param([Parameter(ValueFromRemainingArguments=$true)]$Args)
     if ($Args.Length -ge 2 -and $Args[0] -eq '-m' -and $Args[1] -match '^pip(3)?$') {
-        if ($Args[1] -eq 'pip3') { Invoke-WrappedCommand 'pip3' 'aikido-pip3' $Args[2..($Args.Length-1)] }
-        else { Invoke-WrappedCommand 'pip' 'aikido-pip' $Args[2..($Args.Length-1)] }
+        $pipArgs = if ($Args.Length -gt 2) { $Args | Select-Object -Skip 2 } else { @() }
+        if ($Args[1] -eq 'pip3') { Invoke-WrappedCommand 'pip3' 'aikido-pip3' $pipArgs }
+        else { Invoke-WrappedCommand 'pip' 'aikido-pip' $pipArgs }
     }
     else {
         Invoke-RealCommand 'python' $Args
@@ -111,8 +112,9 @@ function python {
 function python3 {
     param([Parameter(ValueFromRemainingArguments=$true)]$Args)
     if ($Args.Length -ge 2 -and $Args[0] -eq '-m' -and $Args[1] -match '^pip(3)?$') {
-        if ($Args[1] -eq 'pip3') { Invoke-WrappedCommand 'pip3' 'aikido-pip3' $Args[2..($Args.Length-1)] }
-        else { Invoke-WrappedCommand 'pip' 'aikido-pip' $Args[2..($Args.Length-1)] }
+        $pipArgs = if ($Args.Length -gt 2) { $Args | Select-Object -Skip 2 } else { @() }
+        if ($Args[1] -eq 'pip3') { Invoke-WrappedCommand 'pip3' 'aikido-pip3' $pipArgs }
+        else { Invoke-WrappedCommand 'pip' 'aikido-pip' $pipArgs }
     }
     else {
         Invoke-RealCommand 'python3' $Args
