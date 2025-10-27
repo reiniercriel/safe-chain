@@ -85,4 +85,5 @@ describe("E2E: pip coverage", () => {
       `Output did not include expected text. Output was:\n${result.output}`
     );
   });
+
 });

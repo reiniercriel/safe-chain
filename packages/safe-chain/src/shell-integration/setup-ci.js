@@ -46,8 +46,7 @@ function createUnixShims(shimsDir) {
 
   const template = fs.readFileSync(templatePath, "utf-8");
 
-  // Create a shim for each tool except pip for now.
-  // TODO(pip): Enable pip and pip3 CI support
+  // Create a shim for each tool except pip (CI support not yet implemented)
   let created = 0;
   for (const toolInfo of knownAikidoTools) {
     if (toolInfo.tool === "pip") {
@@ -89,8 +88,7 @@ function createWindowsShims(shimsDir) {
 
   const template = fs.readFileSync(templatePath, "utf-8");
 
-  // Create a shim for each tool except pip for now.
-  // TODO(pip): Enable pip and pip3 CI support
+  // Create a shim for each tool except pip (CI support not yet implemented)
   let created = 0;
   for (const toolInfo of knownAikidoTools) {
     if (toolInfo.tool === "pip") {

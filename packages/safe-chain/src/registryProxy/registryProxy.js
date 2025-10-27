@@ -5,6 +5,7 @@ import { handleHttpProxyRequest } from "./plainHttpProxy.js";
 import { getCaCertPath } from "./certUtils.js";
 import { auditChanges } from "../scanning/audit/index.js";
 import { knownJsRegistries, knownPipRegistries, parsePackageFromUrl } from "./parsePackageFromUrl.js";
+import { getEcoSystem, ECOSYSTEM_JS, ECOSYSTEM_PY } from "../config/settings.js";
 import { ui } from "../environment/userInteraction.js";
 import chalk from "chalk";
 
@@ -111,9 +112,18 @@ function handleConnect(req, clientSocket, head) {
   // CONNECT method is used for HTTPS requests
   // It establishes a tunnel to the server identified by the request URL
 
-  if ((knownJsRegistries.some((reg) => req.url.includes(reg))) 
-    || (knownPipRegistries.some((reg) => req.url.includes(reg)))) {
-    mitmConnect(req, clientSocket, isAllowedUrl);    
+  const ecosystem = getEcoSystem();
+  const url = req.url || "";
+
+  let isKnownRegistry = false;
+  if (ecosystem === ECOSYSTEM_JS) {
+    isKnownRegistry = knownJsRegistries.some((reg) => url.includes(reg));
+  } else if (ecosystem === ECOSYSTEM_PY) {
+    isKnownRegistry = knownPipRegistries.some((reg) => url.includes(reg));
+  }
+
+  if (isKnownRegistry) {
+    mitmConnect(req, clientSocket, isAllowedUrl);
   } else {
     // For other hosts, just tunnel the request to the destination tcp socket
     tunnelRequest(req, clientSocket, head);

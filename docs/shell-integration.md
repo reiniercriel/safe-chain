@@ -2,7 +2,7 @@
 
 ## Overview
 
-The shell integration automatically wraps common package manager commands (`npm`, `npx`, `yarn`, `pnpm`, `pnpx`, `bun`, `bunx`) with Aikido's security scanning functionality. This is achieved by sourcing startup scripts that define shell functions to wrap these commands with their Aikido-protected equivalents.
+The shell integration automatically wraps common package manager commands (`npm`, `npx`, `yarn`, `pnpm`, `pnpx`, `bun`, `bunx`, `pip`, `pip3`) with Aikido's security scanning functionality. This is achieved by sourcing startup scripts that define shell functions to wrap these commands with their Aikido-protected equivalents.
 
 ## Supported Shells
 
@@ -28,7 +28,7 @@ This command:
 
 - Copies necessary startup scripts to Safe Chain's installation directory (`~/.safe-chain/scripts`)
 - Detects all supported shells on your system
-- Sources each shell's startup file to add Safe Chain functions for `npm`, `npx`, `yarn`, `pnpm`, `pnpx`, `bun`, and `bunx`
+- Sources each shell's startup file to add Safe Chain functions for `npm`, `npx`, `yarn`, `pnpm`, `pnpx`, `bun`, `bunx`, `pip`, and `pip3`
 
 ❗ After running this command, **you must restart your terminal** for the changes to take effect. This ensures that the startup scripts are sourced correctly.
 
@@ -77,7 +77,7 @@ The system modifies the following files to source Safe Chain startup scripts:
 This means the shell functions are working but the Aikido commands aren't installed or available in your PATH:
 
 - Make sure Aikido Safe Chain is properly installed on your system
-- Verify the `aikido-npm`, `aikido-npx`, `aikido-yarn`, `aikido-pnpm`, `aikido-pnpx`, `aikido-bun`, and `aikido-bunx` commands exist
+- Verify the `aikido-npm`, `aikido-npx`, `aikido-yarn`, `aikido-pnpm`, `aikido-pnpx`, `aikido-bun`, `aikido-bunx`, `aikido-pip`, and `aikido-pip3` commands exist
 - Check that these commands are in your system's PATH
 
 ### Manual Verification
@@ -120,4 +120,4 @@ npm() {
 }
 ```
 
-Repeat this pattern for `npx`, `yarn`, `pnpm`, `pnpx`, `bun`, and `bunx` using their respective `aikido-*` commands. After adding these functions, restart your terminal to apply the changes.
+Repeat this pattern for `npx`, `yarn`, `pnpm`, `pnpx`, `bun`, `bunx`, `pip`, and `pip3` using their respective `aikido-*` commands. After adding these functions, restart your terminal to apply the changes.

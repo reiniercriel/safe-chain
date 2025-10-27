@@ -7,6 +7,7 @@ import {
   mergeSafeChainProxyEnvironmentVariables,
 } from "./registryProxy.js";
 import { getCaCertPath } from "./certUtils.js";
+import { setEcoSystem, ECOSYSTEM_JS, ECOSYSTEM_PY } from "../config/settings.js";
 import fs from "fs";
 
 describe("registryProxy.mitm", () => {
@@ -19,6 +20,8 @@ describe("registryProxy.mitm", () => {
     const proxyUrl = new URL(envVars.HTTPS_PROXY);
     proxyHost = proxyUrl.hostname;
     proxyPort = parseInt(proxyUrl.port, 10);
+    // Default to JS ecosystem for JS registry tests
+    setEcoSystem(ECOSYSTEM_JS);
   });
 
   after(async () => {
@@ -151,6 +154,8 @@ describe("registryProxy.mitm", () => {
   });
 
   it("should intercept HTTPS requests to pypi.org for pip package", async () => {
+    // Switch to Python ecosystem for pip registry MITM tests
+    setEcoSystem(ECOSYSTEM_PY);
     const response = await makeRegistryRequest(
       proxyHost,
       proxyPort,
@@ -162,6 +167,8 @@ describe("registryProxy.mitm", () => {
   });
 
   it("should intercept HTTPS requests to files.pythonhosted.org for pip wheel", async () => {
+    // Ensure Python ecosystem
+    setEcoSystem(ECOSYSTEM_PY);
     const response = await makeRegistryRequest(
       proxyHost,
       proxyPort,
@@ -173,6 +180,8 @@ describe("registryProxy.mitm", () => {
   });
 
   it("should handle pip package with a1 version", async () => {
+    // Ensure Python ecosystem
+    setEcoSystem(ECOSYSTEM_PY);
     const response = await makeRegistryRequest(
       proxyHost,
       proxyPort,
@@ -184,6 +193,8 @@ describe("registryProxy.mitm", () => {
   });
 
   it("should handle pip package with latest version (should not block)", async () => {
+    // Ensure Python ecosystem
+    setEcoSystem(ECOSYSTEM_PY);
     const response = await makeRegistryRequest(
       proxyHost,
       proxyPort,

@@ -69,13 +69,13 @@ function readConfigFile() {
 
 function getDatabasePath() {
   const aikidoDir = getAikidoDirectory();
-  const ecosystem = getEcoSystem() || "js";
+  const ecosystem = getEcoSystem();
   return path.join(aikidoDir, `malwareDatabase_${ecosystem}.json`);
 }
 
 function getDatabaseVersionPath() {
   const aikidoDir = getAikidoDirectory();
-  const ecosystem = getEcoSystem() || "js";
+  const ecosystem = getEcoSystem();
   return path.join(aikidoDir, `version_${ecosystem}.txt`);
 }
 

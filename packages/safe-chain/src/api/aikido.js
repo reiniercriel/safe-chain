@@ -1,13 +1,13 @@
 import fetch from "make-fetch-happen";
-import { getEcoSystem } from "../config/settings.js";
+import { getEcoSystem, ECOSYSTEM_JS, ECOSYSTEM_PY } from "../config/settings.js";
 
 const malwareDatabaseUrls = {
-  js: "https://malware-list.aikido.dev/malware_predictions.json",
-  py: "https://malware-list.aikido.dev/malware_pypi.json",
+  [ECOSYSTEM_JS]: "https://malware-list.aikido.dev/malware_predictions.json",
+  [ECOSYSTEM_PY]: "https://malware-list.aikido.dev/malware_pypi.json",
 };
 
 export async function fetchMalwareDatabase() {
-  const ecosystem = getEcoSystem() || "js";
+  const ecosystem = getEcoSystem();
   const malwareDatabaseUrl = malwareDatabaseUrls[ecosystem];
   const response = await fetch(malwareDatabaseUrl);
   if (!response.ok) {
@@ -26,8 +26,7 @@ export async function fetchMalwareDatabase() {
 }
 
 export async function fetchMalwareDatabaseVersion() {
-  const ecosystem = getEcoSystem() || "js";
-
+  const ecosystem = getEcoSystem();
   const malwareDatabaseUrl = malwareDatabaseUrls[ecosystem];
   const response = await fetch(malwareDatabaseUrl, {
     method: "HEAD",

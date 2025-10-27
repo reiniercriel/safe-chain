@@ -13,9 +13,12 @@ export function getMalwareAction() {
 export const MALWARE_ACTION_BLOCK = "block";
 export const MALWARE_ACTION_PROMPT = "prompt";
 
+export const ECOSYSTEM_JS = "js";
+export const ECOSYSTEM_PY = "py";
+
 // Default to JavaScript ecosystem
 const ecosystemSettings = {
-  ecoSystem: "js",
+  ecoSystem: ECOSYSTEM_JS,
 };
 
 export function getEcoSystem() {

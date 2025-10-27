@@ -1,8 +1,13 @@
-import { describe, it } from "node:test";
+import { describe, it, beforeEach } from "node:test";
 import assert from "node:assert";
 import { parsePackageFromUrl } from "./parsePackageFromUrl.js";
+import { setEcoSystem, ECOSYSTEM_JS, ECOSYSTEM_PY } from "../config/settings.js";
 
 describe("parsePackageFromUrl", () => {
+  beforeEach(() => {
+    setEcoSystem(ECOSYSTEM_JS);
+  });
+
   const testCases = [
     // Regular packages
     {
@@ -114,6 +119,10 @@ describe("parsePackageFromUrl", () => {
 });
 
 describe("parsePackageFromUrl - pip URLs", () => {
+  beforeEach(() => {
+    setEcoSystem(ECOSYSTEM_PY);
+  });
+
   const pipTestCases = [
     // Valid pip URLs
     {

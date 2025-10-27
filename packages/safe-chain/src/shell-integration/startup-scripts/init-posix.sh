@@ -62,9 +62,9 @@ function npm() {
 }
 
 function pip() {
-  wrapSafeChainCommand "pip" "aikido-pip" --target-version-major "2" "$@"
+  wrapSafeChainCommand "pip" "aikido-pip" "$@"
 }
 
 function pip3() {
-  wrapSafeChainCommand "pip3" "aikido-pip" --target-version-major "3" "$@"
+  wrapSafeChainCommand "pip3" "aikido-pip3" "$@"
 }

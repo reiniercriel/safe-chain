@@ -1,20 +1,26 @@
+import { getEcoSystem, ECOSYSTEM_JS, ECOSYSTEM_PY } from "../config/settings.js";
+
 export const knownJsRegistries = ["registry.npmjs.org","registry.yarnpkg.com"];
 export const knownPipRegistries = ["files.pythonhosted.org", "pypi.org", "pypi.python.org", "pythonhosted.org"];
 
 export function parsePackageFromUrl(url) {
+  const ecosystem = getEcoSystem();
   let registry;
 
-  for (const knownRegistry of knownJsRegistries) {
-    if (url.includes(knownRegistry)) {
-      registry = knownRegistry;
-      return parseJsPackageFromUrl(url, registry);
+  // Only check registries that match the current ecosystem
+  if (ecosystem === ECOSYSTEM_JS) {
+    for (const knownRegistry of knownJsRegistries) {
+      if (url.includes(knownRegistry)) {
+        registry = knownRegistry;
+        return parseJsPackageFromUrl(url, registry);
+      }
     }
-  }
-
-  for (const knownRegistry of knownPipRegistries) {
-    if (url.includes(knownRegistry)) {
-      registry = knownRegistry;
-      return parsePipPackageFromUrl(url, registry);
+  } else if (ecosystem === ECOSYSTEM_PY) {
+    for (const knownRegistry of knownPipRegistries) {
+      if (url.includes(knownRegistry)) {
+        registry = knownRegistry;
+        return parsePipPackageFromUrl(url, registry);
+      }
     }
   }
 
@@ -70,20 +76,24 @@ function parsePipPackageFromUrl(url, registry) {
   }
 
   // Quick sanity check on the URL + parse
-  let u;
+  let urlObj;
   try {
-    u = new URL(url);
+    urlObj = new URL(url);
   } catch {
     return { packageName, version};
   }
 
   // Get the last path segment (filename) and decode it (strip query & fragment automatically)
-  const lastSegment = u.pathname.split("/").filter(Boolean).pop();
+  const lastSegment = urlObj.pathname.split("/").filter(Boolean).pop();
   if (!lastSegment){
     return { packageName, version};
   }
 
   const filename = decodeURIComponent(lastSegment);
+
+  // Parse Python package downloads from PyPI/pythonhosted.org
+  // Example wheel: https://files.pythonhosted.org/packages/xx/yy/requests-2.28.1-py3-none-any.whl
+  // Example sdist: https://files.pythonhosted.org/packages/xx/yy/requests-2.28.1.tar.gz
 
   // Wheel (.whl)
   if (filename.endsWith(".whl")) {
@@ -96,6 +106,9 @@ function parsePipPackageFromUrl(url, registry) {
       const rawVersion = secondDash >= 0 ? rest.slice(0, secondDash) : rest;
       packageName = dist; // preserve underscores
       version = rawVersion;
+      // Reject "latest" as it's a placeholder, not a real version
+      // When version is "latest", this signals the URL doesn't contain actual version info
+      // Returning undefined allows the request (see registryProxy.js isAllowedUrl)
       if (version === "latest" || !packageName || !version) {
         return { packageName: undefined, version: undefined };
       }
@@ -111,6 +124,9 @@ function parsePipPackageFromUrl(url, registry) {
     if (lastDash > 0 && lastDash < base.length - 1) {
       packageName = base.slice(0, lastDash);
       version = base.slice(lastDash + 1);
+      // Reject "latest" as it's a placeholder, not a real version
+      // When version is "latest", this signals the URL doesn't contain actual version info
+      // Returning undefined allows the request (see registryProxy.js isAllowedUrl)
       if (version === "latest" || !packageName || !version) {
         return { packageName: undefined, version: undefined };
       }
