@@ -1,12 +1,12 @@
 const state = {
-  malwareAction: undefined,
+  loggingLevel: undefined,
 };
 
 const SAFE_CHAIN_ARG_PREFIX = "--safe-chain-";
 
 export function initializeCliArguments(args) {
   // Reset state on each call
-  state.malwareAction = undefined;
+  state.loggingLevel = undefined;
 
   const safeChainArgs = [];
   const remainingArgs = [];
@@ -19,19 +19,9 @@ export function initializeCliArguments(args) {
     }
   }
 
-  setMalwareAction(safeChainArgs);
+  setLoggingLevel(safeChainArgs);
 
   return remainingArgs;
-}
-
-function setMalwareAction(args) {
-  const safeChainMalwareActionArg = SAFE_CHAIN_ARG_PREFIX + "malware-action=";
-
-  const action = getLastArgEqualsValue(args, safeChainMalwareActionArg);
-  if (!action) {
-    return;
-  }
-  state.malwareAction = action.toLowerCase();
 }
 
 function getLastArgEqualsValue(args, prefix) {
@@ -45,6 +35,16 @@ function getLastArgEqualsValue(args, prefix) {
   return undefined;
 }
 
-export function getMalwareAction() {
-  return state.malwareAction;
+function setLoggingLevel(args) {
+  const safeChainLoggingArg = SAFE_CHAIN_ARG_PREFIX + "logging=";
+
+  const level = getLastArgEqualsValue(args, safeChainLoggingArg);
+  if (!level) {
+    return;
+  }
+  state.loggingLevel = level.toLowerCase();
+}
+
+export function getLoggingLevel() {
+  return state.loggingLevel;
 }

@@ -1,13 +1,13 @@
 import * as cliArguments from "./cliArguments.js";
 
-export function getMalwareAction() {
-  const action = cliArguments.getMalwareAction();
+export function getLoggingLevel() {
+  const level = cliArguments.getLoggingLevel();
 
-  if (action === MALWARE_ACTION_PROMPT) {
-    return MALWARE_ACTION_PROMPT;
+  if (level === LOGGING_SILENT) {
+    return LOGGING_SILENT;
   }
 
-  return MALWARE_ACTION_BLOCK;
+  return LOGGING_NORMAL;
 }
 
 export const MALWARE_ACTION_BLOCK = "block";
@@ -27,3 +27,6 @@ export function getEcoSystem() {
 export function setEcoSystem(setting) {
   ecosystemSettings.ecoSystem = setting;
 }
+
+export const LOGGING_SILENT = "silent";
+export const LOGGING_NORMAL = "normal";

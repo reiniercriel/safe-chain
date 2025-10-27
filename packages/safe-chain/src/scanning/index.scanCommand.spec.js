@@ -1,10 +1,6 @@
 import assert from "node:assert/strict";
-import { beforeEach, describe, it, mock } from "node:test";
+import { describe, it, mock } from "node:test";
 import { setTimeout } from "node:timers/promises";
-import {
-  MALWARE_ACTION_PROMPT,
-  MALWARE_ACTION_BLOCK,
-} from "../config/settings.js";
 
 describe("scanCommand", async () => {
   const getScanTimeoutMock = mock.fn(() => 1000);
@@ -15,8 +11,6 @@ describe("scanCommand", async () => {
     fail: () => {},
     stop: () => {},
   }));
-  const mockConfirm = mock.fn(() => true);
-  let malwareAction = MALWARE_ACTION_PROMPT;
 
   // import { getPackageManager } from "../packagemanager/currentPackageManager.js";
   mock.module("../packagemanager/currentPackageManager.js", {
@@ -46,17 +40,9 @@ describe("scanCommand", async () => {
         writeError: () => {},
         writeInformation: () => {},
         writeWarning: () => {},
+        writeExitWithoutInstallingMaliciousPackages: () => {},
         emptyLine: () => {},
-        confirm: mockConfirm,
       },
-    },
-  });
-
-  mock.module("../config/settings.js", {
-    namedExports: {
-      getMalwareAction: () => malwareAction,
-      MALWARE_ACTION_PROMPT,
-      MALWARE_ACTION_BLOCK,
     },
   });
 
@@ -87,11 +73,6 @@ describe("scanCommand", async () => {
   });
 
   const { scanCommand } = await import("./index.js");
-
-  beforeEach(() => {
-    // Reset malware action back to prompt mode for other tests
-    malwareAction = MALWARE_ACTION_PROMPT;
-  });
 
   it("should succeed when there are no changes", async () => {
     let progressWasStopped = false;
@@ -150,7 +131,7 @@ describe("scanCommand", async () => {
     assert.equal(failureMessageWasSet, true);
   });
 
-  it("should fail and prompt the user when malicious changes are detected", async () => {
+  it("should fail and return 1 malicious changes are detected", async () => {
     let failureMessageWasSet = false;
     mockStartProcess.mock.mockImplementationOnce(() => ({
       setText: () => {},
@@ -163,16 +144,11 @@ describe("scanCommand", async () => {
     mockGetDependencyUpdatesForCommand.mock.mockImplementation(() => [
       { name: "malicious", version: "1.0.0" },
     ]);
-    let userWasPrompted = false;
-    mockConfirm.mock.mockImplementationOnce(() => {
-      userWasPrompted = true;
-      return true; // Simulate user accepting the risk, otherwise the process would exit
-    });
 
-    await scanCommand(["install", "malicious"]);
+    const result = await scanCommand(["install", "malicious"]);
 
     assert.equal(failureMessageWasSet, true);
-    assert.equal(userWasPrompted, true);
+    assert.equal(result, 1);
   });
 
   it("should not report a timeout when the user takes a long time to respond (it should not affect the timeout)", async () => {
@@ -189,10 +165,6 @@ describe("scanCommand", async () => {
     mockGetDependencyUpdatesForCommand.mock.mockImplementation(async () => {
       return [{ name: "malicious", version: "4.17.21" }];
     });
-    mockConfirm.mock.mockImplementationOnce(async () => {
-      await setTimeout(200);
-      return true; // Simulate user accepting the risk, otherwise the process would exit
-    });
 
     await scanCommand(["install", "malicious"]);
 
@@ -203,12 +175,6 @@ describe("scanCommand", async () => {
   });
 
   it("should exit immediately when malicious changes are detected in block mode", async () => {
-    // Set malware action to block mode for this test
-    malwareAction = MALWARE_ACTION_BLOCK;
-
-    // Reset mock call count
-    mockConfirm.mock.resetCalls();
-
     let failureMessageWasSet = false;
 
     mockStartProcess.mock.mockImplementationOnce(() => ({
@@ -228,19 +194,9 @@ describe("scanCommand", async () => {
 
     assert.equal(failureMessageWasSet, true);
     assert.equal(result, 1);
-    // Confirm should not have been called in block mode
-    assert.equal(mockConfirm.mock.callCount(), 0);
   });
 
   it("should exit immediately when malicious changes are detected in block mode without prompting", async () => {
-    // Set malware action to block mode for this test
-    malwareAction = MALWARE_ACTION_BLOCK;
-
-    // Reset mock call count
-    mockConfirm.mock.resetCalls();
-
-    let userWasPrompted = false;
-
     mockStartProcess.mock.mockImplementationOnce(() => ({
       setText: () => {},
       succeed: () => {},
@@ -252,14 +208,8 @@ describe("scanCommand", async () => {
       { name: "malicious", version: "1.0.0" },
     ]);
 
-    mockConfirm.mock.mockImplementationOnce(() => {
-      userWasPrompted = true;
-      return false;
-    });
-
     const result = await scanCommand(["install", "malicious"]);
 
     assert.equal(result, 1);
-    assert.equal(userWasPrompted, false);
   });
 });
