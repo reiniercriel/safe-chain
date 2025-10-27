@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert";
-import { initializeCliArguments, getMalwareAction } from "./cliArguments.js";
+import { initializeCliArguments, getLoggingLevel } from "./cliArguments.js";
 
 describe("initializeCliArguments", () => {
   it("should return all args when no safe-chain args are present", () => {
@@ -57,52 +57,65 @@ describe("initializeCliArguments", () => {
     assert.deepEqual(result, ["install", "my--safe-chain-package", "--save"]);
   });
 
-  it("should not set malwareAction when no safe-chain arguments are passed", () => {
+  it("should not set loggingLevel when no logging argument is passed", () => {
     const args = ["install", "express", "--save"];
-    const result = initializeCliArguments(args);
+    initializeCliArguments(args);
 
-    assert.deepEqual(result, ["install", "express", "--save"]);
-    assert.strictEqual(getMalwareAction(), undefined);
+    assert.strictEqual(getLoggingLevel(), undefined);
   });
 
-  it("should parse malware-action=block and set state", () => {
-    const args = ["--safe-chain-malware-action=block", "install", "package"];
-    const result = initializeCliArguments(args);
-
-    assert.deepEqual(result, ["install", "package"]);
-    assert.strictEqual(getMalwareAction(), "block");
-  });
-
-  it("should parse malware-action=prompt and set state", () => {
-    const args = ["--safe-chain-malware-action=prompt", "install", "package"];
+  it("should parse logging=silent and set state", () => {
+    const args = ["--safe-chain-logging=silent", "install", "package"];
     const result = initializeCliArguments(args);
 
     assert.deepEqual(result, ["install", "package"]);
-    assert.strictEqual(getMalwareAction(), "prompt");
+    assert.strictEqual(getLoggingLevel(), "silent");
   });
 
-  it("should handle multiple malware-action args, using the last valid one", () => {
+  it("should parse logging=normal and set state", () => {
+    const args = ["--safe-chain-logging=normal", "install", "package"];
+    const result = initializeCliArguments(args);
+
+    assert.deepEqual(result, ["install", "package"]);
+    assert.strictEqual(getLoggingLevel(), "normal");
+  });
+
+  it("should handle multiple logging args, using the last one", () => {
     const args = [
-      "--safe-chain-malware-action=block",
-      "--safe-chain-malware-action=prompt",
+      "--safe-chain-logging=normal",
+      "--safe-chain-logging=silent",
       "install",
     ];
     const result = initializeCliArguments(args);
 
     assert.deepEqual(result, ["install"]);
-    assert.strictEqual(getMalwareAction(), "prompt");
+    assert.strictEqual(getLoggingLevel(), "silent");
   });
 
-  it("should handle malware-action with other safe-chain args", () => {
+  it("should handle logging level case-insensitively", () => {
+    const args = ["--safe-chain-logging=SILENT", "install"];
+    initializeCliArguments(args);
+
+    assert.strictEqual(getLoggingLevel(), "silent");
+  });
+
+  it("should capture invalid logging level as-is (lowercased)", () => {
+    const args = ["--safe-chain-logging=invalid", "install"];
+    initializeCliArguments(args);
+
+    assert.strictEqual(getLoggingLevel(), "invalid");
+  });
+
+  it("should handle logging with other safe-chain args", () => {
     const args = [
       "--safe-chain-debug",
+      "--safe-chain-logging=silent",
       "--safe-chain-malware-action=block",
-      "--safe-chain-verbose",
       "install",
     ];
     const result = initializeCliArguments(args);
 
     assert.deepEqual(result, ["install"]);
-    assert.strictEqual(getMalwareAction(), "block");
+    assert.strictEqual(getLoggingLevel(), "silent");
   });
 });

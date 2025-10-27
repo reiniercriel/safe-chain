@@ -154,7 +154,7 @@ function verifyNoMaliciousPackages() {
   }
 
   ui.emptyLine();
-  ui.writeError("Exiting without installing malicious packages.");
+  ui.writeExitWithoutInstallingMaliciousPackages();
   ui.emptyLine();
 
   return false;
