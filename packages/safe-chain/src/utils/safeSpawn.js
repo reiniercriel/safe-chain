@@ -52,7 +52,9 @@ function resolveCommandPath(command) {
 }
 
 export async function safeSpawn(command, args, options = {}) {
-  // command should always be alphanumeric or _ or - to avoid injection
+  // The command is always one of our supported package managers.
+  // It should always be alphanumeric or _ or -
+  // Reject any command names with suspicious characters
   if (!/^[a-zA-Z0-9_-]+$/.test(command)) {
     throw new Error(`Invalid command name: ${command}`);
   }
