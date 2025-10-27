@@ -69,8 +69,7 @@ function pip3() {
   wrapSafeChainCommand "pip3" "aikido-pip3" "$@"
 }
 
-# Intercept `python -m pip[...]` so it routes through safe-chain without changing python itself.
-# Supports: `python -m pip`, `python -m pip3`, `python3 -m pip`, `python3 -m pip3`.
+# `python -m pip`, `python -m pip3`.
 function python() {
   if [[ "$1" == "-m" && "$2" == pip* ]]; then
     local mod="$2"
@@ -85,6 +84,7 @@ function python() {
   fi
 }
 
+# `python3 -m pip`, `python3 -m pip3'.
 function python3() {
   if [[ "$1" == "-m" && "$2" == pip* ]]; then
     local mod="$2"

@@ -245,6 +245,15 @@ describe("safeSpawnPy", () => {
           };
           return obj;
         },
+        // Provide execSync so the module under test can import it without ESM errors.
+        // We don't actually execute it in safeSpawnPy flows, but Node's module loader
+        // validates the presence of the named export during import.
+        execSync: (cmd) => {
+          // Minimal stub: emulate `command -v <cmd>` returning a path
+          const match = /command -v (.*)/.exec(String(cmd) || "");
+          const bin = match?.[1] || "mockbin";
+          return `/usr/bin/${bin}\n`;
+        },
       },
     });
 
