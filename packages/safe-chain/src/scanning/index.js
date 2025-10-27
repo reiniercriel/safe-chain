@@ -4,7 +4,6 @@ import { setTimeout } from "timers/promises";
 import chalk from "chalk";
 import { getPackageManager } from "../packagemanager/currentPackageManager.js";
 import { ui } from "../environment/userInteraction.js";
-import { getMalwareAction, MALWARE_ACTION_PROMPT } from "../config/settings.js";
 
 export function shouldScanCommand(args) {
   if (!args || args.length === 0) {
@@ -65,7 +64,8 @@ export async function scanCommand(args) {
     return 0;
   } else {
     printMaliciousChanges(audit.disallowedChanges, spinner);
-    return await onMalwareFound();
+    onMalwareFound();
+    return 1;
   }
 }
 
@@ -77,23 +77,8 @@ function printMaliciousChanges(changes, spinner) {
   }
 }
 
-async function onMalwareFound() {
+function onMalwareFound() {
   ui.emptyLine();
-
-  if (getMalwareAction() === MALWARE_ACTION_PROMPT) {
-    const continueInstall = await ui.confirm({
-      message:
-        "Malicious packages were found. Do you want to continue with the installation?",
-      default: false,
-    });
-
-    if (continueInstall) {
-      ui.writeWarning("Continuing with the installation despite the risks...");
-      return 0;
-    }
-  }
-
   ui.writeExitWithoutInstallingMaliciousPackages();
   ui.emptyLine();
-  return 1;
 }
