@@ -20,12 +20,12 @@ export async function auditChanges(changes) {
     );
 
     if (malwarePackage) {
-      ui.writeVerboseInformation(
+      ui.writeVerbose(
         `Safe-chain: Package ${change.name}@${change.version} is marked as malware: ${malwarePackage.status}`
       );
       disallowedChanges.push({ ...change, reason: malwarePackage.status });
     } else {
-      ui.writeVerboseInformation(
+      ui.writeVerbose(
         `Safe-chain: Package ${change.name}@${change.version} is clean`
       );
       allowedChanges.push(change);

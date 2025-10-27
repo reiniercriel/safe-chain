@@ -57,7 +57,7 @@ function writeExitWithoutInstallingMaliciousPackages() {
   writeOrBuffer(() => console.error(message));
 }
 
-function writeVerboseInformation(message, ...optionalParams) {
+function writeVerbose(message, ...optionalParams) {
   if (!isVerboseMode()) return;
 
   writeOrBuffer(() => console.log(message, ...optionalParams));
@@ -127,8 +127,8 @@ function writeBufferedLogsAndStopBuffering() {
 }
 
 export const ui = {
+  writeVerbose,
   writeInformation,
-  writeVerboseInformation,
   writeWarning,
   writeError,
   writeExitWithoutInstallingMaliciousPackages,

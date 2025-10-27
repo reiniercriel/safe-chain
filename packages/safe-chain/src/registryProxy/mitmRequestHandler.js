@@ -4,11 +4,11 @@ import { HttpsProxyAgent } from "https-proxy-agent";
 import { ui } from "../environment/userInteraction.js";
 
 export function mitmConnect(req, clientSocket, isAllowed) {
-  ui.writeVerboseInformation(`Safe-chain: Set up MITM tunnel for ${req.url}`);
+  ui.writeVerbose(`Safe-chain: Set up MITM tunnel for ${req.url}`);
   const { hostname } = new URL(`http://${req.url}`);
 
   clientSocket.on("error", (err) => {
-    ui.writeVerboseInformation(
+    ui.writeVerbose(
       `Safe-chain: Client socket error for ${req.url}: ${err.message}`
     );
     // NO-OP
@@ -33,9 +33,7 @@ function createHttpsServer(hostname, isAllowed) {
     const targetUrl = `https://${hostname}${pathAndQuery}`;
 
     if (!(await isAllowed(targetUrl))) {
-      ui.writeVerboseInformation(
-        `Safe-chain: Blocking request to ${targetUrl}`
-      );
+      ui.writeVerbose(`Safe-chain: Blocking request to ${targetUrl}`);
       res.writeHead(403, "Forbidden - blocked by safe-chain");
       res.end("Blocked by safe-chain");
       return;
@@ -66,7 +64,7 @@ function forwardRequest(req, hostname, res) {
   const proxyReq = createProxyRequest(hostname, req, res);
 
   proxyReq.on("error", (err) => {
-    ui.writeVerboseInformation(
+    ui.writeVerbose(
       `Safe-chain: Error occurred while proxying request: ${err.message}`
     );
     res.writeHead(502);
@@ -78,7 +76,7 @@ function forwardRequest(req, hostname, res) {
   });
 
   req.on("end", () => {
-    ui.writeVerboseInformation(
+    ui.writeVerbose(
       `Safe-chain: Finished proxying request to ${req.url} for ${hostname}`
     );
     proxyReq.end();
