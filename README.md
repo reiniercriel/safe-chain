@@ -41,6 +41,7 @@ Installing the Aikido Safe Chain is easy. You just need 3 simple steps:
 When running `npm`, `npx`, `yarn`, `pnpm`, `pnpx`, `bun`, or `bunx` commands, the Aikido Safe Chain will automatically check for malware in the packages you are trying to install. If any malware is detected, it will prompt you to exit the command.
 
 You can check the installed version by running:
+
 ```shell
 safe-chain --version
 ```
@@ -74,19 +75,6 @@ To uninstall the Aikido Safe Chain, you can run the following command:
 3. **❗Restart your terminal** to remove the aliases.
 
 # Configuration
-
-## Malware Action
-
-You can control how Aikido Safe Chain responds when malware is detected using the `--safe-chain-malware-action` flag:
-
-- `--safe-chain-malware-action=block` (**default**) - Automatically blocks installation and exits with an error when malware is detected
-- `--safe-chain-malware-action=prompt` - Prompts the user to decide whether to continue despite the malware detection
-
-Example usage:
-
-```shell
-npm install suspicious-package --safe-chain-malware-action=prompt
-```
 
 ## Logging
 
