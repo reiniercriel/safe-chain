@@ -25,7 +25,15 @@ export async function main(args) {
       }
     }
 
+    // Buffer logs during package manager execution, this avoids interleaving
+    //  of logs from the package manager and safe-chain
+    // Not doing this could cause bugs to disappear when cursor movement codes
+    //  are written by the package manager while safe-chain is writing logs
+    ui.startBufferingLogs();
     const packageManagerResult = await getPackageManager().runCommand(args);
+
+    // Write all buffered logs
+    ui.writeBufferedLogsAndStopBuffering();
 
     if (!proxy.verifyNoMaliciousPackages()) {
       return 1;
