@@ -1,7 +1,6 @@
 // oxlint-disable no-console
 import chalk from "chalk";
 import ora from "ora";
-import { createInterface } from "readline";
 import { isCi } from "./environment.js";
 import { getLoggingLevel, LOGGING_SILENT } from "../config/settings.js";
 
@@ -87,34 +86,6 @@ function startProcess(message) {
   }
 }
 
-async function confirm(config) {
-  if (isCi() || isSilentMode()) {
-    return Promise.resolve(config.default);
-  }
-
-  const rl = createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  return new Promise((resolve) => {
-    const defaultText = config.default ? " (Y/n)" : " (y/N)";
-    rl.question(`${config.message}${defaultText} `, (answer) => {
-      rl.close();
-
-      const normalizedAnswer = answer.trim().toLowerCase();
-
-      if (normalizedAnswer === "y" || normalizedAnswer === "yes") {
-        resolve(true);
-      } else if (normalizedAnswer === "n" || normalizedAnswer === "no") {
-        resolve(false);
-      } else {
-        resolve(config.default);
-      }
-    });
-  });
-}
-
 export const ui = {
   writeInformation,
   writeWarning,
@@ -122,5 +93,4 @@ export const ui = {
   writeExitWithoutInstallingMaliciousPackages,
   emptyLine,
   startProcess,
-  confirm,
 };
