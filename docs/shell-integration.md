@@ -2,7 +2,7 @@
 
 ## Overview
 
-The shell integration automatically wraps common package manager commands (`npm`, `npx`, `yarn`, `pnpm`, `pnpx`, `bun`, `bunx`, `pip`, `pip3`) with Aikido's security scanning functionality. This is achieved by sourcing startup scripts that define shell functions to wrap these commands with their Aikido-protected equivalents.
+The shell integration automatically wraps common package manager commands (`npm`, `npx`, `yarn`, `pnpm`, `pnpx`, `bun`, `bunx`, `pip`, `pip3`) with Aikido's security scanning functionality. It also intercepts Python module invocations for pip when available: `python -m pip`, `python -m pip3`, `python3 -m pip`, `python3 -m pip3`, and on Windows PowerShell `py -m pip`/`py -m pip3`. This is achieved by sourcing startup scripts that define shell functions to wrap these commands with their Aikido-protected equivalents.
 
 ## Supported Shells
 
@@ -29,6 +29,7 @@ This command:
 - Copies necessary startup scripts to Safe Chain's installation directory (`~/.safe-chain/scripts`)
 - Detects all supported shells on your system
 - Sources each shell's startup file to add Safe Chain functions for `npm`, `npx`, `yarn`, `pnpm`, `pnpx`, `bun`, `bunx`, `pip`, and `pip3`
+- Adds lightweight interceptors so `python -m pip[...]` and `python3 -m pip[...]` (and `py -m pip[...]` on Windows PowerShell) route through Safe Chain when invoked by name
 
 ❗ After running this command, **you must restart your terminal** for the changes to take effect. This ensures that the startup scripts are sourced correctly.
 
@@ -80,6 +81,12 @@ This means the shell functions are working but the Aikido commands aren't instal
 - Verify the `aikido-npm`, `aikido-npx`, `aikido-yarn`, `aikido-pnpm`, `aikido-pnpx`, `aikido-bun`, `aikido-bunx`, `aikido-pip`, and `aikido-pip3` commands exist
 - Check that these commands are in your system's PATH
 
+**`python -m pip` is not being intercepted:**
+
+- Ensure you are invoking `python`/`python3`/`py` by name (not via an absolute path). Shell function interception only occurs for command names resolved through PATH and won’t catch absolute paths like `/usr/bin/python -m pip`.
+- Restart your terminal so the updated startup scripts are sourced.
+- On Windows PowerShell, verify `python`, `python3` or `py` resolves by running `Get-Command python` / `Get-Command py`.
+
 ### Manual Verification
 
 To verify the integration is working, follow these steps:
@@ -98,7 +105,8 @@ To verify the integration is working, follow these steps:
    After restarting your terminal, run these commands:
 
    - `npm --version` - Should show output from the Aikido-wrapped version
-   - `type npm` - Should show that `npm` is a function
+  - `type npm` - Should show that `npm` is a function
+  - Optionally: `python -m pip --version` (or `python3 -m pip --version`) should show Safe Chain output at the end
 
 3. **If you need to remove the integration manually:**
 
@@ -121,3 +129,28 @@ npm() {
 ```
 
 Repeat this pattern for `npx`, `yarn`, `pnpm`, `pnpx`, `bun`, `bunx`, `pip`, and `pip3` using their respective `aikido-*` commands. After adding these functions, restart your terminal to apply the changes.
+
+To intercept Python module invocations for pip without altering Python itself, you can add small forwarding functions:
+
+```bash
+# Example for Bash/Zsh
+python() {
+  if [[ "$1" == "-m" && "$2" == pip* ]]; then
+    local mod="$2"; shift 2
+    if [[ "$mod" == "pip3" ]]; then aikido-pip3 "$@"; else aikido-pip "$@"; fi
+  else
+    command python "$@"
+  fi
+}
+
+python3() {
+  if [[ "$1" == "-m" && "$2" == pip* ]]; then
+    local mod="$2"; shift 2
+    if [[ "$mod" == "pip3" ]]; then aikido-pip3 "$@"; else aikido-pip "$@"; fi
+  else
+    command python3 "$@"
+  fi
+}
+```
+
+Limitations: these only apply when invoking `python`/`python3` by name. Absolute paths (e.g., `/usr/bin/python -m pip`) bypass shell functions.

@@ -1,6 +1,6 @@
 # Aikido Safe Chain
 
-The Aikido Safe Chain **prevents developers from installing malware** on their workstations while developing in the Python ecosystem (through pip or pip3) or in the Javascript ecosystem (through npm, npx, yarn, pnpm, pnpx, bun and bunx). It's **free** to use and does not require any token.
+The Aikido Safe Chain **prevents developers from installing malware** on their workstations while developing in the Python ecosystem (through pip or pip3, including `python -m pip[...]` and `python3 -m pip[...]` where available) or in the Javascript ecosystem (through npm, npx, yarn, pnpm, pnpx, bun and bunx). It's **free** to use and does not require any token.
 
 The Aikido Safe Chain wraps around the [npm cli](https://github.com/npm/cli), [npx](https://github.com/npm/cli/blob/latest/docs/content/commands/npx.md), [yarn](https://yarnpkg.com/), [pnpm](https://pnpm.io/), [pnpx](https://pnpm.io/cli/dlx), [bun](https://bun.sh/), [bunx](https://bun.sh/docs/cli/bunx), and [pip](https://pip.pypa.io/) to provide extra checks before installing new packages. This tool will detect when a package contains malware and prompt you to exit, preventing npm, npx, yarn, pnpm, pnpx, bun, bunx, or pip/pip3 from downloading or running the malware.
 
@@ -40,7 +40,7 @@ Installing the Aikido Safe Chain is easy. You just need 3 simple steps:
    ```
    - The output should show that Aikido Safe Chain is blocking the installation of this package as it is flagged as malware.
 
-When running `npm`, `npx`, `yarn`, `pnpm`, `pnpx`, `bun`, `bunx`, `pip`, or `pip3` commands, the Aikido Safe Chain will automatically check for malware in the packages you are trying to install. If any malware is detected, it will prompt you to exit the command.
+When running `npm`, `npx`, `yarn`, `pnpm`, `pnpx`, `bun`, `bunx`, `pip`, or `pip3` commands, the Aikido Safe Chain will automatically check for malware in the packages you are trying to install. It also intercepts Python module invocations for pip when available (e.g., `python -m pip install ...`, `python3 -m pip download ...`, and on Windows `py -m pip ...`). If any malware is detected, it will prompt you to exit the command.
 
 You can check the installed version by running:
 
@@ -50,7 +50,7 @@ safe-chain --version
 
 ## How it works
 
-The Aikido Safe Chain works by running a lightweight proxy server that intercepts package downloads from the npm registry and PyPI. When you run npm, npx, yarn, pnpm, pnpx, bun, bunx, `pip`, or `pip3` commands, all package downloads are routed through this local proxy, which verifies packages in real-time against **[Aikido Intel - Open Sources Threat Intelligence](https://intel.aikido.dev/?tab=malware)**. If malware is detected in any package (including deep dependencies), the proxy blocks the download before the malicious code reaches your machine.
+The Aikido Safe Chain works by running a lightweight proxy server that intercepts package downloads from the npm registry and PyPI. When you run npm, npx, yarn, pnpm, pnpx, bun, bunx, `pip`, or `pip3` commands, all package downloads are routed through this local proxy, which verifies packages in real-time against **[Aikido Intel - Open Sources Threat Intelligence](https://intel.aikido.dev/?tab=malware)**. Python `-m pip[...]` invocations are also routed when invoked by command name. If malware is detected in any package (including deep dependencies), the proxy blocks the download before the malicious code reaches your machine.
 
 The Aikido Safe Chain integrates with your shell to provide a seamless experience when using npm, npx, yarn, pnpm, pnpx, bun, bunx, and pip commands. It sets up aliases for these commands so that they are wrapped by the Aikido Safe Chain commands, which manage the proxy server before executing the original commands. We currently support:
 

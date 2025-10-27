@@ -76,3 +76,33 @@ end
 function pip3
     wrapSafeChainCommand "pip3" "aikido-pip3" $argv
 end
+
+# `python -m pip`, `python -m pip3`.
+function python
+    if test (count $argv) -ge 2; and test $argv[1] = "-m"; and string match -qr '^pip(3)?$' -- $argv[2]
+        set mod $argv[2]
+        set args $argv[3..-1]
+        if test $mod = "pip3"
+            wrapSafeChainCommand "pip3" "aikido-pip3" $args
+        else
+            wrapSafeChainCommand "pip" "aikido-pip" $args
+        end
+    else
+        command python $argv
+    end
+end
+
+# `python3 -m pip`, `python3 -m pip3'.
+function python3
+    if test (count $argv) -ge 2; and test $argv[1] = "-m"; and string match -qr '^pip(3)?$' -- $argv[2]
+        set mod $argv[2]
+        set args $argv[3..-1]
+        if test $mod = "pip3"
+            wrapSafeChainCommand "pip3" "aikido-pip3" $args
+        else
+            wrapSafeChainCommand "pip" "aikido-pip" $args
+        end
+    else
+        command python3 $argv
+    end
+end

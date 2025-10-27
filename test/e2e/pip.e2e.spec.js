@@ -86,4 +86,24 @@ describe("E2E: pip coverage", () => {
     );
   });
 
+  it(`python3 -m pip install routes through safe-chain`, async () => {
+    const shell = await container.openShell("zsh");
+    const result = await shell.runCommand('python3 -m pip install requests');
+
+    assert.ok(
+      result.output.includes("no malicious packages found."),
+      `Output did not include expected text. Output was:\n${result.output}`
+    );
+  });
+
+  it(`python3 -m pip download routes through safe-chain`, async () => {
+    const shell = await container.openShell("zsh");
+    const result = await shell.runCommand('python3 -m pip download requests');
+
+    assert.ok(
+      result.output.includes("no malicious packages found."),
+      `Output did not include expected text. Output was:\n${result.output}`
+    );
+  });
+
 });

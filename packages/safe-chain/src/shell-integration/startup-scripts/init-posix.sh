@@ -68,3 +68,33 @@ function pip() {
 function pip3() {
   wrapSafeChainCommand "pip3" "aikido-pip3" "$@"
 }
+
+# Intercept `python -m pip[...]` so it routes through safe-chain without changing python itself.
+# Supports: `python -m pip`, `python -m pip3`, `python3 -m pip`, `python3 -m pip3`.
+function python() {
+  if [[ "$1" == "-m" && "$2" == pip* ]]; then
+    local mod="$2"
+    shift 2
+    if [[ "$mod" == "pip3" ]]; then
+      wrapSafeChainCommand "pip3" "aikido-pip3" "$@"
+    else
+      wrapSafeChainCommand "pip" "aikido-pip" "$@"
+    fi
+  else
+    command python "$@"
+  fi
+}
+
+function python3() {
+  if [[ "$1" == "-m" && "$2" == pip* ]]; then
+    local mod="$2"
+    shift 2
+    if [[ "$mod" == "pip3" ]]; then
+      wrapSafeChainCommand "pip3" "aikido-pip3" "$@"
+    else
+      wrapSafeChainCommand "pip" "aikido-pip" "$@"
+    fi
+  else
+    command python3 "$@"
+  fi
+}
