@@ -74,6 +74,7 @@ function python() {
   if [[ "$1" == "-m" && "$2" == pip* ]]; then
     local mod="$2"
     shift 2
+    # python -m pip → aikido-pip, python -m pip3 → aikido-pip3
     if [[ "$mod" == "pip3" ]]; then
       wrapSafeChainCommand "pip3" "aikido-pip3" "$@"
     else
@@ -87,13 +88,9 @@ function python() {
 # `python3 -m pip`, `python3 -m pip3'.
 function python3() {
   if [[ "$1" == "-m" && "$2" == pip* ]]; then
-    local mod="$2"
     shift 2
-    if [[ "$mod" == "pip3" ]]; then
-      wrapSafeChainCommand "pip3" "aikido-pip3" "$@"
-    else
-      wrapSafeChainCommand "pip" "aikido-pip" "$@"
-    fi
+    # python3 always uses pip3, regardless of whether user types `pip` or `pip3`
+    wrapSafeChainCommand "pip3" "aikido-pip3" "$@"
   else
     command python3 "$@"
   fi

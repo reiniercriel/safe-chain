@@ -126,6 +126,15 @@ export async function safeSpawnPy(command, args, options = {}) {
     });
 
     child.on("error", (error) => {
+      // When stdio is inherited and spawn fails (e.g., command not found),
+      // we need to write the error to stderr manually since there's no child process
+      if (options.stdio === "inherit") {
+        if (error.code === "ENOENT") {
+          process.stderr.write(`Error: Command '${command}' not found. Please ensure it is installed and available in your PATH.\n`);
+        } else {
+          process.stderr.write(`Error: ${error.message}\n`);
+        }
+      }
       resolve({ status: 1, stdout: "", stderr: error.message || String(error) });
     });
   });

@@ -99,6 +99,7 @@ function pip3 {
 function python {
     param([Parameter(ValueFromRemainingArguments=$true)]$Args)
     if ($Args.Length -ge 2 -and $Args[0] -eq '-m' -and $Args[1] -match '^pip(3)?$') {
+        # python -m pip → aikido-pip, python -m pip3 → aikido-pip3
         $pipArgs = if ($Args.Length -gt 2) { $Args | Select-Object -Skip 2 } else { @() }
         if ($Args[1] -eq 'pip3') { Invoke-WrappedCommand 'pip3' 'aikido-pip3' $pipArgs }
         else { Invoke-WrappedCommand 'pip' 'aikido-pip' $pipArgs }
@@ -112,9 +113,9 @@ function python {
 function python3 {
     param([Parameter(ValueFromRemainingArguments=$true)]$Args)
     if ($Args.Length -ge 2 -and $Args[0] -eq '-m' -and $Args[1] -match '^pip(3)?$') {
+        # python3 always uses pip3, regardless of whether user types `pip` or `pip3`
         $pipArgs = if ($Args.Length -gt 2) { $Args | Select-Object -Skip 2 } else { @() }
-        if ($Args[1] -eq 'pip3') { Invoke-WrappedCommand 'pip3' 'aikido-pip3' $pipArgs }
-        else { Invoke-WrappedCommand 'pip' 'aikido-pip' $pipArgs }
+        Invoke-WrappedCommand 'pip3' 'aikido-pip3' $pipArgs
     }
     else {
         Invoke-RealCommand 'python3' $Args
