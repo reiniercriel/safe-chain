@@ -1,11 +1,11 @@
 import { ui } from "../../environment/userInteraction.js";
-import { safeSpawnPy } from "../../utils/safeSpawn.js";
+import { safeSpawn } from "../../utils/safeSpawn.js";
 import { mergeSafeChainProxyEnvironmentVariables } from "../../registryProxy/registryProxy.js";
 
 
 export async function runPip(command, args) {
   try {
-  const result = await safeSpawnPy(command, args, {
+  const result = await safeSpawn(command, args, {
       stdio: "inherit",
       env: mergeSafeChainProxyEnvironmentVariables(process.env),
     });

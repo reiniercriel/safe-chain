@@ -13,8 +13,13 @@ describe("safeSpawn", () => {
     // Mock child_process module to capture what command string gets built
     mock.module("child_process", {
       namedExports: {
-        spawn: (command, options) => {
-          spawnCalls.push({ command, options });
+        spawn: (command, argsOrOptions, options) => {
+          // Handle both signatures: spawn(cmd, {opts}) and spawn(cmd, [args], {opts})
+          if (Array.isArray(argsOrOptions)) {
+            spawnCalls.push({ command, args: argsOrOptions, options: options || {} });
+          } else {
+            spawnCalls.push({ command, options: argsOrOptions || {} });
+          }
           return {
             on: (event, callback) => {
               if (event === "close") {
@@ -211,84 +216,43 @@ describe("safeSpawn", () => {
     assert.strictEqual(spawnCalls.length, 1);
     assert.strictEqual(spawnCalls[0].command, "valid_command-123");
   });
-});
 
-describe("safeSpawnPy", () => {
-  let safeSpawnPy;
-  let spawnCalls = [];
-
-  beforeEach(async () => {
-    spawnCalls = [];
-
-    // Mock child_process for argument-array spawn signature
-    mock.module("child_process", {
-      namedExports: {
-        spawn: (command, args = [], options = {}) => {
-          spawnCalls.push({ command, args, options });
-          const stdoutListeners = [];
-          const stderrListeners = [];
-          const stdout = { on: (event, cb) => { if (event === "data") stdoutListeners.push(cb); } };
-          const stderr = { on: (event, cb) => { if (event === "data") stderrListeners.push(cb); } };
-          const obj = {
-            stdout,
-            stderr,
-            on: (event, callback) => {
-              if (event === 'close') {
-                // Emit one chunk to stdout and stderr to verify piping works, then close with success
-                setTimeout(() => {
-                  stdoutListeners.forEach((cb) => cb(Buffer.from("STDOUT-TEST")));
-                  stderrListeners.forEach((cb) => cb(Buffer.from("")));
-                  callback(0);
-                }, 0);
-              }
-            }
-          };
-          return obj;
-        },
-        // Provide execSync so the module under test can import it without ESM errors.
-        // We don't actually execute it in safeSpawnPy flows, but Node's module loader
-        // validates the presence of the named export during import.
-        execSync: (cmd) => {
-          // Minimal stub: emulate `command -v <cmd>` returning a path
-          const match = /command -v (.*)/.exec(String(cmd) || "");
-          const bin = match?.[1] || "mockbin";
-          return `/usr/bin/${bin}\n`;
-        },
-      },
-    });
-
-    // Import after mocking; use a query to avoid ESM cache collisions with previous import
-    const safeSpawnModule = await import("./safeSpawn.js?py");
-    safeSpawnPy = safeSpawnModule.safeSpawnPy;
-  });
-
-  afterEach(() => {
-    mock.reset();
-  });
-
-  it("spawns without a shell and preserves args (inherit)", async () => {
-    const result = await safeSpawnPy("pip3", ["install", "Jinja2>=3.1,<3.2"], { stdio: "inherit" });
-
-    // Verifies no throw and status 0
-    assert.strictEqual(result.status, 0);
-
-    // Verify spawn signature
-  assert.strictEqual(spawnCalls.length, 1);
-  // Allow either bare command or resolved full path
-  assert.match(spawnCalls[0].command, /(^|\/)pip3$/);
-    assert.deepStrictEqual(spawnCalls[0].args, ["install", "Jinja2>=3.1,<3.2"]);
-    assert.strictEqual(spawnCalls[0].options.shell, false);
-    assert.strictEqual(spawnCalls[0].options.stdio, "inherit");
-  });
-
-  it("captures stdout when stdio=pipe", async () => {
-    const result = await safeSpawnPy("pip3", ["install", "idna!=3.5,>=3.0", "--dry-run"], { stdio: "pipe" });
-
-    assert.strictEqual(result.status, 0);
-    assert.match(result.stdout || "", /STDOUT-TEST/);
+  it("should handle Python version specifiers with comparison operators on Windows", async () => {
+    os = "win32";
+    await safeSpawn("pip3", ["install", "Jinja2>=3.1,<3.2"]);
 
     assert.strictEqual(spawnCalls.length, 1);
-    assert.strictEqual(spawnCalls[0].options.shell, false);
-    assert.strictEqual(spawnCalls[0].options.stdio, "pipe");
+    // On Windows, args are built into a command string with proper escaping
+    assert.strictEqual(spawnCalls[0].command, 'pip3 install "Jinja2>=3.1,<3.2"');
+    assert.strictEqual(spawnCalls[0].options.shell, true);
+  });
+
+  it("should handle Python version specifiers with comparison operators on Unix", async () => {
+    os = "darwin"; // or "linux"
+    await safeSpawn("pip3", ["install", "Jinja2>=3.1,<3.2"]);
+
+    assert.strictEqual(spawnCalls.length, 1);
+    // On Unix, resolves full path and passes args as array (no shell interpretation)
+    assert.strictEqual(spawnCalls[0].command, "/usr/bin/pip3");
+    assert.deepStrictEqual(spawnCalls[0].args, ["install", "Jinja2>=3.1,<3.2"]);
+    assert.deepStrictEqual(spawnCalls[0].options, {});
+  });
+
+  it("should handle Python not-equal version specifiers", async () => {
+    os = "win32";
+    await safeSpawn("pip3", ["install", "idna!=3.5,>=3.0"]);
+
+    assert.strictEqual(spawnCalls.length, 1);
+    assert.strictEqual(spawnCalls[0].command, 'pip3 install "idna!=3.5,>=3.0"');
+    assert.strictEqual(spawnCalls[0].options.shell, true);
+  });
+
+  it("should handle Python extras with square brackets", async () => {
+    os = "win32";
+    await safeSpawn("pip3", ["install", "requests[socks]"]);
+
+    assert.strictEqual(spawnCalls.length, 1);
+    assert.strictEqual(spawnCalls[0].command, 'pip3 install "requests[socks]"');
+    assert.strictEqual(spawnCalls[0].options.shell, true);
   });
 });
