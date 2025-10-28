@@ -193,4 +193,73 @@ describe("E2E: pip coverage", () => {
     );
   });
 
+  it(`pip3 can install from GitHub URL using system CAs`, async () => {
+    const shell = await container.openShell("zsh");
+    // Install a simple package from GitHub - this should use TCP tunnel, not MITM
+    // Using a popular, small package for testing
+    const result = await shell.runCommand('pip3 install --break-system-packages git+https://github.com/psf/requests.git@v2.32.3');
+
+    assert.ok(
+      result.output.includes("no malicious packages found."),
+      `Output did not include expected text. Output was:\n${result.output}`
+    );
+
+    // Verify installation succeeded (would fail if certificate validation broke)
+    assert.ok(
+      result.output.includes("Successfully installed") || result.output.includes("Requirement already satisfied"),
+      `Installation from GitHub failed - system CAs may not be working. Output was:\n${result.output}`
+    );
+
+    // Verify package was actually installed
+    const listResult = await shell.runCommand("pip3 list");
+    assert.ok(
+      listResult.output.includes("requests"),
+      `Package from GitHub was not installed. Output was:\n${listResult.output}`
+    );
+  });
+
+  it(`pip3 successfully validates certificates for HTTPS downloads`, async () => {
+    const shell = await container.openShell("zsh");
+    // Clear cache to force network download through proxy
+    await shell.runCommand("pip3 cache purge");
+
+    const result = await shell.runCommand('pip3 install --break-system-packages certifi');
+
+    assert.ok(
+      result.output.includes("no malicious packages found."),
+      `Output did not include expected text. Output was:\n${result.output}`
+    );
+
+    // Verify successful installation (would fail with SSL/certificate errors if --cert wasn't working)
+    assert.ok(
+      result.output.includes("Successfully installed"),
+      `Installation should succeed with proper certificate validation. Output was:\n${result.output}`
+    );
+
+    // Should NOT contain SSL or certificate errors
+    assert.ok(
+      !result.output.match(/SSL|certificate verify failed|CERTIFICATE_VERIFY_FAILED/i),
+      `Should not have SSL/certificate errors. Output was:\n${result.output}`
+    );
+  });
+
+  it(`pip3 handles external HTTPS correctly (e.g., downloading from CDN)`, async () => {
+    const shell = await container.openShell("zsh");
+    // Test installing from a direct HTTPS URL (not a registry)
+    // This validates that non-registry HTTPS traffic works with system CAs
+    const result = await shell.runCommand('pip3 install --break-system-packages https://files.pythonhosted.org/packages/70/8e/0e2d847013cb52cd35b38c009bb167a1a26b2ce6cd6965bf26b47bc0bf44/requests-2.31.0-py3-none-any.whl');
+
+    assert.ok(
+      result.output.includes("no malicious packages found."),
+      `Output did not include expected text. Output was:\n${result.output}`
+    );
+
+    // Since this is from pythonhosted.org, it should be MITM'd by safe-chain
+    // But the certificate validation should still work
+    assert.ok(
+      result.output.includes("Successfully installed") || result.output.includes("Requirement already satisfied"),
+      `Installation from direct HTTPS URL failed. Output was:\n${result.output}`
+    );
+  });
+
 });

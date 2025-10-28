@@ -7,10 +7,16 @@ export async function runPip(command, args) {
   try {
     const env = mergeSafeChainProxyEnvironmentVariables(process.env);
 
-    // Pass --cert with our CA to pip so it trusts our MITM for known registries.
-    // pip will append this to its default CA bundle, so it still validates
-    // non-registry HTTPS (GitHub, custom mirrors) against system CAs.
-    const finalArgs = [...args, "--cert", getCaCertPath()];
+    // If the user already provided --cert, respect their choice and do not override.
+    // Support both "--cert <path>" and "--cert=<path>" forms.
+    const hasUserCert = args.some((a, i) => {
+      if (a === "--cert") return true;
+      return typeof a === "string" && a.startsWith("--cert=");
+    });
+
+    // By default, pass --cert with our CA so pip trusts our MITM for known registries.
+    // Note: pip treats --cert as the CA bundle to use for TLS (it does not merge with system CAs).
+    const finalArgs = hasUserCert ? [...args] : [...args, "--cert", getCaCertPath()];
 
     const result = await safeSpawn(command, finalArgs, {
       stdio: "inherit",
