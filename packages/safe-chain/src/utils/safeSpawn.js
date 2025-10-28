@@ -115,7 +115,6 @@ export async function safeSpawnPy(command, args, options = {}) {
   }
 
   return new Promise((resolve) => {
-    // On Unix/macOS resolve to full path to avoid PATH ambiguity; keep shell disabled everywhere
     let cmdToRun = command;
     if (os.platform() !== "win32") {
       try {

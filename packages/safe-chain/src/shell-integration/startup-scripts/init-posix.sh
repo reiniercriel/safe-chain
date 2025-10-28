@@ -74,7 +74,6 @@ function python() {
   if [[ "$1" == "-m" && "$2" == pip* ]]; then
     local mod="$2"
     shift 2
-    # python -m pip → aikido-pip, python -m pip3 → aikido-pip3
     if [[ "$mod" == "pip3" ]]; then
       wrapSafeChainCommand "pip3" "aikido-pip3" "$@"
     else

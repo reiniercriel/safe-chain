@@ -82,7 +82,6 @@ function python
     if test (count $argv) -ge 2; and test $argv[1] = "-m"; and string match -qr '^pip(3)?$' -- $argv[2]
         set mod $argv[2]
         set args $argv[3..-1]
-        # python -m pip → aikido-pip, python -m pip3 → aikido-pip3
         if test $mod = "pip3"
             wrapSafeChainCommand "pip3" "aikido-pip3" $args
         else
