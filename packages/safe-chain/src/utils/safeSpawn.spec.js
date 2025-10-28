@@ -273,8 +273,9 @@ describe("safeSpawnPy", () => {
     assert.strictEqual(result.status, 0);
 
     // Verify spawn signature
-    assert.strictEqual(spawnCalls.length, 1);
-    assert.strictEqual(spawnCalls[0].command, "pip3");
+  assert.strictEqual(spawnCalls.length, 1);
+  // Allow either bare command or resolved full path
+  assert.match(spawnCalls[0].command, /(^|\/)pip3$/);
     assert.deepStrictEqual(spawnCalls[0].args, ["install", "Jinja2>=3.1,<3.2"]);
     assert.strictEqual(spawnCalls[0].options.shell, false);
     assert.strictEqual(spawnCalls[0].options.stdio, "inherit");
