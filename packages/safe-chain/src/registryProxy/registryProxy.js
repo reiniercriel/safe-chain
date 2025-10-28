@@ -34,14 +34,6 @@ function getSafeChainProxyEnvironmentVariables() {
     HTTPS_PROXY: `http://localhost:${state.port}`,
     GLOBAL_AGENT_HTTP_PROXY: `http://localhost:${state.port}`,
     NODE_EXTRA_CA_CERTS: getCaCertPath(),
-
-    // Following env vars point pip and Python's requests/urllib at a CA Cert file.
-    // pip checks PIP_CERT first
-    // If pip uses requests library internally, it needs REQUESTS_CA_BUNDLE
-    // Other Python packages or pip's fallback SSL code may use SSL_CERT_FILE
-    PIP_CERT: getCaCertPath(),
-    REQUESTS_CA_BUNDLE: getCaCertPath(),
-    SSL_CERT_FILE: getCaCertPath(),
   };
 }
 

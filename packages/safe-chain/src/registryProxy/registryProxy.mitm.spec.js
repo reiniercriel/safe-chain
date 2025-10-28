@@ -145,12 +145,11 @@ describe("registryProxy.mitm", () => {
   });
 
   // --- Pip registry MITM and env var tests ---
-  it("should set pip CA trust environment variables", () => {
+  it("should NOT set global Python CA environment variables", () => {
     const envVars = mergeSafeChainProxyEnvironmentVariables([]);
-    const caPath = getCaCertPath();
-    assert.strictEqual(envVars.PIP_CERT, caPath);
-    assert.strictEqual(envVars.REQUESTS_CA_BUNDLE, caPath);
-    assert.strictEqual(envVars.SSL_CERT_FILE, caPath);
+    assert.strictEqual(envVars.PIP_CERT, undefined);
+    assert.strictEqual(envVars.REQUESTS_CA_BUNDLE, undefined);
+    assert.strictEqual(envVars.SSL_CERT_FILE, undefined);
   });
 
   it("should intercept HTTPS requests to pypi.org for pip package", async () => {
