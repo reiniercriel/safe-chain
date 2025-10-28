@@ -9,7 +9,7 @@ export async function runPip(command, args) {
 
     // If the user already provided --cert, respect their choice and do not override.
     // Support both "--cert <path>" and "--cert=<path>" forms.
-    const hasUserCert = args.some((a, i) => {
+    const hasUserCert = args.some((a) => {
       if (a === "--cert") return true;
       return typeof a === "string" && a.startsWith("--cert=");
     });
