@@ -107,7 +107,7 @@ describe("runPipCommand --cert handling", () => {
       "install",
       "certifi",
       "--index-url",
-      "https://pypi.tuna.tsinghua.edu.cn/simple",
+      "https://test.pypi.org/simple",
     ]);
     assert.strictEqual(res.status, 0);
     const idx = capturedArgs.args.indexOf("--cert");
