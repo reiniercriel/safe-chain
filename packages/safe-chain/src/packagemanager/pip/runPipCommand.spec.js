@@ -43,7 +43,7 @@ describe("runPipCommand --cert handling", () => {
     mock.reset();
   });
 
-  it("should append --cert with our CA path to pip args", async () => {
+  it("should append --cert with our CA path to pip args by default (PyPI)", async () => {
     const res = await runPip("pip3", ["install", "requests"]);
     assert.strictEqual(res.status, 0);
 
@@ -59,6 +59,10 @@ describe("runPipCommand --cert handling", () => {
     // Original args should be preserved before --cert
     assert.strictEqual(capturedArgs.args[0], "install");
     assert.strictEqual(capturedArgs.args[1], "requests");
+
+  // No Python CA env overrides expected
+  assert.strictEqual(capturedArgs.options.env.REQUESTS_CA_BUNDLE, undefined);
+  assert.strictEqual(capturedArgs.options.env.SSL_CERT_FILE, undefined);
   });
 
   it("should not override user-provided --cert <path>", async () => {
@@ -72,6 +76,9 @@ describe("runPipCommand --cert handling", () => {
     assert.strictEqual(certIndices.length, 1, "should not inject an extra --cert");
     const userPath = capturedArgs.args[certIndices[0] + 1];
     assert.strictEqual(userPath, "/tmp/user-ca.pem", "should preserve user-provided cert path");
+  // No Python CA env overrides expected
+  assert.strictEqual(capturedArgs.options.env.REQUESTS_CA_BUNDLE, undefined);
+  assert.strictEqual(capturedArgs.options.env.SSL_CERT_FILE, undefined);
   });
 
   it("should not override user-provided --cert=<path>", async () => {
@@ -83,5 +90,37 @@ describe("runPipCommand --cert handling", () => {
     assert.ok(hasInline, "should keep inline --cert=<path>");
     const injectedIndex = capturedArgs.args.indexOf("--cert");
     assert.strictEqual(injectedIndex, -1, "should not inject separate --cert when inline is provided");
+  // No Python CA env overrides expected
+  assert.strictEqual(capturedArgs.options.env.REQUESTS_CA_BUNDLE, undefined);
+  assert.strictEqual(capturedArgs.options.env.SSL_CERT_FILE, undefined);
+  });
+
+  it("should inject --cert when explicit index is a known PyPI host", async () => {
+    const res = await runPip("pip3", ["install", "requests", "--index-url", "https://pypi.org/simple"]);
+    assert.strictEqual(res.status, 0);
+    const idx = capturedArgs.args.indexOf("--cert");
+    assert.ok(idx >= 0, "--cert should be present for known registries");
+  });
+
+  it("should NOT inject --cert when index points to an unknown external mirror (tunneled)", async () => {
+    const res = await runPip("pip3", [
+      "install",
+      "certifi",
+      "--index-url",
+      "https://pypi.tuna.tsinghua.edu.cn/simple",
+    ]);
+    assert.strictEqual(res.status, 0);
+    const idx = capturedArgs.args.indexOf("--cert");
+    assert.strictEqual(idx, -1, "--cert should be omitted for tunneled external hosts");
+  });
+
+  it("should NOT inject --cert when installing from a direct external URL", async () => {
+    const res = await runPip("pip3", [
+      "install",
+      "https://example.com/pkg-1.0.0-py3-none-any.whl",
+    ]);
+    assert.strictEqual(res.status, 0);
+    const idx = capturedArgs.args.indexOf("--cert");
+    assert.strictEqual(idx, -1, "--cert should be omitted for direct external URLs");
   });
 });
