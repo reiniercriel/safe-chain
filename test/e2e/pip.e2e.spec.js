@@ -193,7 +193,7 @@ describe("E2E: pip coverage", () => {
     );
   });
 
-  it(`pip3 can install from GitHub URL using system CAs`, async () => {
+  it(`pip3 can install from GitHub URL using the CA bundle`, async () => {
     const shell = await container.openShell("zsh");
     // Install a simple package from GitHub - this should use TCP tunnel, not MITM
     // Using a popular, small package for testing
@@ -204,10 +204,10 @@ describe("E2E: pip coverage", () => {
       `Output did not include expected text. Output was:\n${result.output}`
     );
 
-    // Verify installation succeeded (would fail if certificate validation broke)
+  // Verify installation succeeded (would fail if certificate validation via env CA bundle broke)
     assert.ok(
       result.output.includes("Successfully installed") || result.output.includes("Requirement already satisfied"),
-      `Installation from GitHub failed - system CAs may not be working. Output was:\n${result.output}`
+  `Installation from GitHub failed - CA bundle may not be working. Output was:\n${result.output}`
     );
 
     // Verify package was actually installed
@@ -230,7 +230,7 @@ describe("E2E: pip coverage", () => {
       `Output did not include expected text. Output was:\n${result.output}`
     );
 
-    // Verify successful installation (would fail with SSL/certificate errors if --cert wasn't working)
+    // Verify successful installation (would fail with SSL/certificate errors if the env CA bundle wasn't working)
     assert.ok(
       result.output.includes("Successfully installed"),
       `Installation should succeed with proper certificate validation. Output was:\n${result.output}`
@@ -246,7 +246,7 @@ describe("E2E: pip coverage", () => {
   it(`pip3 handles external HTTPS correctly (e.g., downloading from CDN)`, async () => {
     const shell = await container.openShell("zsh");
     // Test installing from a direct HTTPS URL (not a registry)
-    // This validates that non-registry HTTPS traffic works with system CAs
+    // This validates that non-registry HTTPS traffic works with our env-provided CA bundle
     const result = await shell.runCommand('pip3 install --break-system-packages https://files.pythonhosted.org/packages/70/8e/0e2d847013cb52cd35b38c009bb167a1a26b2ce6cd6965bf26b47bc0bf44/requests-2.31.0-py3-none-any.whl');
 
     assert.ok(
@@ -265,7 +265,7 @@ describe("E2E: pip coverage", () => {
   it(`pip3 can install from alternate PyPI mirror (tunneled, not MITM)`, async () => {
     const shell = await container.openShell("zsh");
     // Use Tsinghua PyPI mirror which is NOT in knownPipRegistries
-    // This tests tunneled HTTPS with --cert containing only Safe Chain CA
+    // This tests tunneled HTTPS with our env-provided CA bundle (Safe Chain CA + Mozilla + Node roots)
     // If the CA bundle doesn't include public roots, this will fail with CERTIFICATE_VERIFY_FAILED
     const result = await shell.runCommand('pip3 install --break-system-packages --index-url https://pypi.tuna.tsinghua.edu.cn/simple certifi');
 
@@ -277,7 +277,7 @@ describe("E2E: pip coverage", () => {
     // Should succeed if CA bundle properly handles tunneled hosts
     assert.ok(
       result.output.includes("Successfully installed") || result.output.includes("Requirement already satisfied"),
-      `Installation from PyPI mirror failed. This may indicate --cert CA bundle lacks public roots. Output was:\n${result.output}`
+  `Installation from PyPI mirror failed. This may indicate the CA bundle lacks public roots. Output was:\n${result.output}`
     );
 
     // Should NOT contain certificate verification errors

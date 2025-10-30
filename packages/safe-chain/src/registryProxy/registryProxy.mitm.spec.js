@@ -145,7 +145,7 @@ describe("registryProxy.mitm", () => {
   });
 
   // --- Pip registry MITM and env var tests ---
-  it("should NOT set global Python CA environment variables", () => {
+  it("should NOT set Python CA environment variables in proxy merge (handled by runPipCommand)", () => {
     const envVars = mergeSafeChainProxyEnvironmentVariables([]);
     assert.strictEqual(envVars.PIP_CERT, undefined);
     assert.strictEqual(envVars.REQUESTS_CA_BUNDLE, undefined);
