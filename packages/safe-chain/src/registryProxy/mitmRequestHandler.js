@@ -14,6 +14,15 @@ export function mitmConnect(req, clientSocket, isAllowed) {
 
   const server = createHttpsServer(hostname, isAllowed);
 
+  server.on("error", (err) => {
+    ui.writeError(`Safe-chain: HTTPS server error: ${err.message}`);
+    if (!clientSocket.headersSent) {
+      clientSocket.end("HTTP/1.1 502 Bad Gateway\r\n\r\n");
+    } else if (clientSocket.writable) {
+      clientSocket.end();
+    }
+  });
+
   // Establish the connection
   clientSocket.write("HTTP/1.1 200 Connection Established\r\n\r\n");
 
@@ -45,16 +54,6 @@ function createHttpsServer(hostname, isAllowed) {
     },
     handleRequest
   );
-
-  server.on("error", (err) => {
-    ui.writeError(`Safe-chain: HTTPS server error: ${err.message}`);
-    if (!res.headersSent) {
-      res.writeHead(502);
-      res.end("Bad Gateway");
-    } else if (res.writable) {
-      res.destroy();
-    }
-  });
 
   return server;
 }
