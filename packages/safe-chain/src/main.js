@@ -11,6 +11,21 @@ export async function main(args) {
   const proxy = createSafeChainProxy();
   await proxy.startServer();
 
+  // Global error handlers to log unhandled errors
+  process.on("uncaughtException", (error) => {
+    ui.writeError(`Safe-chain: Uncaught exception: ${error.message}`);
+    ui.writeVerbose(`Stack trace: ${error.stack}`);
+    process.exit(1);
+  });
+
+  process.on("unhandledRejection", (reason) => {
+    ui.writeError(`Safe-chain: Unhandled promise rejection: ${reason}`);
+    if (reason instanceof Error) {
+      ui.writeVerbose(`Stack trace: ${reason.stack}`);
+    }
+    process.exit(1);
+  });
+
   try {
     // This parses all the --safe-chain arguments and removes them from the args array
     args = initializeCliArguments(args);
