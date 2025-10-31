@@ -43,8 +43,13 @@ export function handleHttpProxyRequest(req, res) {
       }
     )
     .on("error", (err) => {
-      res.writeHead(502);
-      res.end(`Bad Gateway: ${err.message}`);
+      if (!res.headersSent) {
+        res.writeHead(502);
+        res.end(`Bad Gateway: ${err.message}`);
+      } else {
+        // Headers already sent, just destroy the response
+        res.destroy();
+      }
     });
 
   req.on("error", () => {

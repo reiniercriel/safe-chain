@@ -37,13 +37,19 @@ function createHttpsServer(hostname, isAllowed) {
     forwardRequest(req, hostname, res);
   }
 
-  return https.createServer(
+  const server = https.createServer(
     {
       key: cert.privateKey,
       cert: cert.certificate,
     },
     handleRequest
   );
+
+  server.on("error", (err) => {
+    ui.writeError(`Safe-chain: HTTPS server error: ${err.message}`);
+  });
+
+  return server;
 }
 
 function getRequestPathAndQuery(url) {
@@ -60,6 +66,11 @@ function forwardRequest(req, hostname, res) {
   proxyReq.on("error", () => {
     res.writeHead(502);
     res.end("Bad Gateway");
+  });
+
+  req.on("error", (err) => {
+    ui.writeError(`Safe-chain: Error reading client request: ${err.message}`);
+    proxyReq.destroy();
   });
 
   req.on("data", (chunk) => {
@@ -88,6 +99,16 @@ function createProxyRequest(hostname, req, res) {
   }
 
   const proxyReq = https.request(options, (proxyRes) => {
+    proxyRes.on("error", (err) => {
+      ui.writeError(
+        `Safe-chain: Error reading upstream response: ${err.message}`
+      );
+      if (!res.headersSent) {
+        res.writeHead(502);
+        res.end("Bad Gateway");
+      }
+    });
+
     res.writeHead(proxyRes.statusCode, proxyRes.headers);
     proxyRes.pipe(res);
   });

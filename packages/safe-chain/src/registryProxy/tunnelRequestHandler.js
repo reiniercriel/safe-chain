@@ -24,17 +24,19 @@ export function tunnelRequest(req, clientSocket, head) {
 function tunnelRequestToDestination(req, clientSocket, head) {
   const { port, hostname } = new URL(`http://${req.url}`);
 
-  clientSocket.on("error", () => {
-    // NO-OP
-    // This can happen if the client TCP socket sends RST instead of FIN.
-    // Not subscribing to 'close' event will cause node to throw and crash.
-  });
-
   const serverSocket = net.connect(port || 443, hostname, () => {
     clientSocket.write("HTTP/1.1 200 Connection Established\r\n\r\n");
     serverSocket.write(head);
     serverSocket.pipe(clientSocket);
     clientSocket.pipe(serverSocket);
+  });
+
+  clientSocket.on("error", () => {
+    // This can happen if the client TCP socket sends RST instead of FIN.
+    // Not subscribing to 'close' event will cause node to throw and crash.
+    if (serverSocket.writable) {
+      serverSocket.end();
+    }
   });
 
   serverSocket.on("error", (err) => {
@@ -100,9 +102,13 @@ function tunnelRequestViaProxy(req, clientSocket, head, proxyUrl) {
           proxy.port || 8080
         } - ${err.message}`
       );
-      if (clientSocket.writable) {
-        clientSocket.end("HTTP/1.1 502 Bad Gateway\r\n\r\n");
-      }
+    } else {
+      ui.writeError(
+        `Safe-chain: proxy socket error after connection - ${err.message}`
+      );
+    }
+    if (clientSocket.writable) {
+      clientSocket.end("HTTP/1.1 502 Bad Gateway\r\n\r\n");
     }
   });
 
