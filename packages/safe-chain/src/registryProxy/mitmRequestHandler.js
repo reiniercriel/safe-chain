@@ -47,6 +47,12 @@ function createHttpsServer(hostname, isAllowed) {
 
   server.on("error", (err) => {
     ui.writeError(`Safe-chain: HTTPS server error: ${err.message}`);
+    if (!res.headersSent) {
+      res.writeHead(502);
+      res.end("Bad Gateway");
+    } else if (res.writable) {
+      res.destroy();
+    }
   });
 
   return server;
