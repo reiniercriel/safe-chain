@@ -83,7 +83,7 @@ export function getCombinedCaBundlePath() {
   }
 
   const combined = parts.filter(Boolean).join("\n");
-  const target = path.join(os.tmpdir(), "safe-chain-python-ca-bundle.pem");
+  const target = path.join(os.tmpdir(), "safe-chain-ca-bundle.pem");
   fs.writeFileSync(target, combined, { encoding: "utf8" });
   cachedPath = target;
   return cachedPath;
