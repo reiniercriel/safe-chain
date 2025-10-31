@@ -102,13 +102,16 @@ function tunnelRequestViaProxy(req, clientSocket, head, proxyUrl) {
           proxy.port || 8080
         } - ${err.message}`
       );
+      if (clientSocket.writable) {
+        clientSocket.end("HTTP/1.1 502 Bad Gateway\r\n\r\n");
+      }
     } else {
       ui.writeError(
         `Safe-chain: proxy socket error after connection - ${err.message}`
       );
-    }
-    if (clientSocket.writable) {
-      clientSocket.end("HTTP/1.1 502 Bad Gateway\r\n\r\n");
+      if (clientSocket.writable) {
+        clientSocket.end();
+      }
     }
   });
 
