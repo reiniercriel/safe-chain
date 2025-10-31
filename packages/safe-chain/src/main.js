@@ -8,6 +8,9 @@ import { createSafeChainProxy } from "./registryProxy/registryProxy.js";
 import chalk from "chalk";
 
 export async function main(args) {
+  process.on("SIGINT", handleProcessTermination);
+  process.on("SIGTERM", handleProcessTermination);
+
   const proxy = createSafeChainProxy();
   await proxy.startServer();
 
@@ -58,4 +61,8 @@ export async function main(args) {
   } finally {
     await proxy.stopServer();
   }
+}
+
+function handleProcessTermination() {
+  ui.writeBufferedLogsAndStopBuffering();
 }
