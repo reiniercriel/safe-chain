@@ -33,7 +33,7 @@ function tunnelRequestToDestination(req, clientSocket, head) {
 
   clientSocket.on("error", () => {
     // This can happen if the client TCP socket sends RST instead of FIN.
-    // Not subscribing to 'close' event will cause node to throw and crash.
+    // Not subscribing to 'error' event will cause node to throw and crash.
     if (serverSocket.writable) {
       serverSocket.end();
     }
