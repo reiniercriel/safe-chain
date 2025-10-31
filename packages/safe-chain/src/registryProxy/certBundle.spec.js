@@ -7,7 +7,7 @@ import tls from "node:tls";
 
 // Utility to remove the generated bundle so the module rebuilds it on demand
 function removeBundleIfExists() {
-  const target = path.join(os.tmpdir(), "safe-chain-python-ca-bundle.pem");
+  const target = path.join(os.tmpdir(), "safe-chain-ca-bundle.pem");
   try {
     if (fs.existsSync(target)) fs.unlinkSync(target);
   } catch {
@@ -15,7 +15,7 @@ function removeBundleIfExists() {
   }
 }
 
-describe("pipCaBundle.getCombinedCaBundlePath", () => {
+describe("certBundle.getCombinedCaBundlePath", () => {
   beforeEach(() => {
     mock.restoreAll();
     removeBundleIfExists();
@@ -31,13 +31,13 @@ describe("pipCaBundle.getCombinedCaBundlePath", () => {
     fs.writeFileSync(safeChainPath, `${marker}\n${rootPem}`, "utf8");
 
     // Mock the certUtils.getCaCertPath to return our temp file
-    mock.module("../../../registryProxy/certUtils.js", {
+    mock.module("./certUtils.js", {
       namedExports: {
         getCaCertPath: () => safeChainPath,
       },
     });
 
-    const { getCombinedCaBundlePath } = await import("./pipCaBundle.js");
+    const { getCombinedCaBundlePath } = await import("./certBundle.js");
     const bundlePath = getCombinedCaBundlePath();
     assert.ok(fs.existsSync(bundlePath), "Bundle path should exist");
     const contents = fs.readFileSync(bundlePath, "utf8");
@@ -53,7 +53,7 @@ describe("pipCaBundle.getCombinedCaBundlePath", () => {
     fs.writeFileSync(safeChainPath, invalidMarker, "utf8");
 
     // Mock the certUtils.getCaCertPath to return our invalid file
-    mock.module("../../../registryProxy/certUtils.js", {
+    mock.module("./certUtils.js", {
       namedExports: {
         getCaCertPath: () => safeChainPath,
       },
@@ -61,7 +61,7 @@ describe("pipCaBundle.getCombinedCaBundlePath", () => {
 
     // Ensure fresh build
     removeBundleIfExists();
-    const { getCombinedCaBundlePath } = await import("./pipCaBundle.js");
+    const { getCombinedCaBundlePath } = await import("./certBundle.js");
     const bundlePath = getCombinedCaBundlePath();
     assert.ok(fs.existsSync(bundlePath), "Bundle path should exist");
     const contents = fs.readFileSync(bundlePath, "utf8");

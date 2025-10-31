@@ -4,7 +4,7 @@ import path from "node:path";
 import certifi from "certifi";
 import tls from "node:tls";
 import { X509Certificate } from "node:crypto";
-import { getCaCertPath } from "../../../registryProxy/certUtils.js";
+import { getCaCertPath } from "./certUtils.js";
 
 /**
  * Check if a PEM string contains only parsable cert blocks.
@@ -41,11 +41,11 @@ function isParsable(pem) {
 let cachedPath = null;
 
 /**
- * Build a combined CA bundle specifically for pip flows.
+ * Build a combined CA bundle for Python and Node HTTPS flows.
  * - Includes Safe Chain CA (for MITM of known registries)
  * - Includes Mozilla roots via npm `certifi` (public HTTPS)
  * - Includes Node's built-in root certificates as a portable fallback
- * */
+ */
 export function getCombinedCaBundlePath() {
   if (cachedPath && fs.existsSync(cachedPath)) return cachedPath;
 

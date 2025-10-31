@@ -1,7 +1,7 @@
 import { ui } from "../../environment/userInteraction.js";
 import { safeSpawn } from "../../utils/safeSpawn.js";
 import { mergeSafeChainProxyEnvironmentVariables } from "../../registryProxy/registryProxy.js";
-import { getCombinedCaBundlePath } from "./utils/pipCaBundle.js";
+import { getCombinedCaBundlePath } from "../../registryProxy/certBundle.js";
 
 export async function runPip(command, args) {
   try {

@@ -28,8 +28,8 @@ describe("runPipCommand environment variable handling", () => {
       },
     });
 
-    // Mock pipCaBundle to return a test combined bundle path
-    mock.module("./utils/pipCaBundle.js", {
+    // Mock certBundle to return a test combined bundle path
+    mock.module("../../registryProxy/certBundle.js", {
       namedExports: {
         getCombinedCaBundlePath: () => "/tmp/test-combined-ca.pem",
       },
