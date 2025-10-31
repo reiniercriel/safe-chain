@@ -264,10 +264,10 @@ describe("E2E: pip coverage", () => {
 
   it(`pip3 can install from alternate PyPI mirror (tunneled, not MITM)`, async () => {
     const shell = await container.openShell("zsh");
-    // Use Tsinghua PyPI mirror which is NOT in knownPipRegistries
+    // Use Test PyPI which is NOT in knownPipRegistries
     // This tests tunneled HTTPS with our env-provided CA bundle (Safe Chain CA + Mozilla + Node roots)
     // If the CA bundle doesn't include public roots, this will fail with CERTIFICATE_VERIFY_FAILED
-    const result = await shell.runCommand('pip3 install --break-system-packages --index-url https://pypi.tuna.tsinghua.edu.cn/simple certifi');
+    const result = await shell.runCommand('pip3 install --break-system-packages --index-url https://test.pypi.org/simple certifi');
 
     assert.ok(
       result.output.includes("no malicious packages found."),
@@ -277,7 +277,7 @@ describe("E2E: pip coverage", () => {
     // Should succeed if CA bundle properly handles tunneled hosts
     assert.ok(
       result.output.includes("Successfully installed") || result.output.includes("Requirement already satisfied"),
-  `Installation from PyPI mirror failed. This may indicate the CA bundle lacks public roots. Output was:\n${result.output}`
+      `Installation from Test PyPI failed. This may indicate the CA bundle lacks public roots. Output was:\n${result.output}`
     );
 
     // Should NOT contain certificate verification errors
