@@ -1,6 +1,7 @@
 import https from "https";
 import { generateCertForHost } from "./certUtils.js";
 import { HttpsProxyAgent } from "https-proxy-agent";
+import { ui } from "../environment/userInteraction.js";
 
 export function mitmConnect(req, clientSocket, isAllowed) {
   const { hostname } = new URL(`http://${req.url}`);
