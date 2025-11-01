@@ -15,7 +15,7 @@ import { hasDryRunArg } from "../utils/npmCommands.js";
  */
 
 /**
- * @typedef CommandArgumentScanner
+ * @typedef {Object} CommandArgumentScanner
  * @property {(args: string[]) => Promise<ScanResult[]>} scan
  * @property {(args: string[]) => boolean} shouldScan
  */

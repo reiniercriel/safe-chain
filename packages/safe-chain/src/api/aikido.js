@@ -4,7 +4,7 @@ const malwareDatabaseUrl =
   "https://malware-list.aikido.dev/malware_predictions.json";
 
 /**
- * @typedef MalwarePackage
+ * @typedef {Object} MalwarePackage
  * @property {string} package_name
  * @property {string} version
  * @property {string} reason

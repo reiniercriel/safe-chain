@@ -60,7 +60,7 @@ function writeExitWithoutInstallingMaliciousPackages() {
 }
 
 /**
- * @typedef Spinner
+ * @typedef {Object} Spinner
  * @property {(message: string) => void} succeed
  * @property {(message: string) => void} fail
  * @property {() => void} stop

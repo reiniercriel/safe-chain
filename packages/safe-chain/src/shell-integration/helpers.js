@@ -4,7 +4,7 @@ import fs from "fs";
 import path from "path";
 
 /**
- * @typedef AikidoTool
+ * @typedef {Object} AikidoTool
  * @property {string} tool
  * @property {string} aikidoCommand
  */

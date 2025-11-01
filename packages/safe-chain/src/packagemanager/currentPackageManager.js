@@ -18,7 +18,7 @@ const state = {
 };
 
 /**
- * @typedef PackageManager
+ * @typedef {Object} PackageManager
  * @property {(args: string[]) => Promise<{ status: number }>} runCommand
  * @property {(args: string[]) => boolean} isSupportedCommand
  * @property {(args: string[]) => Promise<{name: string, version: string, type: string}[]>} getDependencyUpdatesForCommand

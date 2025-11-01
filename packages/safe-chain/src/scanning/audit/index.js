@@ -4,14 +4,14 @@ import {
 } from "../malwareDatabase.js";
 
 /**
- * @typedef PackageChange
+ * @typedef {Object} PackageChange
  * @property {string} name
  * @property {string} version
  * @property {string} type
  */
 
 /**
- * @typedef AuditResult
+ * @typedef {Object} AuditResult
  * @property {PackageChange[]} allowedChanges
  * @property {(PackageChange & {reason: string})[]} disallowedChanges
  * @property {boolean} isAllowed

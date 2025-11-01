@@ -6,7 +6,7 @@ import fish from "./supported-shells/fish.js";
 import { ui } from "../environment/userInteraction.js";
 
 /**
- * @typedef Shell
+ * @typedef {Object} Shell
  * @property {string} name
  * @property {() => boolean} isInstalled
  * @property {(tools: import("./helpers.js").AikidoTool[]) => boolean} setup
