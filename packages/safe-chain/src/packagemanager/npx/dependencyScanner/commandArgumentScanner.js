@@ -7,7 +7,7 @@ import { parsePackagesFromArguments } from "../parsing/parsePackagesFromArgument
 export function commandArgumentScanner() {
   return {
     scan: (args) => scanDependencies(args),
-    shouldScan: (args) => true, // all npx commands need to be scanned, npx doesn't have dry-run
+    shouldScan: () => true, // all npx commands need to be scanned, npx doesn't have dry-run
   };
 }
 
