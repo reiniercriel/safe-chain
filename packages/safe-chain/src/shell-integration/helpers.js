@@ -3,6 +3,15 @@ import * as os from "os";
 import fs from "fs";
 import path from "path";
 
+/**
+ * @typedef AikidoTool
+ * @property {string} tool
+ * @property {string} aikidoCommand
+ */
+
+/**
+ * @type {AikidoTool[]}
+ */
 export const knownAikidoTools = [
   { tool: "npm", aikidoCommand: "aikido-npm" },
   { tool: "npx", aikidoCommand: "aikido-npx" },
@@ -30,6 +39,11 @@ export function getPackageManagerList() {
   return `${tools.join(", ")}, and ${lastTool} commands`;
 }
 
+/**
+ * @param {string} executableName
+ *
+ * @returns {boolean}
+ */
 export function doesExecutableExistOnSystem(executableName) {
   if (os.platform() === "win32") {
     const result = spawnSync("where", [executableName], { stdio: "ignore" });
@@ -40,6 +54,13 @@ export function doesExecutableExistOnSystem(executableName) {
   }
 }
 
+/**
+ * @param {string} filePath
+ * @param {RegExp} pattern
+ * @param {string} [eol]
+ *
+ * @returns {void}
+ */
 export function removeLinesMatchingPattern(filePath, pattern, eol) {
   if (!fs.existsSync(filePath)) {
     return;
@@ -54,6 +75,12 @@ export function removeLinesMatchingPattern(filePath, pattern, eol) {
 }
 
 const maxLineLength = 100;
+
+/**
+ * @param {string} line
+ * @param {RegExp} pattern
+ * @returns {boolean}
+ */
 function shouldRemoveLine(line, pattern) {
   const isPatternMatch = pattern.test(line);
 
@@ -82,7 +109,14 @@ function shouldRemoveLine(line, pattern) {
   return true;
 }
 
-export function addLineToFile(filePath, line, eol) {
+/**
+ * @param {string} filePath
+ * @param {string} line
+ * @param {string} [eol]
+ *
+ * @returns {void}
+ */
+export function addLineToFile(filePath, line, eol ) {
   createFileIfNotExists(filePath);
 
   eol = eol || os.EOL;
@@ -92,6 +126,11 @@ export function addLineToFile(filePath, line, eol) {
   fs.writeFileSync(filePath, updatedContent, "utf-8");
 }
 
+/**
+ * @param {string} filePath
+ *
+ * @returns {void}
+ */
 function createFileIfNotExists(filePath) {
   if (fs.existsSync(filePath)) {
     return;
