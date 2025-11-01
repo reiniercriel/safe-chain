@@ -113,7 +113,6 @@ function getDatabasePath() {
   return path.join(aikidoDir, "malwareDatabase.json");
 }
 
-
 function getDatabaseVersionPath() {
   const aikidoDir = getAikidoDirectory();
   return path.join(aikidoDir, "version.txt");
