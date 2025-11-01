@@ -17,7 +17,7 @@ export async function resolvePackageVersion(packageName, versionRange) {
   }
 
   const packageInfo = (
-    /** @type {{"dist-tags"?: Record<string, string>} | null} */
+    /** @type {{"dist-tags"?: Record<string, string>, versions?: Record<string, unknown>} | null} */
     await getPackageInfo(packageName)
   );
   if (!packageInfo) {
@@ -27,7 +27,7 @@ export async function resolvePackageVersion(packageName, versionRange) {
   }
 
   const distTags = packageInfo["dist-tags"];
-  if (distTags && isDistTags(distTags)) {
+  if (distTags && isDistTags(distTags) && distTags[versionRange]) {
     // If the version range is a dist-tag, return the version associated with that tag
     // e.g., "latest", "next", etc.
     return distTags[versionRange];
