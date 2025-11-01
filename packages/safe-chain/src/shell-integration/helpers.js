@@ -116,7 +116,7 @@ function shouldRemoveLine(line, pattern) {
  *
  * @returns {void}
  */
-export function addLineToFile(filePath, line, eol ) {
+export function addLineToFile(filePath, line, eol) {
   createFileIfNotExists(filePath);
 
   eol = eol || os.EOL;
