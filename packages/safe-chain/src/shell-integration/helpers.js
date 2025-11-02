@@ -3,6 +3,12 @@ import * as os from "os";
 import fs from "fs";
 import path from "path";
 
+function mistakeHere() {
+  os.EOLL;
+}
+
+mistakeHere();
+
 /**
  * @typedef {Object} AikidoTool
  * @property {string} tool
