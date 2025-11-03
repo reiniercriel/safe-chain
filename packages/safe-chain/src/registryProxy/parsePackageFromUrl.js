@@ -35,6 +35,7 @@ export function parsePackageFromUrl(url) {
 /**
  * @param {string} url
  * @param {string} registry
+ * @returns {{packageName: string | undefined, version: string | undefined}}
  */
 function parseJsPackageFromUrl(url, registry) {
   let packageName, version;
@@ -78,6 +79,7 @@ function parseJsPackageFromUrl(url, registry) {
 /**
  * @param {string} url
  * @param {string} registry
+ * @returns {{packageName: string | undefined, version: string | undefined}}
  */
 function parsePipPackageFromUrl(url, registry) {
   let packageName, version

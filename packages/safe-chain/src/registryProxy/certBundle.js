@@ -49,6 +49,7 @@ let cachedPath = null;
  * - Includes Safe Chain CA (for MITM of known registries)
  * - Includes Mozilla roots via npm `certifi` (public HTTPS)
  * - Includes Node's built-in root certificates as a portable fallback
+ * @returns {string} Path to the combined CA bundle PEM file
  */
 export function getCombinedCaBundlePath() {
   if (cachedPath && fs.existsSync(cachedPath)) return cachedPath;
