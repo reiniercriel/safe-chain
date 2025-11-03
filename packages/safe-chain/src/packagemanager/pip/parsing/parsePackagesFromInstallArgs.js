@@ -14,6 +14,9 @@
  * - git+https://... (VCS URLs - returned without version)
  * - -r requirements.txt (handled by flag skipping)
  */
+/**
+ * @param {string[]} args
+ */
 export function parsePackagesFromInstallArgs(args) {
   const packages = [];
   let skipNext = false;
@@ -48,6 +51,9 @@ export function parsePackagesFromInstallArgs(args) {
   return packages;
 }
 
+/**
+ * @param {string} arg
+ */
 function isPipOptionWithParameter(arg) {
 
   // Check if a pip flag takes a parameter
@@ -100,6 +106,9 @@ function isPipOptionWithParameter(arg) {
   return optionsWithParameters.includes(arg);
 }
 
+/**
+ * @param {string} spec
+ */
 function parsePipSpec(spec) {
   // Ignore obvious URLs and paths, rely on mitm scanner
   const lower = spec.toLowerCase();

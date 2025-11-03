@@ -7,7 +7,13 @@ import {
   pipWheelCommand,
 } from "./utils/pipCommands.js";
 
+/**
+ * @param {string} [command]
+ */
 export function createPipPackageManager(command = "pip") {
+  /**
+   * @param {string[]} args
+   */
   function isSupportedCommand(args) {
     const scanner = findDependencyScannerForCommand(
       commandScannerMapping,
@@ -16,6 +22,9 @@ export function createPipPackageManager(command = "pip") {
     return scanner.shouldScan(args);
   }
 
+  /**
+   * @param {string[]} args
+   */
   function getDependencyUpdatesForCommand(args) {
     const scanner = findDependencyScannerForCommand(
       commandScannerMapping,
@@ -25,7 +34,7 @@ export function createPipPackageManager(command = "pip") {
   }
 
   return {
-    runCommand: (args) => runPip(command, args),
+    runCommand: /** @param {string[]} args */ (args) => runPip(command, args),
     isSupportedCommand,
     getDependencyUpdatesForCommand,
   };
@@ -43,6 +52,10 @@ const NULL_SCANNER = {
   scan: () => [],
 };
 
+/**
+ * @param {Record<string, any>} scanners
+ * @param {string[]} args
+ */
 function findDependencyScannerForCommand(scanners, args) {
   const command = getPipCommandForArgs(args);
   if (!command) {

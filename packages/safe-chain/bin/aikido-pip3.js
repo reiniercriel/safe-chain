@@ -16,4 +16,4 @@ setEcoSystem(ECOSYSTEM_PY);
 initializePackageManager(packageManagerName);
 const exitCode = await main(argv);
 
-process.exit(exitCode);
+process.exit(typeof exitCode === 'number' ? exitCode : 1);

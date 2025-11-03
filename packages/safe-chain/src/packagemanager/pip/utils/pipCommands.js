@@ -2,6 +2,9 @@ export const pipInstallCommand = "install";
 export const pipDownloadCommand = "download";
 export const pipWheelCommand = "wheel";
 
+/**
+ * @param {string[]} args
+ */
 export function getPipCommandForArgs(args) {
   if (!args || args.length === 0) {
     return null;
@@ -17,6 +20,9 @@ export function getPipCommandForArgs(args) {
   return null;
 }
 
+/**
+ * @param {string[]} args
+ */
 export function hasDryRunArg(args) {
-  return args.some((arg) => arg === "--dry-run");
+  return args.some(/** @param {string} arg */ (arg) => arg === "--dry-run");
 }

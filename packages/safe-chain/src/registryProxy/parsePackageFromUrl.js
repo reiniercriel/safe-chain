@@ -32,6 +32,10 @@ export function parsePackageFromUrl(url) {
   return { packageName: undefined, version: undefined };
 }
 
+/**
+ * @param {string} url
+ * @param {string} registry
+ */
 function parseJsPackageFromUrl(url, registry) {
   let packageName, version;
   if (!registry || !url.endsWith(".tgz")) {
@@ -71,6 +75,10 @@ function parseJsPackageFromUrl(url, registry) {
   return { packageName, version };
 }
 
+/**
+ * @param {string} url
+ * @param {string} registry
+ */
 function parsePipPackageFromUrl(url, registry) {
   let packageName, version
 
