@@ -43,7 +43,7 @@ function getSafeChainProxyEnvironmentVariables() {
 }
 
 /**
- * @param {Record<string, string>} env
+ * @param {Record<string, string | undefined>} env
  *
  * @returns {Record<string, string>}
  */
@@ -56,7 +56,7 @@ export function mergeSafeChainProxyEnvironmentVariables(env) {
     // So we only copy the variable if it's not already set in a different case
     const upperKey = key.toUpperCase();
 
-    if (!proxyEnv[upperKey]) {
+    if (!proxyEnv[upperKey] && env[key]) {
       proxyEnv[key] = env[key];
     }
   }
@@ -122,7 +122,7 @@ function stopServer(server) {
 
 /**
  * @param {import("http").IncomingMessage} req
- * @param {import("net").Socket} clientSocket
+ * @param {import("http").ServerResponse} clientSocket
  * @param {Buffer} head
  *
  * @returns {void}
@@ -130,9 +130,9 @@ function stopServer(server) {
 function handleConnect(req, clientSocket, head) {
   // CONNECT method is used for HTTPS requests
   // It establishes a tunnel to the server identified by the request URL
+  const url = req.url;
 
-  // @ts-expect-error req.url might be undefined
-  if (knownRegistries.some((reg) => req.url.includes(reg))) {
+  if (url && knownRegistries.some((reg) => url.includes(reg))) {
     // For npm and yarn registries, we want to intercept and inspect the traffic
     // so we can block packages with malware
     mitmConnect(req, clientSocket, isAllowedUrl);

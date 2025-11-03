@@ -9,7 +9,6 @@ import { mergeSafeChainProxyEnvironmentVariables } from "../../registryProxy/reg
  */
 export async function runYarnCommand(args) {
   try {
-    // @ts-expect-error values of process.env can be string | undefined
     const env = mergeSafeChainProxyEnvironmentVariables(process.env);
     await fixYarnProxyEnvironmentVariables(env);
 

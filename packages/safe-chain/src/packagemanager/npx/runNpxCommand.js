@@ -11,7 +11,6 @@ export async function runNpx(args) {
   try {
     const result = await safeSpawn("npx", args, {
       stdio: "inherit",
-      // @ts-expect-error values of process.env can be string | undefined
       env: mergeSafeChainProxyEnvironmentVariables(process.env),
     });
     return { status: result.status };

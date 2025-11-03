@@ -5,7 +5,7 @@ import { ui } from "../environment/userInteraction.js";
 
 /**
  * @param {import("http").IncomingMessage} req
- * @param {import("net").Socket} clientSocket
+ * @param {import("http").ServerResponse} clientSocket
  * @param {(target: string) => Promise<boolean>} isAllowed
  */
 export function mitmConnect(req, clientSocket, isAllowed) {
@@ -25,7 +25,6 @@ export function mitmConnect(req, clientSocket, isAllowed) {
 
   server.on("error", (err) => {
     ui.writeError(`Safe-chain: HTTPS server error: ${err.message}`);
-    // @ts-expect-error Property 'headersSent' does not exist on type 'Socket'
     if (!clientSocket.headersSent) {
       clientSocket.end("HTTP/1.1 502 Bad Gateway\r\n\r\n");
     } else if (clientSocket.writable) {
@@ -55,7 +54,13 @@ function createHttpsServer(hostname, isAllowed) {
    * @returns {Promise<void>}
    */
   async function handleRequest(req, res) {
-    // @ts-expect-error req.url might be undefined
+    if (!req.url) {
+      ui.writeError("Safe-chain: Request missing URL");
+      res.writeHead(400, "Bad Request");
+      res.end("Bad Request: Missing URL");
+      return;
+    }
+
     const pathAndQuery = getRequestPathAndQuery(req.url);
     const targetUrl = `https://${hostname}${pathAndQuery}`;
 
@@ -163,7 +168,13 @@ function createProxyRequest(hostname, req, res) {
       }
     });
 
-    // @ts-expect-error statusCode might be undefined
+    if (!proxyRes.statusCode) {
+      ui.writeError("Safe-chain: Proxy response missing status code");
+      res.writeHead(500);
+      res.end("Internal Server Error");
+      return;
+    }
+
     res.writeHead(proxyRes.statusCode, proxyRes.headers);
     proxyRes.pipe(res);
   });
