@@ -72,7 +72,6 @@ export function parsePackagesFromInstallArgs(args) {
 function isPipOptionWithParameter(arg) {
 
   // Check if a pip flag takes a parameter
-  // TODO it would be better to query pip itself for this info
   const optionsWithParameters = [
     // Install options
     "-r",

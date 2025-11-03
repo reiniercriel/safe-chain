@@ -20,10 +20,8 @@ import { hasDryRunArg } from "../utils/pipCommands.js";
  */
 
 /**
- * @param {{ ignoreDryRun?: boolean }} [options]
- */
-/**
  * @param {ScannerOptions} [options]
+ *
  * @returns {CommandArgumentScanner}
  */
 export function commandArgumentScanner(options = {}) {
@@ -36,9 +34,6 @@ export function commandArgumentScanner(options = {}) {
     return shouldScanDependencies(args, ignoreDryRun);
   }
 
-  /**
-   * @param {string[]} args
-   */
   /**
    * @param {string[]} args
    * @returns {Promise<ScanResult[]> | ScanResult[]}
@@ -63,18 +58,12 @@ function shouldScanDependencies(args, ignoreDryRun) {
 
 /**
  * @param {string[]} args
- */
-/**
- * @param {string[]} args
  * @returns {Promise<ScanResult[]> | ScanResult[]}
  */
 function scanDependencies(args) {
   return checkChangesFromArgs(args);
 }
 
-/**
- * @param {string[]} args
- */
 /**
  * @param {string[]} args
  * @returns {Promise<ScanResult[]> | ScanResult[]}

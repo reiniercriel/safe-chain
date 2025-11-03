@@ -21,6 +21,7 @@ const ecosystemSettings = {
   ecoSystem: ECOSYSTEM_JS,
 };
 
+/** @returns {string} - The current ecosystem setting (ECOSYSTEM_JS or ECOSYSTEM_PY) */
 export function getEcoSystem() {
   return ecosystemSettings.ecoSystem;
 }
