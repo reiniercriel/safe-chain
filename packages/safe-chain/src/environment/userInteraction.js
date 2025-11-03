@@ -8,6 +8,9 @@ import {
   LOGGING_VERBOSE,
 } from "../config/settings.js";
 
+/**
+ * @type {{ bufferOutput: boolean, bufferedMessages:(() => void)[]}}
+ */
 const state = {
   bufferOutput: false,
   bufferedMessages: [],
@@ -72,12 +75,21 @@ function writeExitWithoutInstallingMaliciousPackages() {
   writeOrBuffer(() => console.error(message));
 }
 
+/**
+ * @param {string} message
+ * @param {...any} optionalParams
+ * @returns {void}
+ */
 function writeVerbose(message, ...optionalParams) {
   if (!isVerboseMode()) return;
 
   writeOrBuffer(() => console.log(message, ...optionalParams));
 }
 
+/**
+ *
+ * @param {() => void} messageFunction
+ */
 function writeOrBuffer(messageFunction) {
   if (state.bufferOutput) {
     state.bufferedMessages.push(messageFunction);
