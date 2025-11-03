@@ -12,7 +12,7 @@ export function createBunPackageManager() {
     // For bun, we use the proxy-only approach to block package downloads,
     // so we don't need to analyze commands.
     isSupportedCommand: () => false,
-    getDependencyUpdatesForCommand: async () => [],
+    getDependencyUpdatesForCommand: () => [],
   };
 }
 
@@ -26,7 +26,7 @@ export function createBunxPackageManager() {
     // For bunx, we use the proxy-only approach to block package downloads,
     // so we don't need to analyze commands.
     isSupportedCommand: () => false,
-    getDependencyUpdatesForCommand: async () => [],
+    getDependencyUpdatesForCommand: () => [],
   };
 }
 

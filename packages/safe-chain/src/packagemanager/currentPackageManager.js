@@ -18,10 +18,17 @@ const state = {
 };
 
 /**
+ * @typedef {Object} GetDependencyUpdatesResult
+ * @property {string} name
+ * @property {string} version
+ * @property {string} type
+ */
+
+/**
  * @typedef {Object} PackageManager
  * @property {(args: string[]) => Promise<{ status: number }>} runCommand
  * @property {(args: string[]) => boolean} isSupportedCommand
- * @property {(args: string[]) => Promise<{name: string, version: string, type: string}[]>} getDependencyUpdatesForCommand
+ * @property {(args: string[]) => Promise<GetDependencyUpdatesResult[]> | GetDependencyUpdatesResult[]} getDependencyUpdatesForCommand
  */
 
 /**

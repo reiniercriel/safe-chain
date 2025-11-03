@@ -3,7 +3,7 @@
  */
 export function nullScanner() {
   return {
-    scan: async () => [],
+    scan: () => [],
     shouldScan: () => false,
   };
 }

@@ -28,7 +28,7 @@ export function createNpmPackageManager() {
   /**
    * @param {string[]} args
    *
-   * @returns {Promise<{name: string, version: string, type: string}[]>}
+   * @returns {ReturnType<import("../currentPackageManager.js").PackageManager["getDependencyUpdatesForCommand"]>}
    */
   function getDependencyUpdatesForCommand(args) {
     const scanner = findDependencyScannerForCommand(

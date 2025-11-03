@@ -41,7 +41,7 @@ export function createPnpxPackageManager() {
 /**
  * @param {string[]} args
  * @param {boolean} isPnpx
- * @returns {Promise<import("../npm/dependencyScanner/commandArgumentScanner.js").ScanResult[]>}
+ * @returns {ReturnType<import("../currentPackageManager.js").PackageManager["getDependencyUpdatesForCommand"]>}
  */
 function getDependencyUpdatesForCommand(args, isPnpx) {
   if (isPnpx) {
