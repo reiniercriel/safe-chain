@@ -1,29 +1,32 @@
-import { describe, it, beforeEach, afterEach } from "node:test";
+import { describe, it, beforeEach, afterEach, mock } from "node:test";
 import assert from "node:assert";
-import { getScanTimeout } from "./configFile.js";
-import fs from "fs";
-import path from "path";
-import os from "os";
 
 describe("getScanTimeout", () => {
   let originalEnv;
-  let aikidoDir;
-  let configPath;
-  let configBackupPath;
+  let fsMock;
+  let getScanTimeout;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // Save original environment
     originalEnv = process.env.AIKIDO_SCAN_TIMEOUT_MS;
 
-    // Use the actual .aikido directory
-    aikidoDir = path.join(os.homedir(), ".aikido");
-    configPath = path.join(aikidoDir, "config.json");
-    configBackupPath = path.join(aikidoDir, "config.json.backup");
+    // Mock fs module
+    fsMock = {
+      existsSync: mock.fn(() => false),
+      readFileSync: mock.fn(() => "{}"),
+      writeFileSync: mock.fn(),
+      mkdirSync: mock.fn(),
+    };
 
-    // Backup existing config if it exists
-    if (fs.existsSync(configPath)) {
-      fs.copyFileSync(configPath, configBackupPath);
-    }
+    mock.module("fs", {
+      namedExports: fsMock,
+    });
+
+    // Re-import the module to get the mocked version
+    const configFileModule = await import(
+      `./configFile.js?update=${Date.now()}`
+    );
+    getScanTimeout = configFileModule.getScanTimeout;
   });
 
   afterEach(() => {
@@ -34,20 +37,14 @@ describe("getScanTimeout", () => {
       delete process.env.AIKIDO_SCAN_TIMEOUT_MS;
     }
 
-    // Restore original config file
-    if (fs.existsSync(configBackupPath)) {
-      fs.copyFileSync(configBackupPath, configPath);
-      fs.unlinkSync(configBackupPath);
-    } else if (fs.existsSync(configPath)) {
-      fs.unlinkSync(configPath);
-    }
+    // Reset all mocks
+    mock.restoreAll();
   });
 
   it("should return default timeout of 10000ms when no config or env var is set", () => {
     delete process.env.AIKIDO_SCAN_TIMEOUT_MS;
-    if (fs.existsSync(configPath)) {
-      fs.unlinkSync(configPath);
-    }
+    // Mock: config file doesn't exist
+    fsMock.existsSync.mock.mockImplementation(() => false);
 
     const timeout = getScanTimeout();
 
@@ -56,7 +53,11 @@ describe("getScanTimeout", () => {
 
   it("should return timeout from config file when set", () => {
     delete process.env.AIKIDO_SCAN_TIMEOUT_MS;
-    fs.writeFileSync(configPath, JSON.stringify({ scanTimeout: 5000 }));
+    // Mock: config file exists with scanTimeout: 5000
+    fsMock.existsSync.mock.mockImplementation(() => true);
+    fsMock.readFileSync.mock.mockImplementation(() =>
+      JSON.stringify({ scanTimeout: 5000 })
+    );
 
     const timeout = getScanTimeout();
 
@@ -65,7 +66,11 @@ describe("getScanTimeout", () => {
 
   it("should prioritize environment variable over config file", () => {
     process.env.AIKIDO_SCAN_TIMEOUT_MS = "20000";
-    fs.writeFileSync(configPath, JSON.stringify({ scanTimeout: 5000 }));
+    // Mock: config file exists with scanTimeout: 5000
+    fsMock.existsSync.mock.mockImplementation(() => true);
+    fsMock.readFileSync.mock.mockImplementation(() =>
+      JSON.stringify({ scanTimeout: 5000 })
+    );
 
     const timeout = getScanTimeout();
 
@@ -74,7 +79,11 @@ describe("getScanTimeout", () => {
 
   it("should handle invalid environment variable and fall back to config", () => {
     process.env.AIKIDO_SCAN_TIMEOUT_MS = "invalid";
-    fs.writeFileSync(configPath, JSON.stringify({ scanTimeout: 7000 }));
+    // Mock: config file exists with scanTimeout: 7000
+    fsMock.existsSync.mock.mockImplementation(() => true);
+    fsMock.readFileSync.mock.mockImplementation(() =>
+      JSON.stringify({ scanTimeout: 7000 })
+    );
 
     const timeout = getScanTimeout();
 
@@ -82,6 +91,9 @@ describe("getScanTimeout", () => {
   });
 
   it("should ignore zero and negative values and fall back to default", () => {
+    // Mock: config file doesn't exist
+    fsMock.existsSync.mock.mockImplementation(() => false);
+
     process.env.AIKIDO_SCAN_TIMEOUT_MS = "0";
 
     let timeout = getScanTimeout();
@@ -95,7 +107,11 @@ describe("getScanTimeout", () => {
 
   it("should ignore textual non-numeric values in environment variable and fall back to config", () => {
     process.env.AIKIDO_SCAN_TIMEOUT_MS = "fast";
-    fs.writeFileSync(configPath, JSON.stringify({ scanTimeout: 8000 }));
+    // Mock: config file exists with scanTimeout: 8000
+    fsMock.existsSync.mock.mockImplementation(() => true);
+    fsMock.readFileSync.mock.mockImplementation(() =>
+      JSON.stringify({ scanTimeout: 8000 })
+    );
 
     const timeout = getScanTimeout();
 
@@ -104,7 +120,11 @@ describe("getScanTimeout", () => {
 
   it("should ignore textual non-numeric values in config file and fall back to default", () => {
     delete process.env.AIKIDO_SCAN_TIMEOUT_MS;
-    fs.writeFileSync(configPath, JSON.stringify({ scanTimeout: "slow" }));
+    // Mock: config file exists with scanTimeout: "slow"
+    fsMock.existsSync.mock.mockImplementation(() => true);
+    fsMock.readFileSync.mock.mockImplementation(() =>
+      JSON.stringify({ scanTimeout: "slow" })
+    );
 
     const timeout = getScanTimeout();
 
@@ -113,7 +133,11 @@ describe("getScanTimeout", () => {
 
   it("should ignore textual non-numeric values in both env and config, fall back to default", () => {
     process.env.AIKIDO_SCAN_TIMEOUT_MS = "quick";
-    fs.writeFileSync(configPath, JSON.stringify({ scanTimeout: "medium" }));
+    // Mock: config file exists with scanTimeout: "medium"
+    fsMock.existsSync.mock.mockImplementation(() => true);
+    fsMock.readFileSync.mock.mockImplementation(() =>
+      JSON.stringify({ scanTimeout: "medium" })
+    );
 
     const timeout = getScanTimeout();
 
@@ -122,7 +146,11 @@ describe("getScanTimeout", () => {
 
   it("should ignore mixed alphanumeric strings in environment variable", () => {
     process.env.AIKIDO_SCAN_TIMEOUT_MS = "5000ms";
-    fs.writeFileSync(configPath, JSON.stringify({ scanTimeout: 6000 }));
+    // Mock: config file exists with scanTimeout: 6000
+    fsMock.existsSync.mock.mockImplementation(() => true);
+    fsMock.readFileSync.mock.mockImplementation(() =>
+      JSON.stringify({ scanTimeout: 6000 })
+    );
 
     const timeout = getScanTimeout();
 
@@ -131,7 +159,11 @@ describe("getScanTimeout", () => {
 
   it("should ignore mixed alphanumeric strings in config file", () => {
     delete process.env.AIKIDO_SCAN_TIMEOUT_MS;
-    fs.writeFileSync(configPath, JSON.stringify({ scanTimeout: "3000ms" }));
+    // Mock: config file exists with scanTimeout: "3000ms"
+    fsMock.existsSync.mock.mockImplementation(() => true);
+    fsMock.readFileSync.mock.mockImplementation(() =>
+      JSON.stringify({ scanTimeout: "3000ms" })
+    );
 
     const timeout = getScanTimeout();
 

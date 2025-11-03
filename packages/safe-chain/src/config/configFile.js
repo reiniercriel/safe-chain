@@ -5,7 +5,10 @@ import { ui } from "../environment/userInteraction.js";
 
 /**
  * @typedef {Object} SafeChainConfig
- * @property {any} scanTimeout // This should be a number
+ *
+ * This should be a number, but can be anything because it is user-input.
+ * We cannot trust the input and should add the necessary validations.
+ * @property {any} scanTimeout
  */
 
 /**
