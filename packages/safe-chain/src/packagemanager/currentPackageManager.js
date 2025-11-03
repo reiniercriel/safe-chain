@@ -11,10 +11,32 @@ import {
 import { createYarnPackageManager } from "./yarn/createPackageManager.js";
 import { createPipPackageManager } from "./pip/createPackageManager.js";
 
+/**
+ * @type {{packageManagerName: PackageManager | null}}
+ */
 const state = {
   packageManagerName: null,
 };
 
+/**
+ * @typedef {Object} GetDependencyUpdatesResult
+ * @property {string} name
+ * @property {string} version
+ * @property {string} type
+ */
+
+/**
+ * @typedef {Object} PackageManager
+ * @property {(args: string[]) => Promise<{ status: number }>} runCommand
+ * @property {(args: string[]) => boolean} isSupportedCommand
+ * @property {(args: string[]) => Promise<GetDependencyUpdatesResult[]> | GetDependencyUpdatesResult[]} getDependencyUpdatesForCommand
+ */
+
+/**
+ * @param {string} packageManagerName
+ *
+ * @return {PackageManager}
+ */
 export function initializePackageManager(packageManagerName) {
   if (packageManagerName === "npm") {
     state.packageManagerName = createNpmPackageManager();

@@ -6,9 +6,19 @@ const malwareDatabaseUrls = {
   [ECOSYSTEM_PY]: "https://malware-list.aikido.dev/malware_pypi.json",
 };
 
+/**
+ * @typedef {Object} MalwarePackage
+ * @property {string} package_name
+ * @property {string} version
+ * @property {string} reason
+ */
+
+/**
+ * @returns {Promise<{malwareDatabase: MalwarePackage[], version: string | undefined}>}
+ */
 export async function fetchMalwareDatabase() {
   const ecosystem = getEcoSystem();
-  const malwareDatabaseUrl = malwareDatabaseUrls[ecosystem];
+  const malwareDatabaseUrl = malwareDatabaseUrls[/** @type {keyof typeof malwareDatabaseUrls} */ (ecosystem)];
   const response = await fetch(malwareDatabaseUrl);
   if (!response.ok) {
     throw new Error(`Error fetching ${ecosystem} malware database: ${response.statusText}`);
@@ -20,14 +30,17 @@ export async function fetchMalwareDatabase() {
       malwareDatabase: malwareDatabase,
       version: response.headers.get("etag") || undefined,
     };
-  } catch (error) {
-    throw new Error(`Error parsing ${ecosystem} malware database: ${error.message}`);
+  } catch (/** @type {any} */ error) {
+    throw new Error(`Error parsing malware database: ${error.message}`);
   }
 }
 
+/**
+ * @returns {Promise<string | undefined>}
+ */
 export async function fetchMalwareDatabaseVersion() {
   const ecosystem = getEcoSystem();
-  const malwareDatabaseUrl = malwareDatabaseUrls[ecosystem];
+  const malwareDatabaseUrl = malwareDatabaseUrls[/** @type {keyof typeof malwareDatabaseUrls} */ (ecosystem)];
   const response = await fetch(malwareDatabaseUrl, {
     method: "HEAD",
   });

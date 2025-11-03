@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+// @ts-ignore - certifi has no type definitions
 import certifi from "certifi";
 import tls from "node:tls";
 import { X509Certificate } from "node:crypto";
@@ -8,6 +9,8 @@ import { getCaCertPath } from "./certUtils.js";
 
 /**
  * Check if a PEM string contains only parsable cert blocks.
+ * @param {string} pem - PEM-encoded certificate string
+ * @returns {boolean}
  */
 function isParsable(pem) {
   if (!pem || typeof pem !== "string") return false;
@@ -38,6 +41,7 @@ function isParsable(pem) {
   }
 }
 
+/** @type {string | null} */
 let cachedPath = null;
 
 /**

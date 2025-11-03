@@ -24,6 +24,9 @@ const ecosystemSettings = {
 export function getEcoSystem() {
   return ecosystemSettings.ecoSystem;
 }
+/**
+ * @param {string} setting - The ecosystem to set (ECOSYSTEM_JS or ECOSYSTEM_PY)
+ */
 export function setEcoSystem(setting) {
   ecosystemSettings.ecoSystem = setting;
 }

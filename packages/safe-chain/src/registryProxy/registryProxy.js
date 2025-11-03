@@ -10,6 +10,9 @@ import { ui } from "../environment/userInteraction.js";
 import chalk from "chalk";
 
 const SERVER_STOP_TIMEOUT_MS = 1000;
+/**
+ * @type {{port: number | null, blockedRequests: {packageName: string, version: string, url: string}[]}}
+ */
 const state = {
   port: null,
   blockedRequests: [],
@@ -25,6 +28,9 @@ export function createSafeChainProxy() {
   };
 }
 
+/**
+ * @returns {Record<string, string>}
+ */
 function getSafeChainProxyEnvironmentVariables() {
   if (!state.port) {
     return {};
@@ -37,6 +43,11 @@ function getSafeChainProxyEnvironmentVariables() {
   };
 }
 
+/**
+ * @param {Record<string, string>} env
+ *
+ * @returns {Record<string, string>}
+ */
 export function mergeSafeChainProxyEnvironmentVariables(env) {
   const proxyEnv = getSafeChainProxyEnvironmentVariables();
 
@@ -68,6 +79,11 @@ function createProxyServer() {
   return server;
 }
 
+/**
+ * @param {import("http").Server} server
+ *
+ * @returns {Promise<void>}
+ */
 function startServer(server) {
   return new Promise((resolve, reject) => {
     // Passing port 0 makes the OS assign an available port
@@ -87,6 +103,11 @@ function startServer(server) {
   });
 }
 
+/**
+ * @param {import("http").Server} server
+ *
+ * @returns {Promise<void>}
+ */
 function stopServer(server) {
   return new Promise((resolve) => {
     try {
@@ -100,6 +121,13 @@ function stopServer(server) {
   });
 }
 
+/**
+ * @param {import("http").IncomingMessage} req
+ * @param {import("net").Socket} clientSocket
+ * @param {Buffer} head
+ *
+ * @returns {void}
+ */
 function handleConnect(req, clientSocket, head) {
   // CONNECT method is used for HTTPS requests
   // It establishes a tunnel to the server identified by the request URL
@@ -122,6 +150,10 @@ function handleConnect(req, clientSocket, head) {
   }
 }
 
+/**
+ * @param {string} url
+ * @returns {Promise<boolean>}
+ */
 async function isAllowedUrl(url) {
   const { packageName, version } = parsePackageFromUrl(url);
 

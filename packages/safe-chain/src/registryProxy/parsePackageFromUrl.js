@@ -3,6 +3,10 @@ import { getEcoSystem, ECOSYSTEM_JS, ECOSYSTEM_PY } from "../config/settings.js"
 export const knownJsRegistries = ["registry.npmjs.org","registry.yarnpkg.com"];
 export const knownPipRegistries = ["files.pythonhosted.org", "pypi.org", "pypi.python.org", "pythonhosted.org"];
 
+/**
+ * @param {string} url
+ * @returns {{packageName: string | undefined, version: string | undefined}}
+ */
 export function parsePackageFromUrl(url) {
   const ecosystem = getEcoSystem();
   let registry;

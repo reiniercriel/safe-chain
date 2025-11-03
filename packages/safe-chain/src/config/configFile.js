@@ -4,13 +4,56 @@ import os from "os";
 import { ui } from "../environment/userInteraction.js";
 import { getEcoSystem } from "./settings.js";
 
+/**
+ * @typedef {Object} SafeChainConfig
+ *
+ * This should be a number, but can be anything because it is user-input.
+ * We cannot trust the input and should add the necessary validations.
+ * @property {any} scanTimeout
+ */
+
+/**
+ * @returns {number}
+ */
 export function getScanTimeout() {
   const config = readConfigFile();
-  return (
-    parseInt(process.env.AIKIDO_SCAN_TIMEOUT_MS) || config.scanTimeout || 10000 // Default to 10 seconds
-  );
+
+  if (process.env.AIKIDO_SCAN_TIMEOUT_MS) {
+    const scanTimeout = validateTimeout(process.env.AIKIDO_SCAN_TIMEOUT_MS);
+    if (scanTimeout != null) {
+      return scanTimeout;
+    }
+  }
+
+  if (config.scanTimeout) {
+    const scanTimeout = validateTimeout(config.scanTimeout);
+    if (scanTimeout != null) {
+      return scanTimeout;
+    }
+  }
+
+  return 10000; // Default to 10 seconds
 }
 
+/**
+ *
+ * @param {any} value
+ * @returns {number?}
+ */
+function validateTimeout(value) {
+  const timeout = Number(value);
+  if (!Number.isNaN(timeout) && timeout > 0) {
+    return timeout;
+  }
+  return null;
+}
+
+/**
+ * @param {import("../api/aikido.js").MalwarePackage[]} data
+ * @param {string | number} version
+ *
+ * @returns {void}
+ */
 export function writeDatabaseToLocalCache(data, version) {
   try {
     const databasePath = getDatabasePath();
@@ -25,6 +68,9 @@ export function writeDatabaseToLocalCache(data, version) {
   }
 }
 
+/**
+ * @returns {{malwareDatabase: import("../api/aikido.js").MalwarePackage[] | null, version: string | null}}
+ */
 export function readDatabaseFromLocalCache() {
   try {
     const databasePath = getDatabasePath();
@@ -56,17 +102,31 @@ export function readDatabaseFromLocalCache() {
   }
 }
 
+/**
+ * @returns {SafeChainConfig}
+ */
 function readConfigFile() {
   const configFilePath = getConfigFilePath();
 
   if (!fs.existsSync(configFilePath)) {
-    return {};
+    return {
+      scanTimeout: undefined,
+    };
   }
 
-  const data = fs.readFileSync(configFilePath, "utf8");
-  return JSON.parse(data);
+  try {
+    const data = fs.readFileSync(configFilePath, "utf8");
+    return JSON.parse(data);
+  } catch {
+    return {
+      scanTimeout: undefined,
+    };
+  }
 }
 
+/**
+ * @returns {string}
+ */
 function getDatabasePath() {
   const aikidoDir = getAikidoDirectory();
   const ecosystem = getEcoSystem();
@@ -79,10 +139,16 @@ function getDatabaseVersionPath() {
   return path.join(aikidoDir, `version_${ecosystem}.txt`);
 }
 
+/**
+ * @returns {string}
+ */
 function getConfigFilePath() {
   return path.join(getAikidoDirectory(), "config.json");
 }
 
+/**
+ * @returns {string}
+ */
 function getAikidoDirectory() {
   const homeDir = os.homedir();
   const aikidoDir = path.join(homeDir, ".aikido");
