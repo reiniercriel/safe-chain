@@ -4,13 +4,31 @@ import os from "os";
 import { ui } from "../environment/userInteraction.js";
 
 /**
+ * @typedef {Object} SafeChainConfig
+ * @property {any} scanTimeout // This should be a number
+ */
+
+/**
  * @returns {number}
  */
 export function getScanTimeout() {
-  const config = /** @type {{scanTimeout?: number}} */ (readConfigFile());
+  const config = readConfigFile();
 
-  // @ts-expect-error values of process.env can be string | undefined
-  return parseInt(process.env.AIKIDO_SCAN_TIMEOUT_MS) || config.scanTimeout || 10000 // Default to 10 seconds
+  if (process.env.AIKIDO_SCAN_TIMEOUT_MS) {
+    const scanTimeout = Number(process.env.AIKIDO_SCAN_TIMEOUT_MS);
+    if (!Number.isNaN(scanTimeout) && scanTimeout > 0) {
+      return scanTimeout;
+    }
+  }
+
+  if (config.scanTimeout) {
+    const scanTimeout = Number(config.scanTimeout);
+    if (!Number.isNaN(scanTimeout) && scanTimeout > 0) {
+      return scanTimeout;
+    }
+  }
+
+  return 10000; // Default to 10 seconds
 }
 
 /**
@@ -68,13 +86,15 @@ export function readDatabaseFromLocalCache() {
 }
 
 /**
- * @returns {unknown}
+ * @returns {SafeChainConfig}
  */
 function readConfigFile() {
   const configFilePath = getConfigFilePath();
 
   if (!fs.existsSync(configFilePath)) {
-    return {};
+    return {
+      scanTimeout: undefined,
+    };
   }
 
   const data = fs.readFileSync(configFilePath, "utf8");
