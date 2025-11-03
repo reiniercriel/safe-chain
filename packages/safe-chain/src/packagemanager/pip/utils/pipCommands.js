@@ -4,6 +4,7 @@ export const pipWheelCommand = "wheel";
 
 /**
  * @param {string[]} args
+ * @returns {string | null}
  */
 export function getPipCommandForArgs(args) {
   if (!args || args.length === 0) {
@@ -22,6 +23,7 @@ export function getPipCommandForArgs(args) {
 
 /**
  * @param {string[]} args
+ * @returns {boolean}
  */
 export function hasDryRunArg(args) {
   return args.some((arg) => arg === "--dry-run");

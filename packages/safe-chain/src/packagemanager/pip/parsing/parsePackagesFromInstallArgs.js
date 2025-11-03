@@ -1,23 +1,37 @@
 /**
+ * @typedef {Object} PackageDetail
+ * @property {string} name
+ * @property {string} version
+ * @property {string} type
+ */
+
+/**
+ * @typedef {Object} PipOption
+ * @property {string} name
+ * @property {number} numberOfParameters
+ */
+
+/**
  * Supported formats that will be returned:
  * - package_name (no version)
  * - package_name==version (exact version)
  * - package_name===version (exact version, PEP 440)
- * 
- * "Ranges". Because they don't specify an exact version, the following formats are skipped and we will rely solely on the mitm scanner:
+ *
+ * Ranges: Because they don't specify an exact version, the following formats are skipped and we rely on the MITM scanner:
  * - package_name>=version
  * - package_name<=version
  * - package_name>version
  * - package_name<version
  * - package_name~=version
  * - package_name!=version
- * - git+https://... (VCS URLs - returned without version)
+ * - git+https://... (VCS URLs)
  * - -r requirements.txt (handled by flag skipping)
- */
-/**
+ *
  * @param {string[]} args
+ * @returns {PackageDetail[]}
  */
 export function parsePackagesFromInstallArgs(args) {
+  /** @type {PackageDetail[]} */
   const packages = [];
   let skipNext = false;
 
@@ -53,6 +67,7 @@ export function parsePackagesFromInstallArgs(args) {
 
 /**
  * @param {string} arg
+ * @returns {boolean}
  */
 function isPipOptionWithParameter(arg) {
 
@@ -108,6 +123,7 @@ function isPipOptionWithParameter(arg) {
 
 /**
  * @param {string} spec
+ * @returns {{ name: string, version: string } | null}
  */
 function parsePipSpec(spec) {
   // Ignore obvious URLs and paths, rely on mitm scanner
