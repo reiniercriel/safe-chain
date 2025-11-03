@@ -3,13 +3,22 @@ import path from "path";
 import os from "os";
 import { ui } from "../environment/userInteraction.js";
 
+/**
+ * @returns {number}
+ */
 export function getScanTimeout() {
-  const config = readConfigFile();
-  return (
-    parseInt(process.env.AIKIDO_SCAN_TIMEOUT_MS) || config.scanTimeout || 10000 // Default to 10 seconds
-  );
+  const config = /** @type {{scanTimeout?: number}} */ (readConfigFile());
+
+  // @ts-expect-error values of process.env can be string | undefined
+  return parseInt(process.env.AIKIDO_SCAN_TIMEOUT_MS) || config.scanTimeout || 10000 // Default to 10 seconds
 }
 
+/**
+ * @param {import("../api/aikido.js").MalwarePackage[]} data
+ * @param {string | number} version
+ *
+ * @returns {void}
+ */
 export function writeDatabaseToLocalCache(data, version) {
   try {
     const databasePath = getDatabasePath();
@@ -24,6 +33,9 @@ export function writeDatabaseToLocalCache(data, version) {
   }
 }
 
+/**
+ * @returns {{malwareDatabase: import("../api/aikido.js").MalwarePackage[] | null, version: string | null}}
+ */
 export function readDatabaseFromLocalCache() {
   try {
     const databasePath = getDatabasePath();
@@ -55,6 +67,9 @@ export function readDatabaseFromLocalCache() {
   }
 }
 
+/**
+ * @returns {unknown}
+ */
 function readConfigFile() {
   const configFilePath = getConfigFilePath();
 
@@ -66,6 +81,9 @@ function readConfigFile() {
   return JSON.parse(data);
 }
 
+/**
+ * @returns {string}
+ */
 function getDatabasePath() {
   const aikidoDir = getAikidoDirectory();
   return path.join(aikidoDir, "malwareDatabase.json");
@@ -76,10 +94,16 @@ function getDatabaseVersionPath() {
   return path.join(aikidoDir, "version.txt");
 }
 
+/**
+ * @returns {string}
+ */
 function getConfigFilePath() {
   return path.join(getAikidoDirectory(), "config.json");
 }
 
+/**
+ * @returns {string}
+ */
 function getAikidoDirectory() {
   const homeDir = os.homedir();
   const aikidoDir = path.join(homeDir, ".aikido");
