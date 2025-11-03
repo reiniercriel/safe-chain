@@ -7,34 +7,10 @@ import { ui } from "../environment/userInteraction.js";
  * @returns {number}
  */
 export function getScanTimeout() {
-  if (process.env.AIKIDO_SCAN_TIMEOUT_MS) {
-    const timeout = parseInt(process.env.AIKIDO_SCAN_TIMEOUT_MS);
-    if (!isNaN(timeout) && timeout >= 0) {
-      return timeout;
-    }
-  }
+  const config = /** @type {{scanTimeout: number}} */ (readConfigFile());
 
-  const config = readConfigFile();
-
-  if (hasScanTimeout(config) && config.scanTimeout >= 0) {
-    return config.scanTimeout;
-  }
-
-  return 10000; // Default to 10 seconds
-}
-
-/**
- * @param {unknown} config
- *
- * @returns {config is {scanTimeout: number}}
- */
-function hasScanTimeout(config) {
-  return (
-    typeof config === "object" &&
-    config !== null &&
-    "scanTimeout" in config &&
-    typeof config.scanTimeout === "number"
-  );
+  // @ts-expect-error values of process.env can be string | undefined
+  return parseInt(process.env.AIKIDO_SCAN_TIMEOUT_MS) || config.scanTimeout || 10000 // Default to 10 seconds
 }
 
 /**
