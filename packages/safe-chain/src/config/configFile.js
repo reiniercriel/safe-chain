@@ -18,20 +18,33 @@ export function getScanTimeout() {
   const config = readConfigFile();
 
   if (process.env.AIKIDO_SCAN_TIMEOUT_MS) {
-    const scanTimeout = Number(process.env.AIKIDO_SCAN_TIMEOUT_MS);
-    if (!Number.isNaN(scanTimeout) && scanTimeout > 0) {
+    const scanTimeout = validateTimeout(process.env.AIKIDO_SCAN_TIMEOUT_MS);
+    if (scanTimeout != null) {
       return scanTimeout;
     }
   }
 
   if (config.scanTimeout) {
-    const scanTimeout = Number(config.scanTimeout);
-    if (!Number.isNaN(scanTimeout) && scanTimeout > 0) {
+    const scanTimeout = validateTimeout(config.scanTimeout);
+    if (scanTimeout != null) {
       return scanTimeout;
     }
   }
 
   return 10000; // Default to 10 seconds
+}
+
+/**
+ *
+ * @param {any} value
+ * @returns {number?}
+ */
+function validateTimeout(value) {
+  const timeout = Number(value);
+  if (!Number.isNaN(timeout) && timeout > 0) {
+    return timeout;
+  }
+  return null;
 }
 
 /**
@@ -100,8 +113,14 @@ function readConfigFile() {
     };
   }
 
-  const data = fs.readFileSync(configFilePath, "utf8");
-  return JSON.parse(data);
+  try {
+    const data = fs.readFileSync(configFilePath, "utf8");
+    return JSON.parse(data);
+  } catch {
+    return {
+      scanTimeout: undefined,
+    };
+  }
 }
 
 /**
