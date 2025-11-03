@@ -9,10 +9,12 @@ import {
 
 /**
  * @param {string} [command]
+ * @returns {import("../currentPackageManager.js").PackageManager}
  */
 export function createPipPackageManager(command = "pip") {
   /**
    * @param {string[]} args
+   * @returns {boolean}
    */
   function isSupportedCommand(args) {
     const scanner = findDependencyScannerForCommand(
@@ -24,6 +26,7 @@ export function createPipPackageManager(command = "pip") {
 
   /**
    * @param {string[]} args
+   * @returns {ReturnType<import("../currentPackageManager.js").PackageManager["getDependencyUpdatesForCommand"]>}
    */
   function getDependencyUpdatesForCommand(args) {
     const scanner = findDependencyScannerForCommand(
@@ -40,6 +43,9 @@ export function createPipPackageManager(command = "pip") {
   };
 }
 
+/**
+ * @type {Record<string, import("./dependencyScanner/commandArgumentScanner.js").CommandArgumentScanner>}
+ */
 const commandScannerMapping = {
   [pipInstallCommand]: commandArgumentScanner(),
   [pipDownloadCommand]: commandArgumentScanner(), // download also fetches packages from PyPI
@@ -47,21 +53,27 @@ const commandScannerMapping = {
   // Other commands return null scanner by default
 };
 
-const NULL_SCANNER = {
-  shouldScan: () => false,
-  scan: () => [],
-};
+/**
+ * @returns {import("./dependencyScanner/commandArgumentScanner.js").CommandArgumentScanner}
+ */
+function nullScanner() {
+  return {
+    shouldScan: () => false,
+    scan: () => [],
+  };
+}
 
 /**
- * @param {Record<string, any>} scanners
+ * @param {Record<string, import("./dependencyScanner/commandArgumentScanner.js").CommandArgumentScanner>} scanners
  * @param {string[]} args
+ * @returns {import("./dependencyScanner/commandArgumentScanner.js").CommandArgumentScanner}
  */
 function findDependencyScannerForCommand(scanners, args) {
   const command = getPipCommandForArgs(args);
   if (!command) {
-    return NULL_SCANNER;
+    return nullScanner();
   }
 
   const scanner = scanners[command];
-  return scanner || NULL_SCANNER;
+  return scanner || nullScanner();
 }

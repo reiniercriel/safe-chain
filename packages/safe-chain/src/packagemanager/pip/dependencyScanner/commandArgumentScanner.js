@@ -2,7 +2,29 @@ import { parsePackagesFromInstallArgs } from "../parsing/parsePackagesFromInstal
 import { hasDryRunArg } from "../utils/pipCommands.js";
 
 /**
+ * @typedef {Object} ScanResult
+ * @property {string} name
+ * @property {string} version
+ * @property {string} type
+ */
+
+/**
+ * @typedef {Object} ScannerOptions
+ * @property {boolean} [ignoreDryRun]
+ */
+
+/**
+ * @typedef {Object} CommandArgumentScanner
+ * @property {(args: string[]) => Promise<ScanResult[]> | ScanResult[]} scan
+ * @property {(args: string[]) => boolean} shouldScan
+ */
+
+/**
  * @param {{ ignoreDryRun?: boolean }} [options]
+ */
+/**
+ * @param {ScannerOptions} [options]
+ * @returns {CommandArgumentScanner}
  */
 export function commandArgumentScanner(options = {}) {
   const { ignoreDryRun = false } = options;
@@ -16,6 +38,10 @@ export function commandArgumentScanner(options = {}) {
 
   /**
    * @param {string[]} args
+   */
+  /**
+   * @param {string[]} args
+   * @returns {Promise<ScanResult[]> | ScanResult[]}
    */
   function scan(args) {
     return scanDependencies(args);
@@ -38,12 +64,20 @@ function shouldScanDependencies(args, ignoreDryRun) {
 /**
  * @param {string[]} args
  */
+/**
+ * @param {string[]} args
+ * @returns {Promise<ScanResult[]> | ScanResult[]}
+ */
 function scanDependencies(args) {
   return checkChangesFromArgs(args);
 }
 
 /**
  * @param {string[]} args
+ */
+/**
+ * @param {string[]} args
+ * @returns {Promise<ScanResult[]> | ScanResult[]}
  */
 export function checkChangesFromArgs(args) {
   const packageUpdates = parsePackagesFromInstallArgs(args);
