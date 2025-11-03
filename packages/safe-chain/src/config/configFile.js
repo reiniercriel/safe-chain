@@ -7,7 +7,7 @@ import { ui } from "../environment/userInteraction.js";
  * @returns {number}
  */
 export function getScanTimeout() {
-  const config = /** @type {{scanTimeout: number}} */ (readConfigFile());
+  const config = /** @type {{scanTimeout?: number}} */ (readConfigFile());
 
   // @ts-expect-error values of process.env can be string | undefined
   return parseInt(process.env.AIKIDO_SCAN_TIMEOUT_MS) || config.scanTimeout || 10000 // Default to 10 seconds
