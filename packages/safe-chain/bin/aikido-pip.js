@@ -14,6 +14,7 @@ const argv = process.argv.slice(2);
 setEcoSystem(ECOSYSTEM_PY);
 
 initializePackageManager(packageManagerName);
-const exitCode = await main(argv);
+var exitCode = await main(argv);
 
-process.exit(typeof exitCode === 'number' ? exitCode : 1);
+// @ts-expect-error scanCommand can return an empty array in main
+process.exit(exitCode);
