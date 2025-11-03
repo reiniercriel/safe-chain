@@ -133,7 +133,7 @@ function createProxyRequest(hostname, req, res) {
   };
 
   if (options.headers && "host" in options.headers) {
-    delete options.headers["host"];
+    delete options.headers.host;
   }
 
   const httpsProxy = process.env.HTTPS_PROXY || process.env.https_proxy;
