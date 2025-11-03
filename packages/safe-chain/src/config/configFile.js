@@ -4,13 +4,47 @@ import os from "os";
 import { ui } from "../environment/userInteraction.js";
 
 /**
+ * @typedef {Object} SafeChainConfig
+ *
+ * This should be a number, but can be anything because it is user-input.
+ * We cannot trust the input and should add the necessary validations.
+ * @property {any} scanTimeout
+ */
+
+/**
  * @returns {number}
  */
 export function getScanTimeout() {
-  const config = /** @type {{scanTimeout?: number}} */ (readConfigFile());
+  const config = readConfigFile();
 
-  // @ts-expect-error values of process.env can be string | undefined
-  return parseInt(process.env.AIKIDO_SCAN_TIMEOUT_MS) || config.scanTimeout || 10000 // Default to 10 seconds
+  if (process.env.AIKIDO_SCAN_TIMEOUT_MS) {
+    const scanTimeout = validateTimeout(process.env.AIKIDO_SCAN_TIMEOUT_MS);
+    if (scanTimeout != null) {
+      return scanTimeout;
+    }
+  }
+
+  if (config.scanTimeout) {
+    const scanTimeout = validateTimeout(config.scanTimeout);
+    if (scanTimeout != null) {
+      return scanTimeout;
+    }
+  }
+
+  return 10000; // Default to 10 seconds
+}
+
+/**
+ *
+ * @param {any} value
+ * @returns {number?}
+ */
+function validateTimeout(value) {
+  const timeout = Number(value);
+  if (!Number.isNaN(timeout) && timeout > 0) {
+    return timeout;
+  }
+  return null;
 }
 
 /**
@@ -68,17 +102,25 @@ export function readDatabaseFromLocalCache() {
 }
 
 /**
- * @returns {unknown}
+ * @returns {SafeChainConfig}
  */
 function readConfigFile() {
   const configFilePath = getConfigFilePath();
 
   if (!fs.existsSync(configFilePath)) {
-    return {};
+    return {
+      scanTimeout: undefined,
+    };
   }
 
-  const data = fs.readFileSync(configFilePath, "utf8");
-  return JSON.parse(data);
+  try {
+    const data = fs.readFileSync(configFilePath, "utf8");
+    return JSON.parse(data);
+  } catch {
+    return {
+      scanTimeout: undefined,
+    };
+  }
 }
 
 /**
