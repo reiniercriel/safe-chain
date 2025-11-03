@@ -78,7 +78,7 @@ function createHttpsServer(hostname, isAllowed) {
 
 /**
  * @param {string} url
- * @returns {*|string}
+ * @returns {string}
  */
 function getRequestPathAndQuery(url) {
   if (url.startsWith("http://") || url.startsWith("https://")) {
