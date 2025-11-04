@@ -67,8 +67,6 @@ function resolveCommandPath(command) {
   // Use 'command -v' to find the full path
   const fullPath = execSync(`command -v ${command}`, {
     encoding: "utf8",
-    // @ts-expect-error shell is a string option
-    shell: true,
   }).trim();
 
   if (!fullPath) {
@@ -120,8 +118,12 @@ export async function safeSpawn(command, args, options = {}) {
     });
 
     child.on("close", (code) => {
+      // Code is null if it terminated by a signal. This should never
+      // happen in our code. If this happens, return 1 error code.
+
+      code = code ?? 1;
+
       resolve({
-        // @ts-expect-error code can be null
         status: code,
         stdout: stdout,
         stderr: stderr,

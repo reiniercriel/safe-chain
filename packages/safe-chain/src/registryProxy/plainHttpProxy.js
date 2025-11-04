@@ -1,5 +1,6 @@
 import * as http from "http";
 import * as https from "https";
+import { ui } from "../environment/userInteraction.js";
 
 /**
  * @param {import("http").IncomingMessage} req
@@ -8,7 +9,13 @@ import * as https from "https";
  * @returns {void}
  */
 export function handleHttpProxyRequest(req, res) {
-  // @ts-expect-error req.url might be undefined
+  if (!req.url) {
+    ui.writeError("Safe-chain: Request missing URL");
+    res.writeHead(400, "Bad Request");
+    res.end("Bad Request: Missing URL");
+    return;
+  }
+
   const url = new URL(req.url);
 
   // The protocol for the plainHttpProxy should usually only be http:
@@ -27,11 +34,16 @@ export function handleHttpProxyRequest(req, res) {
 
   const proxyRequest = protocol
     .request(
-      // @ts-expect-error req.url might be undefined
       req.url,
       { method: req.method, headers: req.headers },
       (proxyRes) => {
-        // @ts-expect-error statusCode might be undefined
+        if (!proxyRes.statusCode) {
+          ui.writeError("Safe-chain: Proxy response missing status code");
+          res.writeHead(500);
+          res.end("Internal Server Error");
+          return;
+        }
+
         res.writeHead(proxyRes.statusCode, proxyRes.headers);
         proxyRes.pipe(res);
 

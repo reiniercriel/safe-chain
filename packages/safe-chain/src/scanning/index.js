@@ -21,11 +21,11 @@ export function shouldScanCommand(args) {
 /**
  * @param {string[]} args
  *
- * @returns {Promise<number | never[]>}
+ * @returns {Promise<number>}
  */
 export async function scanCommand(args) {
   if (!shouldScanCommand(args)) {
-    return [];
+    return 0;
   }
 
   let timedOut = false;

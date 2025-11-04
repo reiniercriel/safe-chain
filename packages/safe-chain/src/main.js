@@ -9,7 +9,7 @@ import chalk from "chalk";
 
 /**
  * @param {string[]} args
- * @returns {Promise<number | never[]>}
+ * @returns {Promise<number>}
  */
 export async function main(args) {
   process.on("SIGINT", handleProcessTermination);

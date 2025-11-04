@@ -39,7 +39,6 @@ async function runBunCommand(command, args) {
   try {
     const result = await safeSpawn(command, args, {
       stdio: "inherit",
-      // @ts-expect-error values of process.env can be string | undefined
       env: mergeSafeChainProxyEnvironmentVariables(process.env),
     });
     return { status: result.status };
