@@ -103,13 +103,13 @@ describe("runYarnCommand", () => {
     );
   });
 
-  it("should not set Yarn-specific proxy vars for Yarn v1", async () => {
+  it("should set YARN_HTTPS_PROXY for Yarn v1", async () => {
     yarnVersion = "1.22.19";
     await runYarnCommand(["add", "lodash"]);
 
     assert.strictEqual(
       capturedEnv.YARN_HTTPS_PROXY,
-      undefined,
+      "http://localhost:8080",
       "YARN_HTTPS_PROXY should not be set for Yarn v1"
     );
     assert.strictEqual(
