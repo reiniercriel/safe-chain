@@ -16,5 +16,4 @@ setEcoSystem(ECOSYSTEM_PY);
 initializePackageManager(packageManagerName);
 var exitCode = await main(argv);
 
-// @ts-expect-error scanCommand can return an empty array in main
 process.exit(exitCode);

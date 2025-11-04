@@ -11,7 +11,6 @@ import { getCombinedCaBundlePath } from "../../registryProxy/certBundle.js";
  */
 export async function runPip(command, args) {
   try {
-    // @ts-expect-error values of process.env can be string | undefined
     const env = mergeSafeChainProxyEnvironmentVariables(process.env);
 
     // Always provide Python with a complete CA bundle (Safe Chain CA + Mozilla + Node built-in roots)
