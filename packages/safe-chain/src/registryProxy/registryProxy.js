@@ -44,7 +44,7 @@ function getSafeChainProxyEnvironmentVariables() {
 }
 
 /**
- * @param {Record<string, string>} env
+ * @param {Record<string, string | undefined>} env
  *
  * @returns {Record<string, string>}
  */
@@ -57,7 +57,7 @@ export function mergeSafeChainProxyEnvironmentVariables(env) {
     // So we only copy the variable if it's not already set in a different case
     const upperKey = key.toUpperCase();
 
-    if (!proxyEnv[upperKey]) {
+    if (!proxyEnv[upperKey] && env[key]) {
       proxyEnv[key] = env[key];
     }
   }
@@ -123,7 +123,7 @@ function stopServer(server) {
 
 /**
  * @param {import("http").IncomingMessage} req
- * @param {import("net").Socket} clientSocket
+ * @param {import("http").ServerResponse} clientSocket
  * @param {Buffer} head
  *
  * @returns {void}
@@ -146,6 +146,7 @@ function handleConnect(req, clientSocket, head) {
     mitmConnect(req, clientSocket, isAllowedUrl);
   } else {
     // For other hosts, just tunnel the request to the destination tcp socket
+    ui.writeVerbose(`Safe-chain: Tunneling request to ${req.url}`);
     tunnelRequest(req, clientSocket, head);
   }
 }

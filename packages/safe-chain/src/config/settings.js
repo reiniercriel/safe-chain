@@ -7,6 +7,10 @@ export function getLoggingLevel() {
     return LOGGING_SILENT;
   }
 
+  if (level === LOGGING_VERBOSE) {
+    return LOGGING_VERBOSE;
+  }
+
   return LOGGING_NORMAL;
 }
 
@@ -34,3 +38,4 @@ export function setEcoSystem(setting) {
 
 export const LOGGING_SILENT = "silent";
 export const LOGGING_NORMAL = "normal";
+export const LOGGING_VERBOSE = "verbose";

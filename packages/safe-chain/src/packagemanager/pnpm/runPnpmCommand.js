@@ -13,13 +13,11 @@ export async function runPnpmCommand(args, toolName = "pnpm") {
     if (toolName === "pnpm") {
       result = await safeSpawn("pnpm", args, {
         stdio: "inherit",
-        // @ts-expect-error values of process.env can be string | undefined
         env: mergeSafeChainProxyEnvironmentVariables(process.env),
       });
     } else if (toolName === "pnpx") {
       result = await safeSpawn("pnpx", args, {
         stdio: "inherit",
-        // @ts-expect-error values of process.env can be string | undefined
         env: mergeSafeChainProxyEnvironmentVariables(process.env),
       });
     } else {

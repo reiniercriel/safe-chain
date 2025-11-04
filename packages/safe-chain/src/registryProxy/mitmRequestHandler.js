@@ -5,13 +5,17 @@ import { ui } from "../environment/userInteraction.js";
 
 /**
  * @param {import("http").IncomingMessage} req
- * @param {import("net").Socket} clientSocket
+ * @param {import("http").ServerResponse} clientSocket
  * @param {(target: string) => Promise<boolean>} isAllowed
  */
 export function mitmConnect(req, clientSocket, isAllowed) {
+  ui.writeVerbose(`Safe-chain: Set up MITM tunnel for ${req.url}`);
   const { hostname } = new URL(`http://${req.url}`);
 
-  clientSocket.on("error", () => {
+  clientSocket.on("error", (err) => {
+    ui.writeVerbose(
+      `Safe-chain: Client socket error for ${req.url}: ${err.message}`
+    );
     // NO-OP
     // This can happen if the client TCP socket sends RST instead of FIN.
     // Not subscribing to 'close' event will cause node to throw and crash.
@@ -21,7 +25,6 @@ export function mitmConnect(req, clientSocket, isAllowed) {
 
   server.on("error", (err) => {
     ui.writeError(`Safe-chain: HTTPS server error: ${err.message}`);
-    // @ts-expect-error Property 'headersSent' does not exist on type 'Socket'
     if (!clientSocket.headersSent) {
       clientSocket.end("HTTP/1.1 502 Bad Gateway\r\n\r\n");
     } else if (clientSocket.writable) {
@@ -51,11 +54,18 @@ function createHttpsServer(hostname, isAllowed) {
    * @returns {Promise<void>}
    */
   async function handleRequest(req, res) {
-    // @ts-expect-error req.url might be undefined
+    if (!req.url) {
+      ui.writeError("Safe-chain: Request missing URL");
+      res.writeHead(400, "Bad Request");
+      res.end("Bad Request: Missing URL");
+      return;
+    }
+
     const pathAndQuery = getRequestPathAndQuery(req.url);
     const targetUrl = `https://${hostname}${pathAndQuery}`;
 
     if (!(await isAllowed(targetUrl))) {
+      ui.writeVerbose(`Safe-chain: Blocking request to ${targetUrl}`);
       res.writeHead(403, "Forbidden - blocked by safe-chain");
       res.end("Blocked by safe-chain");
       return;
@@ -96,7 +106,10 @@ function getRequestPathAndQuery(url) {
 function forwardRequest(req, hostname, res) {
   const proxyReq = createProxyRequest(hostname, req, res);
 
-  proxyReq.on("error", () => {
+  proxyReq.on("error", (err) => {
+    ui.writeVerbose(
+      `Safe-chain: Error occurred while proxying request: ${err.message}`
+    );
     res.writeHead(502);
     res.end("Bad Gateway");
   });
@@ -111,6 +124,9 @@ function forwardRequest(req, hostname, res) {
   });
 
   req.on("end", () => {
+    ui.writeVerbose(
+      `Safe-chain: Finished proxying request to ${req.url} for ${hostname}`
+    );
     proxyReq.end();
   });
 }
@@ -152,7 +168,13 @@ function createProxyRequest(hostname, req, res) {
       }
     });
 
-    // @ts-expect-error statusCode might be undefined
+    if (!proxyRes.statusCode) {
+      ui.writeError("Safe-chain: Proxy response missing status code");
+      res.writeHead(500);
+      res.end("Internal Server Error");
+      return;
+    }
+
     res.writeHead(proxyRes.statusCode, proxyRes.headers);
     proxyRes.pipe(res);
   });

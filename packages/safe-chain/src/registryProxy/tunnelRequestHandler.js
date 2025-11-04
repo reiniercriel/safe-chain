@@ -3,7 +3,7 @@ import { ui } from "../environment/userInteraction.js";
 
 /**
  * @param {import("http").IncomingMessage} req
- * @param {import("net").Socket} clientSocket
+ * @param {import("http").ServerResponse} clientSocket
  * @param {Buffer} head
  *
  * @returns {void}
@@ -30,7 +30,7 @@ export function tunnelRequest(req, clientSocket, head) {
 
 /**
  * @param {import("http").IncomingMessage} req
- * @param {import("net").Socket} clientSocket
+ * @param {import("http").ServerResponse} clientSocket
  * @param {Buffer} head
  *
  * @returns {void}
@@ -38,13 +38,16 @@ export function tunnelRequest(req, clientSocket, head) {
 function tunnelRequestToDestination(req, clientSocket, head) {
   const { port, hostname } = new URL(`http://${req.url}`);
 
-  // @ts-expect-error port from URL is a string but net.connect accepts number
-  const serverSocket = net.connect(port || 443, hostname, () => {
-    clientSocket.write("HTTP/1.1 200 Connection Established\r\n\r\n");
-    serverSocket.write(head);
-    serverSocket.pipe(clientSocket);
-    clientSocket.pipe(serverSocket);
-  });
+  const serverSocket = net.connect(
+    Number.parseInt(port) || 443,
+    hostname,
+    () => {
+      clientSocket.write("HTTP/1.1 200 Connection Established\r\n\r\n");
+      serverSocket.write(head);
+      serverSocket.pipe(clientSocket);
+      clientSocket.pipe(serverSocket);
+    }
+  );
 
   clientSocket.on("error", () => {
     // This can happen if the client TCP socket sends RST instead of FIN.
@@ -66,7 +69,7 @@ function tunnelRequestToDestination(req, clientSocket, head) {
 
 /**
  * @param {import("http").IncomingMessage} req
- * @param {import("net").Socket} clientSocket
+ * @param {import("http").ServerResponse} clientSocket
  * @param {Buffer} head
  * @param {string} proxyUrl
  */
@@ -75,10 +78,9 @@ function tunnelRequestViaProxy(req, clientSocket, head, proxyUrl) {
   const proxy = new URL(proxyUrl);
 
   // Connect to proxy server
-  // @ts-expect-error net.connect wants port as number but proxy.port is string
   const proxySocket = net.connect({
     host: proxy.hostname,
-    port: proxy.port,
+    port: Number.parseInt(proxy.port) || 80,
   });
 
   proxySocket.on("connect", () => {
