@@ -12,13 +12,15 @@ import chalk from "chalk";
  * @returns {Promise<number | never[]>}
  */
 export async function main(args) {
+  process.on("SIGINT", handleProcessTermination);
+  process.on("SIGTERM", handleProcessTermination);
+
   const proxy = createSafeChainProxy();
   await proxy.startServer();
 
   // Global error handlers to log unhandled errors
   process.on("uncaughtException", (error) => {
     ui.writeError(`Safe-chain: Uncaught exception: ${error.message}`);
-    // @ts-expect-error writeVerbose will be added in a future PR
     ui.writeVerbose(`Stack trace: ${error.stack}`);
     process.exit(1);
   });
@@ -26,7 +28,6 @@ export async function main(args) {
   process.on("unhandledRejection", (reason) => {
     ui.writeError(`Safe-chain: Unhandled promise rejection: ${reason}`);
     if (reason instanceof Error) {
-      // @ts-expect-error writeVerbose will be added in a future PR
       ui.writeVerbose(`Stack trace: ${reason.stack}`);
     }
     process.exit(1);
@@ -46,7 +47,15 @@ export async function main(args) {
       }
     }
 
+    // Buffer logs during package manager execution, this avoids interleaving
+    //  of logs from the package manager and safe-chain
+    // Not doing this could cause bugs to disappear when cursor movement codes
+    //  are written by the package manager while safe-chain is writing logs
+    ui.startBufferingLogs();
     const packageManagerResult = await getPackageManager().runCommand(args);
+
+    // Write all buffered logs
+    ui.writeBufferedLogsAndStopBuffering();
 
     if (!proxy.verifyNoMaliciousPackages()) {
       return 1;
@@ -71,4 +80,8 @@ export async function main(args) {
   } finally {
     await proxy.stopServer();
   }
+}
+
+function handleProcessTermination() {
+  ui.writeBufferedLogsAndStopBuffering();
 }
